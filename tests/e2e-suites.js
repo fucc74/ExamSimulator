@@ -90,7 +90,7 @@ module.exports = {
     },
 
     'full run of each bundled exam (single/multiple)': async ({ p, check, runAll, URL_BASE }) => {
-        for (const name of ['managedServices', 'v31', 'v31advanced']) {
+        for (const name of ['managedServices', 'v31', 'v31realtest']) {
             await fresh(p, URL_BASE, name);
             const n = await runAll(p, 'all');
             const pct = await p.locator('#metric-percentage').innerText();
@@ -361,9 +361,9 @@ module.exports = {
         const errs = [];
         p.on('pageerror', e => errs.push(e.message));
         p.on('dialog', d => d.accept());
-        await p.goto(HTTP_BASE + '/exam.html?content=v31advanced');
+        await p.goto(HTTP_BASE + '/exam.html?content=v31realtest');
         await p.waitForSelector('#start-btn');
-        check('exam loaded via fetch (octet-stream + nosniff)', /V31 Advanced/.test(await p.title()));
+        check('exam loaded via fetch (octet-stream + nosniff)', /V31 Real Test/.test(await p.title()));
         await p.goto(HTTP_BASE + '/exam.html?content=nope');
         await p.waitForSelector('.error-box');
         check('404 reported as not found', /nope\.exam/.test(await p.locator('.error-box').innerText()));

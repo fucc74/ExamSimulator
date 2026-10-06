@@ -29,21 +29,21 @@ window.ExamCatalog = [
   {
     "file": "v31",
     "id": "v31",
-    "title": "V31 Practice Test",
-    "description": "Practice test, scenario-based and advanced questions on AI fundamentals, HPE Private Cloud AI architecture and sizing, deployment and administration, NVIDIA and AI Essentials, operations, edge AI and HPC.",
+    "title": "V31 Practice Test (Complete)",
+    "description": "Complete V31 practice bank: 200 scenario-based and advanced questions plus 100 expert-level questions on AI fundamentals, HPE Private Cloud AI architecture and sizing, deployment and administration, NVIDIA and AI Essentials, MLIS/NIM, KAI Scheduler, air-gapped deployments, operations, edge AI and HPC.",
     "code": "V31",
-    "version": "v1.0",
-    "questionCount": 200,
-    "topicCount": 19
+    "version": "v2.0",
+    "questionCount": 300,
+    "topicCount": 26
   },
   {
-    "file": "v31advanced",
-    "id": "v31advanced",
-    "title": "V31 Advanced Practice Test",
-    "description": "Expert-level scenario questions on HPE Private Cloud AI sizing, AI Essentials resource governance, MLIS/NIM model serving, air-gapped deployments, edge inferencing and HPC/AI.",
-    "code": "V31-ADV",
+    "file": "v31realtest",
+    "id": "v31realtest",
+    "title": "V31 Real Test",
+    "description": "Thirty practice questions with the official answer rationales, transcribed from the V31 practice test document.",
+    "code": "V31-REAL",
     "version": "v1.0",
-    "questionCount": 100,
-    "topicCount": 7
+    "questionCount": 30,
+    "topicCount": 8
   }
 ];
