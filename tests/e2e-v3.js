@@ -189,7 +189,8 @@ module.exports = {
         check('saved in the library with 4 questions and 2 topics', saved.questionCount === 4 && saved.topicCount === 2, saved);
         await p.click('#ed-back');
         await p.click('#opt-back');
-        check('picker lists the new exam', (await p.locator('#exam-list .exam-card').count()) === 5);
+        const bundled = await p.evaluate(() => ExamSim.App.loader.baseCatalog().length);
+        check('picker lists the new exam', (await p.locator('#exam-list .exam-card').count()) === bundled + 1);
         await p.click('.exam-card:has-text("Imported Networking Quiz")');
         await p.waitForSelector('#start-btn');
         check('local exam opens on its dashboard', /Imported Networking Quiz/.test(await p.locator('#view-dashboard h1').innerText()));
