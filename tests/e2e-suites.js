@@ -79,6 +79,7 @@ module.exports = {
 
     'picker and exam loading': async ({ p, check, URL_BASE }) => {
         await p.goto(URL_BASE);
+        await p.waitForSelector('.exam-card');
         check('exam cards listed', (await p.locator('.exam-card').count()) >= 4);
         await p.click('.exam-card >> text=V31 Practice Test');
         await p.waitForSelector('#start-btn');
