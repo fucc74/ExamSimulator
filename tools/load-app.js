@@ -7,7 +7,12 @@ const { jsFiles } = require('./build.js');
 function loadApp() {
     const files = jsFiles().filter(f => !/^(8|9)\d-/.test(path.basename(f)));
     const code = files.map(f => fs.readFileSync(f, 'utf8')).join('\n') + '\n;App;';
-    const sandbox = { console, setTimeout, clearTimeout, Date, Math, JSON, document: {} };
+    const sandbox = {
+        console, setTimeout, clearTimeout, Date, Math, JSON, document: {},
+        TextEncoder, TextDecoder, Blob, Response, btoa, atob, Uint8Array, URL,
+        CompressionStream: global.CompressionStream, DecompressionStream: global.DecompressionStream,
+        fetch: (...a) => global.fetch(...a)          // looked up at call time so tests can mock it
+    };
     sandbox.window = sandbox;
     vm.createContext(sandbox);
     return vm.runInContext(code, sandbox, { filename: 'engine-bundle.js' });

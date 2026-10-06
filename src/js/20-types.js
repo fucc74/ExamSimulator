@@ -61,6 +61,7 @@
         const order = keep ? identity : shuffle(identity);
         const answers = (Array.isArray(def.answer) ? def.answer : [def.answer]);
         item.options = order.map(i => def.options[i]);
+        item.origin = order;     // shown position -> position in the exam file (used for per-option statistics)
         item.answer = answers.map(a => order.indexOf(a)).sort((a, b) => a - b);
         item.kind = multi ? 'multiple' : 'single';
         return item;

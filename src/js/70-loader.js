@@ -50,6 +50,14 @@ App.loader = (function () {
     const isHttp = () => typeof location !== 'undefined' && /^https?:$/.test(location.protocol);
 
     async function loadByName(name) {
+        if (name.startsWith('local:')) {
+            const id = name.slice(6);
+            const raw = App.library && App.library.get(id);
+            if (!raw) throw new LoadError('notFound', { name });
+            const exam = finalize(raw, id, name);
+            exam.sourceFile = name; exam.local = true;
+            return exam;
+        }
         const file = name + '.exam';
         let data = null;
         pending = null;
@@ -81,8 +89,11 @@ App.loader = (function () {
     // Exam list: exams.js (generated, optional) overrides the list embedded in exam.html at build time.
     function catalog() {
         if (typeof window === 'undefined') return [];
-        if (Array.isArray(window.ExamCatalog) && window.ExamCatalog.length) return window.ExamCatalog;
-        return Array.isArray(window.ExamCatalogDefault) ? window.ExamCatalogDefault : [];
+        let base = [];
+        if (Array.isArray(window.ExamCatalog) && window.ExamCatalog.length) base = window.ExamCatalog;
+        else if (Array.isArray(window.ExamCatalogDefault)) base = window.ExamCatalogDefault;
+        const local = App.library ? App.library.list() : [];
+        return local.length ? base.concat(local) : base;
     }
 
     // Human-readable message for a load error.

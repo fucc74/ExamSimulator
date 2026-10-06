@@ -99,6 +99,18 @@ App.createStorage = function (backend, opts) {
             return save();
         },
 
+        // ---- wrong-question reports and small per-exam metadata (seen version…) ----
+        addReport(examId, report) {
+            const b = bucket(examId);
+            b.reports = b.reports || [];
+            b.reports.push(Object.assign({ id: App.util.uid(), ts: Date.now() }, report));
+            return save();
+        },
+        listReports(examId) { return (bucket(examId).reports || []).slice(); },
+        removeReport(examId, id) { const b = bucket(examId); b.reports = (b.reports || []).filter(r => r.id !== id); return save(); },
+        getMeta(examId, k) { return (bucket(examId).meta || {})[k]; },
+        setMeta(examId, k, v) { const b = bucket(examId); b.meta = b.meta || {}; b.meta[k] = v; return save(); },
+
         // ---- maintenance ----
         clearExam(examId) { delete ensure().exams[examId]; return save(); },
         examIds() { return Object.keys(ensure().exams); },
@@ -131,6 +143,12 @@ App.createStorage = function (backend, opts) {
                     } else if (inc.note && !cur.note) { cur.note = inc.note; }
                 });
                 Object.keys(src.sessions || {}).forEach(sid => { if (!b.sessions[sid]) b.sessions[sid] = src.sessions[sid]; });
+                if (Array.isArray(src.reports)) {
+                    b.reports = b.reports || [];
+                    const have = new Set(b.reports.map(r => r.id));
+                    src.reports.forEach(r => { if (r && r.id && !have.has(r.id)) b.reports.push(r); });
+                }
+                if (src.meta && typeof src.meta === 'object') { b.meta = b.meta || {}; Object.keys(src.meta).forEach(k => { if (b.meta[k] === undefined) b.meta[k] = src.meta[k]; }); }
             });
             save();
             return { attempts, qstats };

@@ -53,7 +53,10 @@ App.Session = (function () {
         _record(i, ok, storage) {
             if (this.applied[i]) return;
             this.applied[i] = true;
-            App.recordAnswer(this.examId, this.item(i).uid, ok, this.times[i] || 0, storage);
+            const it = this.item(i), v = this.values[i];
+            let picks;
+            if ((it.kind === 'single' || it.kind === 'multiple') && it.origin && v !== undefined) picks = (Array.isArray(v) ? v : [v]).map(k => it.origin[k]).filter(k => k !== undefined);
+            App.recordAnswer(this.examId, it.uid, ok, this.times[i] || 0, storage, undefined, { picks, rev: it.rev });
         }
 
         canPause() { return this.timerMode !== 'none' && !this.paused && (this.pausesAllowed === null || this.pausesUsed < this.pausesAllowed); }

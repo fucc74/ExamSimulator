@@ -30,7 +30,7 @@
         const name = params.get('content');
         const url = params.get('url');
         try {
-            if (name && /^[\w.\-]+$/.test(name)) {
+            if (name && /^(local:)?[\w.\-]+$/.test(name)) {
                 showLoading();
                 openExam(await App.loader.loadByName(name));
             } else if (url) {

@@ -119,6 +119,17 @@
             if (key) { if (texts.has(key)) rep.warn(label, 'same text as question ' + texts.get(key)); else texts.set(key, q.id); }
         });
 
+        if (qs.every(q => isObj(q) && q.retired === true)) rep.error('questions', 'every question is retired — at least one must stay active');
+        if (exam.changelog !== undefined) {
+            if (!Array.isArray(exam.changelog)) rep.error('changelog', 'must be a list of {version, date, notes}');
+            else exam.changelog.forEach((c, i) => {
+                const p = 'changelog[' + i + ']';
+                if (!isObj(c) || typeof c.version !== 'string' || !c.version) { rep.error(p + '.version', 'is required (text)'); return; }
+                if (c.date !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(String(c.date))) rep.error(p + '.date', 'must look like 2026-03-31');
+                const notes = Array.isArray(c.notes) ? c.notes : (c.notes === undefined ? [] : [c.notes]);
+                notes.forEach((n, k) => { if (!isLoc(n)) rep.error(p + '.notes[' + k + ']', 'must be a non-empty string or {en,it} object'); });
+            });
+        }
         if (exam.topics !== undefined) {
             if (!isObj(exam.topics)) rep.error('topics', 'must be an object mapping topic -> name');
             else Object.keys(exam.topics).forEach(k => { if (!isLoc(exam.topics[k])) rep.error('topics.' + k, 'must be a non-empty string or {en,it} object'); });
@@ -175,6 +186,8 @@
             q.uid = q.uid !== undefined ? String(q.uid) : String(q.id);
             q.type = App.questionType(q);
         });
+        exam.retiredQuestions = exam.questions.filter(q => q.retired);
+        exam.questions = exam.questions.filter(q => !q.retired);
         exam.topicList = [];
         exam.questions.forEach(q => { if (!exam.topicList.includes(q.topic)) exam.topicList.push(q.topic); });
         exam.hasDifficulty = exam.questions.some(q => q.difficulty);

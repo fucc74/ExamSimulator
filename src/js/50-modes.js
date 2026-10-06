@@ -18,15 +18,25 @@
             s.time = (s.time || 0) + (sec || 0);
             return s;
         },
-        isDue: (stat, now) => !!stat && stat.seen > 0 && (stat.due || 0) <= now,
+        isDue: (stat, now, q) => !!stat && stat.seen > 0 && ((stat.due || 0) <= now || !!(q && (q.rev || 1) > (stat.rev || 1))),   // a revised question comes back for review
         isMastered: stat => !!stat && (stat.box || 0) >= 3
     };
 
     // Records one answer in the persistent per-question stats.
-    App.recordAnswer = function (examId, uid, ok, sec, storage, now) {
+    // extra: {picks: [position in the exam file of each option chosen], rev}
+    App.recordAnswer = function (examId, uid, ok, sec, storage, now, extra) {
         storage = storage || App.storage;
         now = now || Date.now();
-        storage.patchQStat(examId, uid, cur => App.srs.update(cur, ok, sec, now));
+        extra = extra || {};
+        storage.patchQStat(examId, uid, cur => {
+            const s = App.srs.update(cur, ok, sec, now);
+            if (extra.rev) s.rev = extra.rev;
+            if (extra.picks && extra.picks.length) {
+                s.picks = Object.assign({}, cur.picks);
+                extra.picks.forEach(i => { s.picks[i] = (s.picks[i] || 0) + 1; });
+            }
+            return s;
+        });
         App.events.emit('answerRecorded', { examId, uid, ok });
     };
 
@@ -106,7 +116,7 @@
             }
             if (id === 'review') {
                 const seen = qs.filter(q => stats[q.uid] && stats[q.uid].seen);
-                const due = seen.filter(q => App.srs.isDue(stats[q.uid], now)).sort((a, b) => (stats[a.uid].due || 0) - (stats[b.uid].due || 0));
+                const due = seen.filter(q => App.srs.isDue(stats[q.uid], now, q)).sort((a, b) => (stats[a.uid].due || 0) - (stats[b.uid].due || 0));
                 if (due.length) return { questions: due };
                 const weakest = seen.slice().sort((a, b) => (stats[a.uid].box || 0) - (stats[b.uid].box || 0) || (stats[a.uid].due || 0) - (stats[b.uid].due || 0));
                 return { questions: weakest, fallback: true };

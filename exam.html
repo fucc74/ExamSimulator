@@ -1182,6 +1182,7 @@ App.loc = function (v) {
         const order = keep ? identity : shuffle(identity);
         const answers = (Array.isArray(def.answer) ? def.answer : [def.answer]);
         item.options = order.map(i => def.options[i]);
+        item.origin = order;     // shown position -> position in the exam file (used for per-option statistics)
         item.answer = answers.map(a => order.indexOf(a)).sort((a, b) => a - b);
         item.kind = multi ? 'multiple' : 'single';
         return item;
@@ -1653,6 +1654,17 @@ App.loc = function (v) {
             if (key) { if (texts.has(key)) rep.warn(label, 'same text as question ' + texts.get(key)); else texts.set(key, q.id); }
         });
 
+        if (qs.every(q => isObj(q) && q.retired === true)) rep.error('questions', 'every question is retired — at least one must stay active');
+        if (exam.changelog !== undefined) {
+            if (!Array.isArray(exam.changelog)) rep.error('changelog', 'must be a list of {version, date, notes}');
+            else exam.changelog.forEach((c, i) => {
+                const p = 'changelog[' + i + ']';
+                if (!isObj(c) || typeof c.version !== 'string' || !c.version) { rep.error(p + '.version', 'is required (text)'); return; }
+                if (c.date !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(String(c.date))) rep.error(p + '.date', 'must look like 2026-03-31');
+                const notes = Array.isArray(c.notes) ? c.notes : (c.notes === undefined ? [] : [c.notes]);
+                notes.forEach((n, k) => { if (!isLoc(n)) rep.error(p + '.notes[' + k + ']', 'must be a non-empty string or {en,it} object'); });
+            });
+        }
         if (exam.topics !== undefined) {
             if (!isObj(exam.topics)) rep.error('topics', 'must be an object mapping topic -> name');
             else Object.keys(exam.topics).forEach(k => { if (!isLoc(exam.topics[k])) rep.error('topics.' + k, 'must be a non-empty string or {en,it} object'); });
@@ -1709,6 +1721,8 @@ App.loc = function (v) {
             q.uid = q.uid !== undefined ? String(q.uid) : String(q.id);
             q.type = App.questionType(q);
         });
+        exam.retiredQuestions = exam.questions.filter(q => q.retired);
+        exam.questions = exam.questions.filter(q => !q.retired);
         exam.topicList = [];
         exam.questions.forEach(q => { if (!exam.topicList.includes(q.topic)) exam.topicList.push(q.topic); });
         exam.hasDifficulty = exam.questions.some(q => q.difficulty);
@@ -1918,6 +1932,18 @@ App.createStorage = function (backend, opts) {
             return save();
         },
 
+        // ---- wrong-question reports and small per-exam metadata (seen version…) ----
+        addReport(examId, report) {
+            const b = bucket(examId);
+            b.reports = b.reports || [];
+            b.reports.push(Object.assign({ id: App.util.uid(), ts: Date.now() }, report));
+            return save();
+        },
+        listReports(examId) { return (bucket(examId).reports || []).slice(); },
+        removeReport(examId, id) { const b = bucket(examId); b.reports = (b.reports || []).filter(r => r.id !== id); return save(); },
+        getMeta(examId, k) { return (bucket(examId).meta || {})[k]; },
+        setMeta(examId, k, v) { const b = bucket(examId); b.meta = b.meta || {}; b.meta[k] = v; return save(); },
+
         // ---- maintenance ----
         clearExam(examId) { delete ensure().exams[examId]; return save(); },
         examIds() { return Object.keys(ensure().exams); },
@@ -1950,6 +1976,12 @@ App.createStorage = function (backend, opts) {
                     } else if (inc.note && !cur.note) { cur.note = inc.note; }
                 });
                 Object.keys(src.sessions || {}).forEach(sid => { if (!b.sessions[sid]) b.sessions[sid] = src.sessions[sid]; });
+                if (Array.isArray(src.reports)) {
+                    b.reports = b.reports || [];
+                    const have = new Set(b.reports.map(r => r.id));
+                    src.reports.forEach(r => { if (r && r.id && !have.has(r.id)) b.reports.push(r); });
+                }
+                if (src.meta && typeof src.meta === 'object') { b.meta = b.meta || {}; Object.keys(src.meta).forEach(k => { if (b.meta[k] === undefined) b.meta[k] = src.meta[k]; }); }
             });
             save();
             return { attempts, qstats };
@@ -2135,6 +2167,621 @@ App.profiles = (function () {
     return api;
 })();
 
+/* Backup and sync: snapshots, transfer codes, backup reminder, auto-backup file, private GitHub Gist sync.
+   Everything here is opt-in; nothing leaves the device unless the user starts it. */
+App.backup = (function () {
+    const GIST_FILE = 'examsim-backup.json';
+    const GIST_KEY = 'examsim:gist';
+    const PORTABLE_PREFS = ['scoring', 'examRules', 'backupRemindDays'];
+    const rawBackend = () => App.backend || App.defaultBackend();
+
+    // ---- snapshot of the current profile (+ optionally the local exam library) ----
+    function snapshot(opts) {
+        opts = opts || {};
+        const data = App.storage.exportData(opts.examIds);
+        const prefs = {};
+        PORTABLE_PREFS.forEach(k => { if (data.prefs && data.prefs[k] !== undefined) prefs[k] = data.prefs[k]; });
+        data.prefs = prefs;
+        if (opts.library && App.library) data.library = App.library.exportAll();
+        if (opts.sessions === false) Object.keys(data.exams).forEach(id => { data.exams[id] = Object.assign({}, data.exams[id], { sessions: {} }); });
+        return data;
+    }
+
+    // Merges a snapshot into the current profile. Returns counts.
+    function apply(obj) {
+        const r = App.storage.importData(obj);
+        r.library = 0;
+        if (obj.library && App.library) r.library = App.library.importAll(obj.library);
+        const prefs = obj.prefs || {};
+        PORTABLE_PREFS.forEach(k => { if (prefs[k] !== undefined && App.storage.getPref(k) === undefined) App.storage.setPref(k, prefs[k]); });
+        return r;
+    }
+
+    // ---- transfer code: gzip + base64url, safe to paste into a chat or a note ----
+    function toB64(bytes) {
+        let s = '';
+        for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+        return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+    function fromB64(str) {
+        const s = atob(str.replace(/-/g, '+').replace(/_/g, '/'));
+        const out = new Uint8Array(s.length);
+        for (let i = 0; i < s.length; i++) out[i] = s.charCodeAt(i);
+        return out;
+    }
+    async function pipe(bytes, stream) {
+        const body = new Blob([bytes]).stream().pipeThrough(stream);
+        return new Uint8Array(await new Response(body).arrayBuffer());
+    }
+    const canGzip = () => typeof CompressionStream !== 'undefined' && typeof DecompressionStream !== 'undefined';
+
+    async function encode(obj) {
+        const bytes = new TextEncoder().encode(JSON.stringify(obj));
+        if (canGzip()) return 'ES1.' + toB64(await pipe(bytes, new CompressionStream('gzip')));
+        return 'ES0.' + toB64(bytes);
+    }
+    async function decode(code) {
+        const m = String(code || '').trim().replace(/\s+/g, '').match(/^(ES[01])\.([\w\-]+)$/);
+        if (!m) throw new Error('not an ExamSim transfer code');
+        let bytes = fromB64(m[2]);
+        if (m[1] === 'ES1') {
+            if (!canGzip()) throw new Error('this browser cannot read compressed codes');
+            bytes = await pipe(bytes, new DecompressionStream('gzip'));
+        }
+        let obj;
+        try { obj = JSON.parse(new TextDecoder().decode(bytes)); } catch (e) { throw new Error('the code is damaged or incomplete'); }
+        return obj;
+    }
+
+    // ---- backup reminder ----
+    function markBackup(now) { App.storage.setPref('lastBackup', now || Date.now()); }
+    function lastBackup() { return Number(App.storage.getPref('lastBackup')) || 0; }
+    function remindDays() { const d = App.storage.getPref('backupRemindDays'); return d === undefined || d === '' ? 14 : Number(d); }
+    // True when there is progress worth protecting and no backup was made for `remindDays` days.
+    function due(now) {
+        now = now || Date.now();
+        const days = remindDays();
+        if (!(days > 0)) return false;
+        if ((Number(App.storage.getPref('backupSnooze')) || 0) > now) return false;
+        let oldest = Infinity, any = false;
+        App.storage.examIds().forEach(id => App.storage.listAttempts(id).forEach(a => { any = true; oldest = Math.min(oldest, a.ts); }));
+        if (!any) return false;
+        const base = lastBackup() || oldest;
+        return now - base > days * 86400000;
+    }
+    function snooze(days, now) { App.storage.setPref('backupSnooze', (now || Date.now()) + (days || 3) * 86400000); }
+
+    // ---- GitHub Gist sync (private gist, token stays on this device, never exported) ----
+    function gistConfig() { try { return JSON.parse(rawBackend().getItem(GIST_KEY)) || {}; } catch (e) { return {}; } }
+    function setGistConfig(c) { rawBackend().setItem(GIST_KEY, JSON.stringify(c || {})); if (rawBackend().flush) rawBackend().flush(); }
+    async function gistFetch(method, path, token, body) {
+        let resp;
+        try {
+            resp = await fetch('https://api.github.com' + path, {
+                method, headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' },
+                body: body ? JSON.stringify(body) : undefined
+            });
+        } catch (e) { throw new Error('network error'); }
+        if (resp.status === 401) throw new Error('GitHub refused the token (401)');
+        if (resp.status === 404) throw new Error('gist not found (404) — check the id and that the token has the "gist" permission');
+        if (!resp.ok) throw new Error('GitHub answered ' + resp.status);
+        return resp.json();
+    }
+    async function gistPull(cfg) {
+        const g = await gistFetch('GET', '/gists/' + encodeURIComponent(cfg.id), cfg.token);
+        const f = g.files && g.files[GIST_FILE];
+        if (!f) throw new Error('the gist has no ' + GIST_FILE);
+        let content = f.content;
+        if (f.truncated && f.raw_url) { const r = await fetch(f.raw_url); content = await r.text(); }
+        try { return JSON.parse(content); } catch (e) { throw new Error('the gist content is not valid JSON'); }
+    }
+    async function gistPush(cfg, data) {
+        const files = {}; files[GIST_FILE] = { content: JSON.stringify(data) };
+        if (cfg.id) { await gistFetch('PATCH', '/gists/' + encodeURIComponent(cfg.id), cfg.token, { files }); return cfg.id; }
+        const g = await gistFetch('POST', '/gists', cfg.token, { description: 'ExamSim backup', public: false, files });
+        return g.id;
+    }
+    // Pull (merge) then push. Returns {pulled, pushed, id}.
+    async function syncGist(opts) {
+        const cfg = Object.assign({}, gistConfig());
+        if (!cfg.token) throw new Error('no GitHub token configured');
+        let pulled = null;
+        if (cfg.id) pulled = apply(await gistPull(cfg));
+        cfg.id = await gistPush(cfg, snapshot({ library: !opts || opts.library !== false, sessions: false }));
+        cfg.last = Date.now();
+        setGistConfig(cfg);
+        markBackup();
+        return { pulled, id: cfg.id };
+    }
+
+    // ---- auto-backup to a file chosen by the user (File System Access API, Chromium browsers) ----
+    const fsSupported = () => typeof window !== 'undefined' && typeof window.showSaveFilePicker === 'function';
+    function fsDb() {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open('examsim-fs', 1);
+            req.onupgradeneeded = () => req.result.createObjectStore('h');
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+        });
+    }
+    async function fsGet() { try { const db = await fsDb(); return await new Promise(r => { const q = db.transaction('h').objectStore('h').get('file'); q.onsuccess = () => r(q.result || null); q.onerror = () => r(null); }); } catch (e) { return null; } }
+    async function fsPut(h) { const db = await fsDb(); await new Promise((res, rej) => { const t = db.transaction('h', 'readwrite'); if (h) t.objectStore('h').put(h, 'file'); else t.objectStore('h').delete('file'); t.oncomplete = res; t.onerror = rej; }); }
+    async function chooseAutoFile() {
+        const h = await window.showSaveFilePicker({ suggestedName: 'examsim-backup.json', types: [{ description: 'ExamSim backup', accept: { 'application/json': ['.json'] } }] });
+        await fsPut(h);
+        await writeAuto();
+        return h.name;
+    }
+    async function autoFileName() { const h = await fsGet(); return h ? h.name : null; }
+    async function disableAutoFile() { await fsPut(null); }
+    // Writes the backup if a file was chosen and permission is still granted. Never prompts.
+    async function writeAuto() {
+        if (!fsSupported()) return false;
+        const h = await fsGet();
+        if (!h) return false;
+        try {
+            if (h.queryPermission && (await h.queryPermission({ mode: 'readwrite' })) !== 'granted') return false;
+            const w = await h.createWritable();
+            await w.write(JSON.stringify(snapshot({ library: true, sessions: false })));
+            await w.close();
+            markBackup();
+            return true;
+        } catch (e) { return false; }
+    }
+
+    return { snapshot, apply, encode, decode, canGzip, markBackup, lastBackup, remindDays, due, snooze, gistConfig, setGistConfig, syncGist, gistPull, gistPush, fsSupported, chooseAutoFile, autoFileName, disableAutoFile, writeAuto, PORTABLE_PREFS };
+})();
+
+/* Local exam library: exams created with the wizard/editor or imported from a file live in the browser storage
+   and appear next to the bundled exams. They are shared by all profiles. */
+App.library = (function () {
+    const INDEX = 'examsim:lib:index';
+    const keyOf = id => 'examsim:lib:' + id;
+    const be = () => App.backend || App.defaultBackend();
+    const flush = () => { const b = be(); if (b && b.flush) b.flush(); };
+
+    function readIndex() { try { const x = JSON.parse(be().getItem(INDEX)); return Array.isArray(x) ? x : []; } catch (e) { return []; } }
+    function writeIndex(list) { be().setItem(INDEX, JSON.stringify(list)); }
+
+    function summary(raw) {
+        const topics = new Set((raw.questions || []).map(q => q.topic));
+        return { id: raw.id, title: raw.title, description: raw.description, code: raw.code, version: raw.version,
+            questionCount: (raw.questions || []).length, topicCount: topics.size, updated: Date.now() };
+    }
+
+    const api = {
+        // Catalog entries in the same shape as the bundled catalog.
+        list() { return readIndex().map(s => Object.assign({}, s, { file: 'local:' + s.id, local: true })); },
+        has: id => readIndex().some(s => s.id === id),
+        get(id) { try { return JSON.parse(be().getItem(keyOf(id))); } catch (e) { return null; } },
+        // A free id: appends -2, -3… when taken by a bundled or local exam.
+        freeId(wanted, takenByCatalog) {
+            let base = String(wanted || 'my-exam').toLowerCase().replace(/[^\w.\-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'my-exam', id = base, n = 2;
+            const taken = new Set((takenByCatalog || []).concat(readIndex().map(s => s.id)));
+            while (taken.has(id)) id = base + '-' + (n++);
+            return id;
+        },
+        // Validates and stores an exam (raw format-2 object). Returns {ok, report, id}.
+        save(raw) {
+            const prepared = App.schema.prepare(raw, raw && raw.id);
+            if (!prepared.exam) return { ok: false, report: prepared.report };
+            const clean = App.util.clone(raw);
+            clean.format = App.FORMAT_VERSION;
+            try { be().setItem(keyOf(clean.id), JSON.stringify(clean)); } catch (e) { App.events.emit('storageError', e); return { ok: false, report: prepared.report, error: e }; }
+            const idx = readIndex().filter(s => s.id !== clean.id);
+            idx.push(summary(clean));
+            writeIndex(idx);
+            flush();
+            App.events.emit('libraryChange', { id: clean.id });
+            return { ok: true, report: prepared.report, id: clean.id };
+        },
+        remove(id) {
+            be().removeItem(keyOf(id));
+            writeIndex(readIndex().filter(s => s.id !== id));
+            flush();
+            App.events.emit('libraryChange', { id });
+        },
+        exportAll() { const out = {}; readIndex().forEach(s => { const e = api.get(s.id); if (e) out[s.id] = e; }); return out; },
+        // Adds exams from a snapshot without overwriting newer local copies. Returns how many were added/updated.
+        importAll(map) {
+            let n = 0;
+            Object.keys(map || {}).forEach(id => {
+                const inc = map[id];
+                if (!inc || typeof inc !== 'object') return;
+                const cur = api.get(id);
+                const better = !cur || (String(inc.version || '') > String(cur.version || '')) || (inc.questions || []).length > (cur.questions || []).length;
+                if (better && api.save(Object.assign({}, inc, { id })).ok) n++;
+            });
+            return n;
+        },
+        // Serializes a raw exam as a .exam file
+        toFileText(raw) { return 'ExamSim.register(' + JSON.stringify(raw, null, 1) + ');\n'; }
+    };
+    return api;
+})();
+
+/* Conversions between exams and text formats: free-text/Markdown parser (import wizard), Markdown, CSV and Anki export.
+   Pure functions, no DOM. Question types supported in text: single, multiple, truefalse, numeric.
+   CSV also carries ordering and matching. Scenario questions are exported to JSON/Anki only. */
+App.convert = (function () {
+    const LETTERS = 'ABCDEFGH';
+    const loc = (v, lang) => (v === undefined || v === null) ? '' : (typeof v === 'string' || typeof v === 'number') ? String(v) : (v[lang] || v.en || Object.values(v)[0] || '');
+    const slug = s => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30) || 'general';
+
+    // ---------------------------------------------------------------- text parser
+    const RE = {
+        qWord: /^\s*(?:#{1,6}\s*)?(?:Question|Domanda|Quesito|Q\.?)\s*(\d{1,4})\s*(?:[.):\-]\s*|\s+|$)(.*)$/i,
+        qNum: /^\s*(?:#{1,6}\s*)?(\d{1,4})\s*[.):]\s+(.*)$/,
+        checkbox: /^\s*[-*+]\s*\[( |x|X)\]\s*(?:\(?([A-Ha-h])[.)]\s+)?(.+)$/,
+        letter: /^\s*\(?([A-Ha-h])[.)]\s+(.+)$/,
+        bullet: /^\s*[-*•]\s+(.+)$/,
+        answer: /^\s*(?:\*\*)?(?:Correct\s+answers?|Right\s+answers?|Answers?|Ans|Risposte?(?:\s+corrette?|\s+esatta)?|Soluzione|Correct|Corretta|Giusta)(?:\*\*)?\s*[:=\-]\s*(?:\*\*)?(.+?)\s*$/i,
+        expl: /^\s*(?:\*\*)?(?:Explanation|Spiegazione|Rationale|Motivazione|Why|Commento)(?:\*\*)?\s*[:\-]\s*(?:\*\*)?(.*)$/i,
+        header: /^\s*(?:(#{1,6})\s+(.+?)\s*#*|(?:Topic|Section|Sezione|Argomento|Domain|Dominio|Chapter|Capitolo)\s*[:\-]\s*(.+)|={3,}\s*(.+?)\s*=*|-{3,}\s*(.+?)\s*-{3,})\s*$/i,
+        mark: /\s*(?:✓|✔|\(correct\)|\(corretta\)|\[correct\]|\[corretta\])\s*$/i
+    };
+
+    function parseAnswerValue(v, optCount) {
+        let s = String(v).replace(/^\*+|\*+$/g, '').trim().replace(/[.;]$/, '');
+        const word = optCount > 0 ? /^(true|vero)$/i : /^(true|vero|v|t)$/i, wordF = optCount > 0 ? /^(false|falso)$/i : /^(false|falso|f)$/i;
+        if (word.test(s)) return { bool: true };
+        if (wordF.test(s)) return { bool: false };
+        const num = s.match(/^(-?\d+(?:[.,]\d+)?)\s*(?:(?:±|\+\/-)\s*(\d+(?:[.,]\d+)?))?\s*(.*)$/);
+        const lets = s.match(/^([A-Ha-h](?:\s*(?:,|;|&|\/|\+|and|e|ed)\s*[A-Ha-h])*)\s*(?:[.):]|$)/);
+        if (lets) return { letters: (lets[1].toUpperCase().match(/[A-H]/g) || []).map(c => LETTERS.indexOf(c)) };
+        if (/^[A-Ha-h]{2,6}$/.test(s)) return { letters: s.toUpperCase().split('').map(c => LETTERS.indexOf(c)) };
+        if (num) {
+            const out = { number: Number(num[1].replace(',', '.')) };
+            if (num[2]) out.tolerance = Number(num[2].replace(',', '.'));
+            if (num[3] && num[3].trim()) out.unit = num[3].trim();
+            return out;
+        }
+        return { text: s };
+    }
+
+    function parseText(input) {
+        const lines = String(input || '').replace(/^﻿/, '').replace(/\r\n?/g, '\n').split('\n');
+        const meta = {}, topics = {}, warnings = [], qs = [];
+        let cur = null, field = null, topicKey = 'general', lastNum = 0;
+        const addTopic = name => { const k = slug(name); topics[k] = name.trim(); return k; };
+
+        function finish() {
+            if (!cur) return;
+            const q = cur; cur = null;
+            q.text = q.text.trim(); if (q.explanation !== undefined) q.explanation = q.explanation.trim();
+            const issues = [];
+            const opts = q.options.map(o => o.trim());
+            const correct = new Set(q.marked);
+            let a = q.answerRaw !== undefined ? parseAnswerValue(q.answerRaw, opts.length) : null;
+            let out = { id: q.n || qs.length + 1, topic: q.topic, text: q.text };
+            if (opts.length >= 2) {
+                if (a && a.letters) a.letters.forEach(i => correct.add(i));
+                else if (a && a.text) { const i = opts.findIndex(o => o.toLowerCase() === a.text.toLowerCase()); if (i >= 0) correct.add(i); }
+                else if (a && a.number !== undefined && Number.isInteger(a.number) && a.number >= 1 && a.number <= opts.length) correct.add(a.number - 1);
+                const ans = Array.from(correct).filter(i => i < opts.length).sort((x, y) => x - y);
+                out.type = ans.length > 1 ? 'multiple' : 'single';
+                out.options = opts; out.answer = ans;
+                if (!ans.length) issues.push('noAnswer');
+            } else if (a && a.bool !== undefined && opts.length === 0) {
+                out.type = 'truefalse'; out.answer = a.bool;
+            } else if (a && a.number !== undefined && opts.length === 0) {
+                out.type = 'numeric';
+                out.answer = (a.tolerance || a.unit) ? Object.assign({ value: a.number }, a.tolerance ? { tolerance: a.tolerance } : {}, a.unit ? { unit: a.unit } : {}) : a.number;
+            } else {
+                out.type = 'single'; out.options = opts; out.answer = [];
+                issues.push(opts.length ? 'fewOptions' : 'noOptions');
+            }
+            if (q.explanation) out.explanation = q.explanation;
+            if (!out.text) issues.push('noText');
+            out._issues = issues;
+            qs.push(out);
+        }
+
+        const open = (n, text) => { finish(); cur = { n, text: text || '', options: [], marked: [], topic: topicKey }; field = 'text'; lastNum = n; };
+
+        for (let li = 0; li < lines.length; li++) {
+            const line = lines[li];
+            if (!line.trim()) { if (cur && field === 'text' && cur.text) cur.text += '\n'; else if (cur && field === 'expl' && cur.explanation) cur.explanation += '\n'; continue; }
+            let m;
+            const qm = (m = line.match(RE.qWord)) || (m = line.match(RE.qNum));
+            if (qm && (!cur || cur.options.length >= 2 || cur.answerRaw !== undefined || Number(m[1]) === lastNum + 1) && !(cur && field === 'expl' && Number(m[1]) !== lastNum + 1)) { open(Number(m[1]), m[2]); continue; }
+            if (cur) {
+                if ((m = line.match(RE.expl))) { cur.explanation = m[1]; field = 'expl'; continue; }
+                if ((m = line.match(RE.answer)) && field !== 'expl') { cur.answerRaw = m[1]; field = 'answer'; continue; }
+                if (field !== 'expl' && field !== 'answer') {
+                    let om;
+                    if ((om = line.match(RE.checkbox))) { cur.options.push(om[3].replace(RE.mark, '')); if (om[1].toLowerCase() === 'x') cur.marked.push(cur.options.length - 1); field = 'opt'; continue; }
+                    if ((om = line.match(RE.letter)) && LETTERS.indexOf(om[1].toUpperCase()) === cur.options.length) {
+                        const mk = RE.mark.test(om[2]);
+                        cur.options.push(om[2].replace(RE.mark, '')); if (mk) cur.marked.push(cur.options.length - 1); field = 'opt'; continue;
+                    }
+                    if (field === 'opt' && (om = line.match(RE.bullet))) { cur.options.push(om[1]); field = 'opt'; continue; }
+                }
+            }
+            if ((m = line.match(RE.header)) && (!cur || cur.options.length || cur.answerRaw !== undefined || field === 'expl' || !cur.text.trim() || /^#/.test(line.trim()) && !line.match(/^\s*#{1,6}\s+\d/))) {
+                const level = m[1] ? m[1].length : 0;
+                const name = (m[2] || m[3] || m[4] || m[5] || '').trim();
+                if (level === 1 && !qs.length && !cur && !meta.title) { meta.title = name; continue; }
+                finish(); topicKey = addTopic(name); field = null;
+                continue;
+            }
+            if (!cur) {
+                const bq = line.match(/^\s*>\s?(.*)$/);
+                if (bq && !qs.length) { meta.description = (meta.description ? meta.description + ' ' : '') + bq[1].trim(); continue; }
+                if (!qs.length && !meta.title && line.trim().length < 120) { meta.title = line.trim(); continue; }
+                continue;
+            }
+            // continuation of the current field
+            const t = line.replace(/^\s+/, '');
+            if (field === 'text') cur.text += (cur.text && !cur.text.endsWith('\n') ? '\n' : '') + t;
+            else if (field === 'opt') cur.options[cur.options.length - 1] += ' ' + t;
+            else if (field === 'expl') cur.explanation += (cur.explanation ? '\n' : '') + t;
+            else if (field === 'answer') cur.answerRaw += ' ' + t;
+        }
+        finish();
+        if (!qs.length) warnings.push('noQuestions');
+        // keep only topics that are used
+        const used = {};
+        qs.forEach(q => { if (!topics[q.topic] && q.topic === 'general') topics.general = 'General'; });
+        Object.keys(topics).forEach(k => { if (qs.some(q => q.topic === k)) used[k] = topics[k]; });
+        // unique ids
+        const seen = new Set();
+        qs.forEach((q, i) => { if (seen.has(q.id)) q.id = i + 1 + 1000; seen.add(q.id); });
+        return { meta, topics: used, questions: qs, warnings };
+    }
+
+    // Builds a complete format-2 exam from parsed pieces. Drops the transient _issues field.
+    function buildExam(p) {
+        const questions = p.questions.map(q => { const c = Object.assign({}, q); delete c._issues; return c; });
+        const n = questions.length;
+        const exam = {
+            format: 2, id: p.id || slug(p.title || 'my-exam'), title: p.title || 'My exam', version: p.version || '1.0',
+            settings: { passThreshold: 70, timePerQuestionSec: 90, shuffleOptions: true },
+            topics: p.topics && Object.keys(p.topics).length ? p.topics : undefined,
+            modes: [{ id: 'mock', name: { en: 'Mock exam', it: 'Simulazione' }, selection: 'balanced', count: Math.min(20, n), exam: true }],
+            questions
+        };
+        if (p.description) exam.description = p.description;
+        if (p.code) exam.code = p.code;
+        if (!exam.topics) delete exam.topics;
+        return exam;
+    }
+
+    // ---------------------------------------------------------------- Markdown export
+    function toMarkdown(exam, lang) {
+        const L = v => loc(v, lang);
+        const out = ['# ' + L(exam.title)];
+        if (exam.description) out.push('> ' + L(exam.description).replace(/\n+/g, ' '));
+        out.push('');
+        const skipped = [];
+        let topic = null, n = 0;
+        (exam.questions || []).forEach(q => {
+            const type = App.questionType(q);
+            if (!['single', 'multiple', 'truefalse', 'numeric'].includes(type)) { skipped.push(q.id); return; }
+            if (q.topic !== topic) {
+                topic = q.topic;
+                out.push('## ' + L(exam.topics && exam.topics[topic] !== undefined ? exam.topics[topic] : topic), '');
+            }
+            n++;
+            out.push('### ' + n + '. ' + L(q.text !== undefined ? q.text : q.question).replace(/\n{2,}/g, '\n'));
+            if (type === 'single' || type === 'multiple') {
+                const ans = Array.isArray(q.answer) ? q.answer : [q.answer];
+                q.options.forEach((o, i) => out.push('- [' + (ans.includes(i) ? 'x' : ' ') + '] ' + L(o).replace(/\n/g, ' ')));
+            } else if (type === 'truefalse') out.push('Answer: ' + (q.answer ? 'True' : 'False'));
+            else {
+                const a = q.answer && typeof q.answer === 'object' ? q.answer : { value: q.answer };
+                out.push('Answer: ' + a.value + (a.tolerance ? ' ±' + a.tolerance : '') + (a.unit || q.unit ? ' ' + (a.unit || q.unit) : ''));
+            }
+            if (q.explanation) out.push('Explanation: ' + L(q.explanation).replace(/\n+/g, ' '));
+            out.push('');
+        });
+        return { text: out.join('\n'), skipped };
+    }
+
+    // ---------------------------------------------------------------- CSV
+    const CSV_COLUMNS = ['id', 'topic', 'type', 'difficulty', 'text', 'options', 'answer', 'explanation', 'tags', 'points'];
+
+    function csvCell(v) { const s = v === undefined || v === null ? '' : String(v); return /[",\n\r;\t]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+
+    function toCSV(exam, lang) {
+        const L = v => loc(v, lang);
+        const rows = [CSV_COLUMNS.join(',')], skipped = [];
+        (exam.questions || []).forEach(q => {
+            const type = App.questionType(q);
+            if (type === 'scenario') { skipped.push(q.id); return; }
+            let options = '', answer = '';
+            if (type === 'single' || type === 'multiple') {
+                options = q.options.map(o => L(o).replace(/\n/g, ' ')).join('\n');
+                answer = (Array.isArray(q.answer) ? q.answer : [q.answer]).map(i => LETTERS[i]).join(';');
+            } else if (type === 'truefalse') answer = q.answer ? 'true' : 'false';
+            else if (type === 'numeric') { const a = typeof q.answer === 'object' ? q.answer : { value: q.answer }; answer = a.value + (a.tolerance ? '±' + a.tolerance : '') + (a.unit ? ' ' + a.unit : ''); }
+            else if (type === 'ordering') options = q.items.map(o => L(o).replace(/\n/g, ' ')).join('\n');
+            else if (type === 'matching') options = q.pairs.map(p => L(p.left).replace(/\n/g, ' ') + ' => ' + L(p.right).replace(/\n/g, ' ')).join('\n');
+            rows.push([q.id, L(exam.topics && exam.topics[q.topic] !== undefined ? exam.topics[q.topic] : q.topic), type, q.difficulty || '', L(q.text !== undefined ? q.text : q.question), options, answer, L(q.explanation), (q.tags || []).join(';'), q.points || ''].map(csvCell).join(','));
+        });
+        return { text: '﻿' + rows.join('\r\n') + '\r\n', skipped };
+    }
+
+    function parseCSVRows(text, delim) {
+        const rows = []; let row = [], cell = '', q = false;
+        for (let i = 0; i < text.length; i++) {
+            const c = text[i];
+            if (q) {
+                if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += c;
+            } else if (c === '"' && !cell) q = true;
+            else if (c === delim) { row.push(cell); cell = ''; }
+            else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cell); cell = ''; rows.push(row); row = []; }
+            else cell += c;
+        }
+        if (cell || row.length) { row.push(cell); rows.push(row); }
+        return rows.filter(r => r.some(c => c.trim() !== ''));
+    }
+
+    const HEAD_ALIASES = {
+        id: /^(id|n|no|num|number|numero)$/, topic: /^(topic|argomento|section|sezione|category|categoria|domain|dominio)$/,
+        type: /^(type|tipo)$/, difficulty: /^(difficulty|difficolta|livello|level)$/,
+        text: /^(text|question|domanda|quesito|testo)$/, options: /^(options|opzioni|choices|risposte)$/,
+        answer: /^(answer|answers|correct|correct answer|risposta|risposta corretta|soluzione)$/, explanation: /^(explanation|spiegazione|rationale|motivazione)$/,
+        tags: /^(tags|tag)$/, points: /^(points|punti|score|punteggio)$/
+    };
+
+    function fromCSV(text) {
+        text = String(text || '').replace(/^﻿/, '');
+        const first = text.split(/\r?\n/, 1)[0] || '';
+        const delim = [',', ';', '\t'].map(d => [d, first.split(d).length]).sort((a, b) => b[1] - a[1])[0][0];
+        const rows = parseCSVRows(text, delim);
+        if (rows.length < 2) return { meta: {}, topics: {}, questions: [], warnings: ['noQuestions'] };
+        const norm = s => s.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        const head = rows[0].map(norm);
+        const col = {}; const optCols = [];
+        head.forEach((h, i) => {
+            const oc = h.match(/^(?:option|opt|opzione|risposta)?[_ ]?([a-f])$/);
+            if (oc && !HEAD_ALIASES.answer.test(h)) { optCols[LETTERS.indexOf(oc[1].toUpperCase())] = i; return; }
+            Object.keys(HEAD_ALIASES).forEach(k => { if (col[k] === undefined && HEAD_ALIASES[k].test(h)) col[k] = i; });
+        });
+        const warnings = []; const topics = {}; const questions = [];
+        if (col.text === undefined) return { meta: {}, topics: {}, questions: [], warnings: ['noTextColumn'] };
+        rows.slice(1).forEach((r, ri) => {
+            const get = k => col[k] === undefined ? '' : (r[col[k]] || '').trim();
+            const out = { id: get('id') && /^\d+$/.test(get('id')) ? Number(get('id')) : (get('id') || ri + 1), text: get('text') };
+            const tname = get('topic') || 'General'; const tk = slug(tname); topics[tk] = tname; out.topic = tk;
+            const issues = [];
+            let opts = get('options') ? get('options').split(/\n/).map(s => s.trim()).filter(Boolean) : [];
+            if (!opts.length && optCols.length) opts = optCols.map(i => (r[i] || '').trim()).filter(Boolean);
+            let type = get('type').toLowerCase();
+            const a = get('answer');
+            if (!type) type = opts.length >= 2 ? (/[;,&]/.test(a) || /^[A-Ha-h]{2,}$/.test(a) ? 'multiple' : 'single') : (/^(true|false|vero|falso)$/i.test(a) ? 'truefalse' : 'numeric');
+            out.type = type;
+            if (type === 'single' || type === 'multiple') {
+                const pv = parseAnswerValue(a, opts.length);
+                let ans = pv.letters || [];
+                if (!ans.length && pv.text) { const i = opts.findIndex(o => o.toLowerCase() === pv.text.toLowerCase()); if (i >= 0) ans = [i]; }
+                ans = Array.from(new Set(ans)).filter(i => i < opts.length).sort((x, y) => x - y);
+                out.type = ans.length > 1 ? 'multiple' : 'single';
+                out.options = opts; out.answer = ans;
+                if (!ans.length) issues.push('noAnswer');
+                if (opts.length < 2) issues.push('fewOptions');
+            } else if (type === 'truefalse') {
+                const pv = parseAnswerValue(a, 0);
+                if (pv.bool === undefined) { issues.push('noAnswer'); out.answer = true; } else out.answer = pv.bool;
+            } else if (type === 'numeric') {
+                const pv = parseAnswerValue(a, 0);
+                if (pv.number === undefined) { issues.push('noAnswer'); out.answer = 0; }
+                else out.answer = (pv.tolerance || pv.unit) ? Object.assign({ value: pv.number }, pv.tolerance ? { tolerance: pv.tolerance } : {}, pv.unit ? { unit: pv.unit } : {}) : pv.number;
+            } else if (type === 'ordering') {
+                out.items = opts; if (opts.length < 2) issues.push('fewOptions');
+            } else if (type === 'matching') {
+                out.pairs = opts.map(o => { const p = o.split(/\s*(?:=>|->|=)\s*/); return { left: p[0], right: p.slice(1).join(' = ') }; });
+                if (out.pairs.length < 2 || out.pairs.some(p => !p.right)) issues.push('fewOptions');
+            } else issues.push('badType');
+            if (get('difficulty') && [1, 2, 3].includes(Number(get('difficulty')))) out.difficulty = Number(get('difficulty'));
+            if (get('explanation')) out.explanation = get('explanation');
+            if (get('tags')) out.tags = get('tags').split(/[;,]/).map(s => s.trim()).filter(Boolean);
+            if (get('points') && Number(get('points')) > 0) out.points = Number(get('points'));
+            if (!out.text) issues.push('noText');
+            out._issues = issues;
+            questions.push(out);
+        });
+        return { meta: {}, topics, questions, warnings };
+    }
+
+    // ---------------------------------------------------------------- Anki (tab separated, HTML cards)
+    const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+    function toAnki(exam, lang) {
+        const L = v => App.rich && App.rich.plain ? App.rich.plain(loc(v, lang)) : loc(v, lang);
+        const rows = ['#separator:tab', '#html:true', '#tags column:3'];
+        const cell = s => s.replace(/\t/g, ' ').replace(/\r?\n/g, ' ');
+        (exam.questions || []).forEach(q => {
+            const type = App.questionType(q);
+            let front = esc(L(q.text !== undefined ? q.text : q.question)), back = '';
+            if (type === 'single' || type === 'multiple') {
+                const ans = Array.isArray(q.answer) ? q.answer : [q.answer];
+                front += '<br><br>' + q.options.map((o, i) => LETTERS[i] + ') ' + esc(L(o))).join('<br>');
+                back = ans.map(i => '<b>' + LETTERS[i] + ') ' + esc(L(q.options[i])) + '</b>').join('<br>');
+            } else if (type === 'truefalse') { front += '<br><i>True / False</i>'; back = '<b>' + (q.answer ? 'True' : 'False') + '</b>'; }
+            else if (type === 'numeric') { const a = typeof q.answer === 'object' ? q.answer : { value: q.answer }; back = '<b>' + a.value + (a.tolerance ? ' ±' + a.tolerance : '') + (a.unit ? ' ' + esc(a.unit) : '') + '</b>'; }
+            else if (type === 'ordering') back = q.items.map((o, i) => '<b>' + (i + 1) + '.</b> ' + esc(L(o))).join('<br>');
+            else if (type === 'matching') { front += '<br><br>' + q.pairs.map(p => esc(L(p.left))).join('<br>'); back = q.pairs.map(p => esc(L(p.left)) + ' → <b>' + esc(L(p.right)) + '</b>').join('<br>'); }
+            else if (type === 'scenario') {
+                front = esc(L(q.context)) + '<br><br>' + q.parts.map((p, i) => (i + 1) + '. ' + esc(L(p.text !== undefined ? p.text : p.question))).join('<br>');
+                back = q.parts.map((p, i) => {
+                    const pt = App.questionType(p), ans = Array.isArray(p.answer) ? p.answer : [p.answer];
+                    return (i + 1) + '. <b>' + ((pt === 'single' || pt === 'multiple') ? ans.map(k => esc(L(p.options[k]))).join(' / ') : esc(String(typeof p.answer === 'object' ? p.answer.value : p.answer))) + '</b>';
+                }).join('<br>');
+            }
+            if (q.explanation) back += '<br><br>' + esc(L(q.explanation));
+            const tags = (q.topic ? [slug(L(exam.topics && exam.topics[q.topic] !== undefined ? exam.topics[q.topic] : q.topic))] : []).concat((q.tags || []).map(slug)).join(' ');
+            rows.push(cell(front) + '\t' + cell(back) + '\t' + tags);
+        });
+        return rows.join('\n') + '\n';
+    }
+
+    return { parseText, buildExam, toMarkdown, toCSV, fromCSV, toAnki, parseAnswerValue, slug, CSV_COLUMNS };
+})();
+
+/* Automatic question-quality detection from the answers collected on this device.
+   Pure logic: works on an exam and a map of per-question stats ({seen, correct, wrong, time, picks}). */
+App.quality = (function () {
+    const MIN_SEEN = 5;
+
+    // Returns a list of findings: {uid, id, kind, severity, params}.
+    // kinds: tooEasy, tooHard, dubiousKey, weakDistractor, slow, difficultyMismatch
+    function analyze(exam, qstats) {
+        const out = [];
+        qstats = qstats || {};
+        exam.questions.forEach(q => {
+            const s = qstats[q.uid];
+            if (!s || (s.seen || 0) < MIN_SEEN) return;
+            const acc = s.correct / s.seen;
+            const add = (kind, severity, params) => out.push({ uid: q.uid, id: q.id, kind, severity, params: params || {} });
+            const type = q.type || App.questionType(q);
+            if (acc >= 0.95 && s.seen >= MIN_SEEN) add('tooEasy', 1, { pct: Math.round(acc * 100), n: s.seen });
+            if (acc <= 0.25) add('tooHard', 2, { pct: Math.round(acc * 100), n: s.seen });
+            if (q.difficulty === 1 && acc <= 0.4) add('difficultyMismatch', 1, { pct: Math.round(acc * 100), d: 1 });
+            if (q.difficulty === 3 && acc >= 0.9) add('difficultyMismatch', 1, { pct: Math.round(acc * 100), d: 3 });
+            const avg = s.time && s.seen ? s.time / s.seen : 0;
+            const est = q.estimatedSec || 0;
+            if (est && avg > est * 3 && s.seen >= MIN_SEEN) add('slow', 1, { avg: Math.round(avg), est });
+            if ((type === 'single' || type === 'multiple') && s.picks && Array.isArray(q.options)) {
+                const ans = Array.isArray(q.answer) ? q.answer : [q.answer];
+                const total = Object.values(s.picks).reduce((a, b) => a + b, 0);
+                const wrongPicks = q.options.map((_, i) => ans.includes(i) ? 0 : (s.picks[i] || 0));
+                const wrongTotal = wrongPicks.reduce((a, b) => a + b, 0);
+                // everybody who is wrong picks the same distractor, and accuracy is very low: the key may be wrong
+                if (type === 'single' && s.seen >= 8 && acc <= 0.15 && wrongTotal >= 6 && Math.max(...wrongPicks) / wrongTotal >= 0.7) {
+                    const top = wrongPicks.indexOf(Math.max(...wrongPicks));
+                    add('dubiousKey', 3, { opt: 'ABCDEF'[top], pct: Math.round(100 * acc) });
+                }
+                // a distractor nobody ever picks does not distract
+                if (total >= 10) {
+                    const dead = q.options.map((_, i) => i).filter(i => !ans.includes(i) && !(s.picks[i] > 0));
+                    if (dead.length && dead.length < q.options.length - ans.length + 0 && q.options.length - ans.length >= 2) add('weakDistractor', 1, { opts: dead.map(i => 'ABCDEF'[i]).join(', '), n: total });
+                }
+            }
+        });
+        return out.sort((a, b) => b.severity - a.severity);
+    }
+
+    // Structural checks that need no answers: very short options, duplicates, "all of the above" patterns, long option imbalance.
+    function structural(exam) {
+        const out = [];
+        exam.questions.forEach(q => {
+            const type = q.type || App.questionType(q);
+            if (type !== 'single' && type !== 'multiple') return;
+            const texts = q.options.map(o => App.rich.plain(App.loc(o)).trim());
+            const add = (kind, params) => out.push({ uid: q.uid, id: q.id, kind, severity: 1, params: params || {} });
+            if (new Set(texts.map(t => t.toLowerCase())).size < texts.length) add('duplicateOptions');
+            if (texts.some(t => /^(all|none) of the above|^(tutte|nessuna) (le precedenti|delle precedenti)/i.test(t))) add('allOfAbove');
+            const ans = Array.isArray(q.answer) ? q.answer : [q.answer];
+            const lens = texts.map(t => t.length);
+            if (type === 'single' && lens.length >= 3 && lens[ans[0]] > 1.8 * Math.max(...lens.filter((_, i) => i !== ans[0]))) add('correctMuchLonger');
+        });
+        return out;
+    }
+
+    return { analyze, structural, MIN_SEEN };
+})();
+
 /* Study modes and spaced repetition (Leitner boxes). Pure logic, no DOM. */
 (function () {
     const { shuffle } = App.util;
@@ -2155,15 +2802,25 @@ App.profiles = (function () {
             s.time = (s.time || 0) + (sec || 0);
             return s;
         },
-        isDue: (stat, now) => !!stat && stat.seen > 0 && (stat.due || 0) <= now,
+        isDue: (stat, now, q) => !!stat && stat.seen > 0 && ((stat.due || 0) <= now || !!(q && (q.rev || 1) > (stat.rev || 1))),   // a revised question comes back for review
         isMastered: stat => !!stat && (stat.box || 0) >= 3
     };
 
     // Records one answer in the persistent per-question stats.
-    App.recordAnswer = function (examId, uid, ok, sec, storage, now) {
+    // extra: {picks: [position in the exam file of each option chosen], rev}
+    App.recordAnswer = function (examId, uid, ok, sec, storage, now, extra) {
         storage = storage || App.storage;
         now = now || Date.now();
-        storage.patchQStat(examId, uid, cur => App.srs.update(cur, ok, sec, now));
+        extra = extra || {};
+        storage.patchQStat(examId, uid, cur => {
+            const s = App.srs.update(cur, ok, sec, now);
+            if (extra.rev) s.rev = extra.rev;
+            if (extra.picks && extra.picks.length) {
+                s.picks = Object.assign({}, cur.picks);
+                extra.picks.forEach(i => { s.picks[i] = (s.picks[i] || 0) + 1; });
+            }
+            return s;
+        });
         App.events.emit('answerRecorded', { examId, uid, ok });
     };
 
@@ -2243,7 +2900,7 @@ App.profiles = (function () {
             }
             if (id === 'review') {
                 const seen = qs.filter(q => stats[q.uid] && stats[q.uid].seen);
-                const due = seen.filter(q => App.srs.isDue(stats[q.uid], now)).sort((a, b) => (stats[a.uid].due || 0) - (stats[b.uid].due || 0));
+                const due = seen.filter(q => App.srs.isDue(stats[q.uid], now, q)).sort((a, b) => (stats[a.uid].due || 0) - (stats[b.uid].due || 0));
                 if (due.length) return { questions: due };
                 const weakest = seen.slice().sort((a, b) => (stats[a.uid].box || 0) - (stats[b.uid].box || 0) || (stats[a.uid].due || 0) - (stats[b.uid].due || 0));
                 return { questions: weakest, fallback: true };
@@ -2377,7 +3034,10 @@ App.Session = (function () {
         _record(i, ok, storage) {
             if (this.applied[i]) return;
             this.applied[i] = true;
-            App.recordAnswer(this.examId, this.item(i).uid, ok, this.times[i] || 0, storage);
+            const it = this.item(i), v = this.values[i];
+            let picks;
+            if ((it.kind === 'single' || it.kind === 'multiple') && it.origin && v !== undefined) picks = (Array.isArray(v) ? v : [v]).map(k => it.origin[k]).filter(k => k !== undefined);
+            App.recordAnswer(this.examId, it.uid, ok, this.times[i] || 0, storage, undefined, { picks, rev: it.rev });
         }
 
         canPause() { return this.timerMode !== 'none' && !this.paused && (this.pausesAllowed === null || this.pausesUsed < this.pausesAllowed); }
@@ -2496,6 +3156,14 @@ App.loader = (function () {
     const isHttp = () => typeof location !== 'undefined' && /^https?:$/.test(location.protocol);
 
     async function loadByName(name) {
+        if (name.startsWith('local:')) {
+            const id = name.slice(6);
+            const raw = App.library && App.library.get(id);
+            if (!raw) throw new LoadError('notFound', { name });
+            const exam = finalize(raw, id, name);
+            exam.sourceFile = name; exam.local = true;
+            return exam;
+        }
         const file = name + '.exam';
         let data = null;
         pending = null;
@@ -2527,8 +3195,11 @@ App.loader = (function () {
     // Exam list: exams.js (generated, optional) overrides the list embedded in exam.html at build time.
     function catalog() {
         if (typeof window === 'undefined') return [];
-        if (Array.isArray(window.ExamCatalog) && window.ExamCatalog.length) return window.ExamCatalog;
-        return Array.isArray(window.ExamCatalogDefault) ? window.ExamCatalogDefault : [];
+        let base = [];
+        if (Array.isArray(window.ExamCatalog) && window.ExamCatalog.length) base = window.ExamCatalog;
+        else if (Array.isArray(window.ExamCatalogDefault)) base = window.ExamCatalogDefault;
+        const local = App.library ? App.library.list() : [];
+        return local.length ? base.concat(local) : base;
     }
 
     // Human-readable message for a load error.
@@ -3551,7 +4222,7 @@ App.ui = {};
         const name = params.get('content');
         const url = params.get('url');
         try {
-            if (name && /^[\w.\-]+$/.test(name)) {
+            if (name && /^(local:)?[\w.\-]+$/.test(name)) {
                 showLoading();
                 openExam(await App.loader.loadByName(name));
             } else if (url) {
