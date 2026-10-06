@@ -660,7 +660,9 @@
             if (!Array.isArray(q.answer)) q.answer = [q.answer];
             q.type = q.answer.length > 1 ? 'multiple' : 'single';
 
-            const order = shuffle(q.options.map((_, i) => i));
+            // shuffle:false mantiene l'ordine (es. opzioni tipo "All of the above")
+            const identity = q.options.map((_, i) => i);
+            const order = q.shuffle === false ? identity : shuffle(identity);
             const opts = q.options.map(stripLetter);
             q.options = order.map(i => opts[i]);
             q.answer = q.answer.map(old => order.indexOf(old)).sort((a, b) => a - b);
