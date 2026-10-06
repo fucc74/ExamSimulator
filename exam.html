@@ -296,8 +296,9 @@ select { appearance: none; -webkit-appearance: none; padding-right: 38px; backgr
 .tag-topic { display: inline-flex; align-items: center; max-width: 100%; padding: 4px 12px; border-radius: var(--r-pill); font-size: 0.74rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; background: var(--primary-soft); color: var(--primary); }
 .q-meta { display: flex; align-items: center; gap: 8px; }
 .q-number { font-size: 0.85rem; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
-.flag-btn { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: var(--r-pill); border: 1px solid var(--border-strong); background: var(--surface); color: var(--muted); font-size: 0.8rem; font-weight: 700; transition: all .15s; }
+.flag-btn, .chip-btn { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: var(--r-pill); border: 1px solid var(--border-strong); background: var(--surface); color: var(--muted); font-size: 0.8rem; font-weight: 700; transition: all .15s; }
 .flag-btn:hover { border-color: var(--warning); color: var(--warning); }
+.chip-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
 .flag-btn[aria-pressed="true"] { border-color: var(--warning); background: var(--warning-soft); color: var(--warning); }
 .question-text { font-size: clamp(1.08rem, 1rem + 0.5vw, 1.3rem); font-weight: 700; line-height: 1.45; letter-spacing: -0.01em; white-space: pre-line; margin-bottom: 20px; overflow-wrap: anywhere; }
 
@@ -503,7 +504,7 @@ math { font-size: 1.1em; }
 .pause-card { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; max-width: 360px; color: var(--primary); }
 .pause-card h2 { color: var(--text); }
 .pace-chip { font-variant-numeric: tabular-nums; }
-.flag-btn:disabled { opacity: 0.5; cursor: default; }
+.flag-btn:disabled, .chip-btn:disabled { opacity: 0.5; cursor: default; }
 
 /* ===== Print / save as PDF ===== */
 .print-only { display: none; }
@@ -535,8 +536,8 @@ math { font-size: 1.1em; }
     (function () {
         var theme = null;
         try {
-            var raw = localStorage.getItem('examsim:v2');
-            if (raw) theme = (JSON.parse(raw).prefs || {}).theme;
+            theme = localStorage.getItem('examsim:theme');     // mirror written by the app (works with IndexedDB storage too)
+            if (!theme) { var raw = localStorage.getItem('examsim:v2'); if (raw) theme = (JSON.parse(raw).prefs || {}).theme; }
             if (!theme) theme = localStorage.getItem('exam_theme');
         } catch (e) {}
         if (theme !== 'dark' && theme !== 'light') {
@@ -1832,8 +1833,9 @@ App.defaultBackend = function () {
     } catch (e) { return App.memoryBackend(); }
 };
 
-App.createStorage = function (backend) {
-    const KEY = 'examsim:v2';
+App.createStorage = function (backend, opts) {
+    opts = opts || {};
+    const KEY = opts.key || 'examsim:v2';
     const MAX_ATTEMPTS = 500, MAX_SESSIONS = 10;
     let db = null;
 
@@ -1868,6 +1870,7 @@ App.createStorage = function (backend) {
     }
 
     const api = {
+        key: KEY,
         reload: load,
         raw: () => ensure(),
 
@@ -1877,7 +1880,7 @@ App.createStorage = function (backend) {
             if (v !== undefined) return v;
             try { const old = backend.getItem('exam_' + k); return old === null ? undefined : old; } catch (e) { return undefined; }
         },
-        setPref(k, v) { ensure().prefs[k] = v; return save(); },
+        setPref(k, v) { ensure().prefs[k] = v; const r = save(); if (backend && backend.flush) backend.flush(); return r; },
 
         // ---- sessions in progress ----
         saveSession(examId, session) {
@@ -1956,6 +1959,181 @@ App.createStorage = function (backend) {
 };
 
 App.storage = App.createStorage(App.defaultBackend());
+App.storageKind = 'memory';
+
+/* IndexedDB storage backend: far larger quota than localStorage.
+   The whole key/value set is loaded into memory at start-up, so the storage API stays synchronous;
+   writes go to IndexedDB in the background (flushed when the page is hidden). */
+App.createIdbBackend = function (dbName) {
+    dbName = dbName || 'examsim';
+    const mem = new Map();
+    const dirty = new Map();           // key -> string | null (null = delete)
+    let db = null, timer = null, flushing = Promise.resolve();
+
+    function open() {
+        return new Promise((resolve, reject) => {
+            if (typeof indexedDB === 'undefined') { reject(new Error('IndexedDB is not available')); return; }
+            const req = indexedDB.open(dbName, 1);
+            req.onupgradeneeded = () => { req.result.createObjectStore('kv'); };
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error || new Error('IndexedDB error'));
+            req.onblocked = () => reject(new Error('IndexedDB blocked'));
+        });
+    }
+    function tx(mode) { return db.transaction('kv', mode).objectStore('kv'); }
+
+    function loadAll() {
+        return new Promise((resolve, reject) => {
+            const out = [];
+            const req = tx('readonly').openCursor();
+            req.onsuccess = () => { const c = req.result; if (c) { out.push([c.key, c.value]); c.continue(); } else resolve(out); };
+            req.onerror = () => reject(req.error);
+        });
+    }
+
+    function flush() {
+        clearTimeout(timer); timer = null;
+        if (!db || !dirty.size) return flushing;
+        const batch = Array.from(dirty.entries());
+        dirty.clear();
+        flushing = flushing.then(() => new Promise(resolve => {
+            try {
+                const t = db.transaction('kv', 'readwrite');
+                const st = t.objectStore('kv');
+                batch.forEach(([k, v]) => { if (v === null) st.delete(k); else st.put(v, k); });
+                t.oncomplete = () => resolve();
+                t.onerror = t.onabort = () => { batch.forEach(([k, v]) => { if (!dirty.has(k)) dirty.set(k, v); }); App.events.emit('storageError', t.error); resolve(); };
+            } catch (e) { App.events.emit('storageError', e); resolve(); }
+        }));
+        return flushing;
+    }
+    const schedule = () => { if (!timer) timer = setTimeout(flush, 120); };
+
+    const backend = {
+        kind: 'indexeddb',
+        getItem: k => (mem.has(k) ? mem.get(k) : null),
+        setItem(k, v) { mem.set(k, String(v)); dirty.set(k, String(v)); schedule(); },
+        removeItem(k) { mem.delete(k); dirty.set(k, null); schedule(); },
+        keys: () => Array.from(mem.keys()),
+        flush,
+        // Opens the database, loads everything and imports data left in localStorage by earlier versions (once).
+        async init() {
+            db = await open();
+            (await loadAll()).forEach(([k, v]) => mem.set(k, v));
+            if (!mem.has('__migrated')) {
+                try {
+                    const ls = window.localStorage;
+                    for (let i = 0; i < ls.length; i++) {
+                        const k = ls.key(i);
+                        if (/^(examsim:|exam_)/.test(k) && !mem.has(k)) { mem.set(k, ls.getItem(k)); dirty.set(k, ls.getItem(k)); }
+                    }
+                } catch (e) { /* localStorage unavailable: nothing to migrate */ }
+                mem.set('__migrated', '1'); dirty.set('__migrated', '1');
+                await flush();
+            }
+            const hide = () => { flush(); };
+            document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') hide(); });
+            window.addEventListener('pagehide', hide);
+            return backend;
+        },
+        // Removes every stored key (used by "delete all data")
+        async clear() {
+            mem.clear(); dirty.clear(); clearTimeout(timer); timer = null;
+            await flushing;
+            await new Promise(resolve => { const t = db.transaction('kv', 'readwrite'); t.objectStore('kv').clear(); t.oncomplete = t.onerror = t.onabort = () => resolve(); });
+            mem.set('__migrated', '1'); dirty.set('__migrated', '1');
+            await flush();
+        }
+    };
+    return backend;
+};
+
+/* Chooses the best available backend: IndexedDB, then localStorage, then memory. */
+App.initStorage = async function () {
+    let backend = null;
+    try {
+        backend = await Promise.race([App.createIdbBackend().init(), new Promise((_, rej) => setTimeout(() => rej(new Error('IndexedDB timeout')), 4000))]);
+        App.storageKind = 'indexeddb';
+    } catch (e) {
+        backend = App.defaultBackend();
+        App.storageKind = backend === (typeof window !== 'undefined' && window.localStorage) ? 'localStorage' : 'memory';
+    }
+    App.backend = backend;
+    App.profiles.use(App.profiles.current());
+    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { /* optional */ }
+    return backend;
+};
+
+App.storageUsage = async function () {
+    try { if (navigator.storage && navigator.storage.estimate) { const e = await navigator.storage.estimate(); return { used: e.usage || 0, quota: e.quota || 0 }; } } catch (e) { /* ignore */ }
+    return null;
+};
+
+// Wipes everything (all profiles). Used by "delete all data" and by tests.
+App.wipeAll = async function () {
+    if (App.backend && App.backend.clear) await App.backend.clear();
+    else if (App.backend) { ['examsim:profiles'].concat(App.profiles.list().map(p => App.profiles.keyOf(p.id))).forEach(k => App.backend.removeItem(k)); }
+    try { Object.keys(localStorage).filter(k => /^(examsim:|exam_)/.test(k)).forEach(k => localStorage.removeItem(k)); } catch (e) { /* ignore */ }
+    App.profiles.reset();
+};
+
+/* Profiles: several people (or goals) on one device, each with separate progress.
+   "default" keeps the original storage key so existing data is untouched. */
+App.profiles = (function () {
+    const META = 'examsim:profiles';
+    const backend = () => App.backend || App.defaultBackend();
+
+    function read() {
+        let m = null;
+        try { m = JSON.parse(backend().getItem(META)); } catch (e) { m = null; }
+        if (!m || !Array.isArray(m.list) || !m.list.length) m = { v: 1, current: 'default', list: [{ id: 'default', name: 'Default', created: Date.now() }] };
+        if (!m.list.some(p => p.id === m.current)) m.current = m.list[0].id;
+        return m;
+    }
+    function write(m) { try { backend().setItem(META, JSON.stringify(m)); } catch (e) { App.events.emit('storageError', e); } }
+
+    const keyOf = id => id === 'default' ? 'examsim:v2' : 'examsim:v2:p:' + id;
+
+    const api = {
+        keyOf,
+        list: () => read().list,
+        current: () => read().current,
+        currentProfile: () => { const m = read(); return m.list.find(p => p.id === m.current); },
+        // Points App.storage at a profile's data.
+        use(id) {
+            const m = read();
+            if (!m.list.some(p => p.id === id)) id = m.current;
+            m.current = id; write(m);
+            App.storage = App.createStorage(backend(), { key: keyOf(id) });
+            App.events.emit('profileChange', { id });
+            return App.storage;
+        },
+        create(name) {
+            const m = read();
+            name = String(name || '').trim().slice(0, 40) || ('Profile ' + (m.list.length + 1));
+            const id = 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+            m.list.push({ id, name, created: Date.now() });
+            write(m);
+            return id;
+        },
+        rename(id, name) {
+            const m = read(); const p = m.list.find(x => x.id === id);
+            if (p) { p.name = String(name || '').trim().slice(0, 40) || p.name; write(m); }
+        },
+        remove(id) {
+            const m = read();
+            if (m.list.length <= 1) return false;
+            m.list = m.list.filter(p => p.id !== id);
+            try { backend().removeItem(keyOf(id)); } catch (e) { /* ignore */ }
+            if (m.current === id) m.current = m.list[0].id;
+            write(m);
+            if (App.storage.key === keyOf(id)) App.profiles.use(m.current);
+            return true;
+        },
+        reset() { try { backend().removeItem(META); } catch (e) { /* ignore */ } App.profiles.use('default'); }
+    };
+    return api;
+})();
 
 /* Study modes and spaced repetition (Leitner boxes). Pure logic, no DOM. */
 (function () {
@@ -2456,6 +2634,7 @@ App.ui = {};
         const meta = document.querySelector('meta[name="theme-color"]');
         if (meta) meta.setAttribute('content', theme === 'dark' ? '#0a0e14' : '#00a67e');
         App.storage.setPref('theme', theme);
+        try { localStorage.setItem('examsim:theme', theme); } catch (e) { /* optional mirror for the pre-paint script */ }
         paintHeader();
     };
     App.ui.applyStatic = function () {
@@ -2812,7 +2991,7 @@ App.ui = {};
         refs.topic = el('span', { class: 'tag-topic' });
         refs.pos = el('span', { class: 'q-number', aria: { live: 'polite' } });
         refs.pace = el('span', { class: 'chip pace-chip hidden', id: 'pace-chip' });
-        refs.pause = el('button', { type: 'button', class: 'flag-btn', id: 'pause-btn', onclick: () => doPause() });
+        refs.pause = el('button', { type: 'button', class: 'chip-btn', id: 'pause-btn', onclick: () => doPause() });
         refs.flag = el('button', { type: 'button', class: 'flag-btn', onclick: () => toggleFlag() });
         refs.text = el('div', { class: 'question-text', id: 'q-text' });
         refs.body = el('div', { id: 'q-body' });
@@ -3392,7 +3571,8 @@ App.ui = {};
         App.ui.show('picker');
     }
 
-    function boot() {
+    async function boot() {
+        await App.initStorage();
         const lang = App.storage.getPref('lang');
         App.setLang(lang === 'it' ? 'it' : 'en');
         const theme = App.storage.getPref('theme');

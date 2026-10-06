@@ -14,8 +14,9 @@ App.defaultBackend = function () {
     } catch (e) { return App.memoryBackend(); }
 };
 
-App.createStorage = function (backend) {
-    const KEY = 'examsim:v2';
+App.createStorage = function (backend, opts) {
+    opts = opts || {};
+    const KEY = opts.key || 'examsim:v2';
     const MAX_ATTEMPTS = 500, MAX_SESSIONS = 10;
     let db = null;
 
@@ -50,6 +51,7 @@ App.createStorage = function (backend) {
     }
 
     const api = {
+        key: KEY,
         reload: load,
         raw: () => ensure(),
 
@@ -59,7 +61,7 @@ App.createStorage = function (backend) {
             if (v !== undefined) return v;
             try { const old = backend.getItem('exam_' + k); return old === null ? undefined : old; } catch (e) { return undefined; }
         },
-        setPref(k, v) { ensure().prefs[k] = v; return save(); },
+        setPref(k, v) { ensure().prefs[k] = v; const r = save(); if (backend && backend.flush) backend.flush(); return r; },
 
         // ---- sessions in progress ----
         saveSession(examId, session) {
@@ -138,3 +140,4 @@ App.createStorage = function (backend) {
 };
 
 App.storage = App.createStorage(App.defaultBackend());
+App.storageKind = 'memory';

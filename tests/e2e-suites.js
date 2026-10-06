@@ -1,11 +1,16 @@
 // E2E suites. Each receives {p, ctx, browser, check, answerCurrent, runAll, URL_BASE, HTTP_BASE, ROOT, errors, newPage}.
 const fs = require('fs');
 const path = require('path');
+const { readExamFile } = require('../tools/exam-files.js');
+const DEMO = readExamFile(path.join(__dirname, '..', 'demo.exam'));
+const N = DEMO.questions.length;
+const N_D3 = DEMO.questions.filter(q => q.difficulty === 3).length;
 
 const S = p => p.evaluate(() => { const s = ExamSim.App.state.session; return s && { index: s.index, length: s.length, studyMode: s.studyMode, kind: s.item().kind }; });
 const fresh = async (p, base, content) => {
     await p.goto(base + (content ? '?content=' + content : ''));
-    await p.evaluate(() => { try { localStorage.clear(); } catch (e) {} });
+    await p.waitForFunction(() => window.ExamSim && ExamSim.App.backend);
+    await p.evaluate(async () => { await ExamSim.App.wipeAll(); try { localStorage.clear(); } catch (e) {} });
     await p.goto(base + (content ? '?content=' + content : ''));
     if (content) await p.waitForSelector('#start-btn');
 };
@@ -98,7 +103,7 @@ module.exports = {
         const n = await runAll(p, 'all');
         const kinds = await p.evaluate(() => [...new Set(ExamSim.App.state.lastResult.session.items.map(i => i.kind))].sort());
         check('all kinds present', ['multiple', 'matching', 'numeric', 'ordering', 'scenario', 'single'].every(k => kinds.includes(k)), kinds);
-        check('12 questions → 100%', n === 12 && (await p.locator('#metric-percentage').innerText()) === '100%', await p.locator('#metric-percentage').innerText());
+        check(N + ' questions → 100%', n === N && (await p.locator('#metric-percentage').innerText()) === '100%', await p.locator('#metric-percentage').innerText());
     },
 
     'study mode: check locks the answer and shows the explanation': async ({ p, check, URL_BASE }) => {
@@ -168,7 +173,7 @@ module.exports = {
         await p.reload();
         await p.waitForSelector('.sessions-box');
         const info = await p.locator('.session-info').first().innerText();
-        check('session listed with progress', /1\/12 answered/.test(info), info);
+        check('session listed with progress', new RegExp('1/' + N + ' answered').test(info), info);
         await p.click('.sessions-box >> text=Resume');
         check('resumes at the right question', (await S(p)).index === 1);
         check('answer preserved', await p.evaluate(() => ExamSim.App.state.session.hasAnswer(0)));
@@ -204,7 +209,7 @@ module.exports = {
         const review = await p.locator('#cfg-mode option[value="review"]').innerText();
         check('review mode lists the due question', /\(1\)/.test(review), review);
         const unseen = await p.locator('#cfg-mode option[value="unseen"]').innerText();
-        check('unseen excludes answered question', /\(11\)/.test(unseen), unseen);
+        check('unseen excludes answered question', new RegExp('\\(' + (N - 1) + '\\)').test(unseen), unseen);
         await p.selectOption('#cfg-mode', 'mistakes');
         await p.click('#start-btn');
         check('mistakes session has 1 question', (await S(p)).length === 1);
@@ -223,7 +228,7 @@ module.exports = {
         check('difficulty modes present', (await p.locator('#cfg-mode option[value^="difficulty:"]').count()) === 3);
         await p.selectOption('#cfg-mode', 'difficulty:3');
         const max = await p.getAttribute('#cfg-count', 'max');
-        check('count max equals pool size', Number(max) === 4, max);
+        check('count max equals pool size', Number(max) === N_D3, max);
         await p.fill('#cfg-count', '2');
         await p.click('#start-btn');
         check('count respected', (await S(p)).length === 2);
@@ -277,7 +282,7 @@ module.exports = {
         const it = await p.locator('#q-text').innerText();
         check('question text switches language', en !== it && /Quale approccio/.test(it), [en, it]);
         check('options switch language', /supervisionato/.test(await p.locator('#q-body').innerText()));
-        check('UI switches language', /Domanda 1 di 12/.test(await p.locator('#view-runtime .q-number').first().innerText()));
+        check('UI switches language', new RegExp('Domanda 1 di ' + N).test(await p.locator('#view-runtime .q-number').first().innerText()));
         await p.click('#lang-btn');
     },
 
@@ -300,8 +305,8 @@ module.exports = {
         const file = path.join(require('os').tmpdir(), 'examsim-e2e-export.json');
         await dl.saveAs(file);
         const data = JSON.parse(fs.readFileSync(file, 'utf8'));
-        check('export has attempts and question stats', data.exams.demo.attempts.length === 1 && Object.keys(data.exams.demo.qstats).length === 12);
-        await p.evaluate(() => localStorage.clear());
+        check('export has attempts and question stats', data.exams.demo.attempts.length === 1 && Object.keys(data.exams.demo.qstats).length === N);
+        await p.evaluate(async () => { await ExamSim.App.wipeAll(); });
         await p.reload();
         await p.waitForSelector('#start-btn');
         await p.setInputFiles('#import-file', file);
@@ -320,7 +325,7 @@ module.exports = {
         check('radio inputs for single choice', (await p.locator('#q-body input[type=radio]').count()) === 4);
         check('options are labelled', (await p.locator('#q-body label.option-card').count()) === 4);
         check('main landmark and skip link', (await p.locator('main#main').count()) === 1 && (await p.locator('a.skip-link').count()) === 1);
-        check('grid buttons have names', (await p.locator('.nav-grid-btn[aria-label]').count()) === 12);
+        check('grid buttons have names', (await p.locator('.nav-grid-btn[aria-label]').count()) === N);
         const unlabeled = await p.evaluate(() => [...document.querySelectorAll('button')].filter(b => !b.textContent.trim() && !b.getAttribute('aria-label')).length);
         check('no unlabeled buttons', unlabeled === 0, unlabeled);
         await p.keyboard.press('Tab');
@@ -341,10 +346,10 @@ module.exports = {
         await p.click('#start-btn');
         const bar = await p.evaluate(() => { const r = document.querySelector('.actionbar').getBoundingClientRect(); return { bottom: Math.round(r.bottom), h: window.innerHeight, pos: getComputedStyle(document.querySelector('.actionbar')).position }; });
         check('action bar is pinned to the bottom of the phone screen', bar.pos === 'fixed' && bar.bottom === bar.h, bar);
-        for (let i = 0; i < 12; i++) {
+        for (let i = 0; i < N; i++) {
             const ok = await p.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
             if (!ok) { check('question ' + (i + 1) + ' fits the screen', false); break; }
-            if (i === 11) check('all 12 question types fit a 390px screen', true);
+            if (i === N - 1) check('all ' + N + ' demo questions fit a 390px screen', true);
             else await p.click('#session-action-trigger');
         }
         await ctx.close();

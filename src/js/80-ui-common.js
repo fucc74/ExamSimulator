@@ -79,6 +79,7 @@ App.ui = {};
         const meta = document.querySelector('meta[name="theme-color"]');
         if (meta) meta.setAttribute('content', theme === 'dark' ? '#0a0e14' : '#00a67e');
         App.storage.setPref('theme', theme);
+        try { localStorage.setItem('examsim:theme', theme); } catch (e) { /* optional mirror for the pre-paint script */ }
         paintHeader();
     };
     App.ui.applyStatic = function () {

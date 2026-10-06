@@ -50,7 +50,8 @@
         App.ui.show('picker');
     }
 
-    function boot() {
+    async function boot() {
+        await App.initStorage();
         const lang = App.storage.getPref('lang');
         App.setLang(lang === 'it' ? 'it' : 'en');
         const theme = App.storage.getPref('theme');

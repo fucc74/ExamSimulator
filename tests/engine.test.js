@@ -334,3 +334,26 @@ test('scoring: resolution order (defaults < user < exam < mode) and session pass
     const a = s.submit(store);
     assert.equal(a.pct, 75); assert.equal(a.mandatoryFailed, 1); assert.equal(a.passed, false);
 });
+
+test('profiles: separate data per profile, default key preserved', () => {
+    const be = App.memoryBackend();
+    App.backend = be;
+    App.profiles.reset();
+    App.profiles.use('default');
+    assert.equal(App.storage.key, 'examsim:v2');
+    App.storage.addAttempt('e', { id: 'a1', ts: 1, pct: 50 });
+    const id = App.profiles.create('Anna');
+    App.profiles.use(id);
+    assert.notEqual(App.storage.key, 'examsim:v2');
+    assert.equal(App.storage.listAttempts('e').length, 0, 'new profile starts empty');
+    App.storage.addAttempt('e', { id: 'b1', ts: 2, pct: 90 });
+    App.profiles.use('default');
+    assert.equal(App.storage.listAttempts('e').length, 1);
+    assert.equal(App.storage.listAttempts('e')[0].id, 'a1');
+    assert.equal(App.profiles.list().length, 2);
+    App.profiles.rename(id, 'Anna R.');
+    assert.equal(App.profiles.list().find(p => p.id === id).name, 'Anna R.');
+    assert.equal(App.profiles.remove('default') && App.profiles.list().length, 1, 'a profile can be removed');
+    assert.equal(App.profiles.remove(App.profiles.current()), false, 'the last profile cannot be removed');
+    App.profiles.reset();
+});

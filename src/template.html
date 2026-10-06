@@ -16,8 +16,8 @@
     (function () {
         var theme = null;
         try {
-            var raw = localStorage.getItem('examsim:v2');
-            if (raw) theme = (JSON.parse(raw).prefs || {}).theme;
+            theme = localStorage.getItem('examsim:theme');     // mirror written by the app (works with IndexedDB storage too)
+            if (!theme) { var raw = localStorage.getItem('examsim:v2'); if (raw) theme = (JSON.parse(raw).prefs || {}).theme; }
             if (!theme) theme = localStorage.getItem('exam_theme');
         } catch (e) {}
         if (theme !== 'dark' && theme !== 'light') {

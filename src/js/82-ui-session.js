@@ -45,7 +45,7 @@
         refs.topic = el('span', { class: 'tag-topic' });
         refs.pos = el('span', { class: 'q-number', aria: { live: 'polite' } });
         refs.pace = el('span', { class: 'chip pace-chip hidden', id: 'pace-chip' });
-        refs.pause = el('button', { type: 'button', class: 'flag-btn', id: 'pause-btn', onclick: () => doPause() });
+        refs.pause = el('button', { type: 'button', class: 'chip-btn', id: 'pause-btn', onclick: () => doPause() });
         refs.flag = el('button', { type: 'button', class: 'flag-btn', onclick: () => toggleFlag() });
         refs.text = el('div', { class: 'question-text', id: 'q-text' });
         refs.body = el('div', { id: 'q-body' });
