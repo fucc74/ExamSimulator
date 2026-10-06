@@ -116,6 +116,7 @@ module.exports = {
         await fresh(p, URL_BASE, 'demo');
         await runAll(p, 'quick');
         await p.evaluate(() => ExamSim.App.storage.patchQStat('demo', '1', c => Object.assign({}, c, { note: 'my note', seen: 1, last: Date.now() })));
+        await p.waitForTimeout(200);       // let the IndexedDB write commit before leaving the page
         await p.goto(URL_BASE);
         await openOptions(p);
         await p.click('#sync-make');
@@ -280,10 +281,10 @@ module.exports = {
         await p.click('#search-practice');
         check('practice session started from the results', (await p.evaluate(() => ExamSim.App.state.session.length)) === nNum && (await p.locator('#view-runtime').isVisible()));
         await p.keyboard.press('Control+K');
-        await p.waitForSelector('#palette-input');
+        await p.waitForSelector('#palette-input', { timeout: 5000 }).catch(async () => { check('palette opened (diagnostics)', false, await p.evaluate(() => ({ screen: ExamSim.App.state.screen, modal: !!document.querySelector('.modal-backdrop'), active: document.activeElement && (document.activeElement.id || document.activeElement.tagName), url: location.href, w: innerWidth }))); });
         await p.keyboard.type('option');
         await p.keyboard.press('Enter');
-        await p.waitForSelector('#opt-general');
+        await p.waitForSelector('#opt-general', { timeout: 5000 }).catch(async () => { check('palette command ran (diagnostics)', false, await p.evaluate(() => ({ lang: document.documentElement.lang, list: document.querySelector('#palette-list') && document.querySelector('#palette-list').innerText, input: document.querySelector('#palette-input') && document.querySelector('#palette-input').value, screen: ExamSim.App.state.screen }))); });
         check('command palette opened the options page', true);
         await p.click('#opt-back');
         await p.keyboard.press('Shift+?');

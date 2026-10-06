@@ -118,7 +118,7 @@ App.ui = {};
             if (opts.onclose) opts.onclose();
         }
         const firstField = card.querySelector('input, textarea, select') || card.querySelector('.modal-actions button, .modal-head button');
-        if (firstField) setTimeout(() => firstField.focus(), 0);
+        if (firstField) firstField.focus();      // synchronous: keystrokes typed right after opening must land in the field
         return { close, root, card };
     };
     App.ui.modalOpen = () => !!document.querySelector('.modal-backdrop');
