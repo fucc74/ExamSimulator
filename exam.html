@@ -619,7 +619,7 @@
 
     // ── Helpers ─────────────────────────────────────────────────────────────
     const $ = id => document.getElementById(id);
-    const LETTERS = ['A', 'B', 'C', 'D', 'E'];
+    const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
     // Costruisce un elemento DOM; i testi passano sempre da textContent (niente innerHTML).
     function el(tag, props, ...children) {
@@ -654,7 +654,7 @@
     // ── Preparazione dati ───────────────────────────────────────────────────
     // Lettere assegnate dal motore, tipo derivato da answer, opzioni rimescolate.
     function normalizeQuestions() {
-        const stripLetter = t => String(t).replace(/^\s*[A-Ea-e][)\.]\s+/, '');
+        const stripLetter = t => String(t).replace(/^\s*[A-Fa-f][)\.]\s+/, '');
         data().questions.forEach(q => {
             if (!Array.isArray(q.options)) return;
             if (!Array.isArray(q.answer)) q.answer = [q.answer];
