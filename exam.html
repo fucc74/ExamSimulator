@@ -488,6 +488,7 @@
             cursor: pointer; transition: all 0.2s ease; margin-right: 12px;
         }
         #validate-btn:hover { background-color: #333333; border-color: #333333; }
+        #validate-btn:disabled { opacity: 0.5; cursor: default; }
         .correct-reveal  { background-color: #d1fae5 !important; border: 2px solid #10b981 !important; color: #065f46 !important; }
         .incorrect-reveal{ background-color: #fee2e2 !important; border: 2px solid #ef4444 !important; color: #991b1b !important; }
         .dynamic-explanation-box {
@@ -550,7 +551,7 @@
                                 <!-- Populated Dynamically with Options -->
                             </select>
                         </div>
-                        <button class="btn" onclick="EngineController.startExam()">Initialize Simulator Session</button>
+                        <button id="start-btn" class="btn" type="button">Initialize Simulator Session</button>
                     </div>
                 </div>
             </div>
@@ -572,8 +573,9 @@
                     </div>
                     
                     <div class="nav-controls">
-                        <button class="btn btn-secondary" onclick="EngineController.prevQuestion()">Previous</button>
-                        <button id="session-action-trigger" class="btn" onclick="EngineController.nextQuestion()">Next Question</button>
+                        <button id="prev-btn" class="btn btn-secondary" type="button">Previous</button>
+                        <button id="validate-btn" type="button">Validate Answer</button>
+                        <button id="session-action-trigger" class="btn" type="button">Next Question</button>
                     </div>
                 </div>
                 
@@ -582,7 +584,7 @@
                     <div id="runtime-matrix-grid" class="grid-navigation">
                         <!-- Dynamic Navigation Matrix Grid Blocks -->
                     </div>
-                    <button class="btn btn-secondary" style="width: 100%; border-color: var(--error); color: var(--error);" onclick="EngineController.submitExam()">Terminate & Score Session</button>
+                    <button id="submit-btn" class="btn btn-secondary" type="button" style="width: 100%; border-color: var(--error); color: var(--error);">Terminate & Score Session</button>
                 </div>
             </div>
         </div>
@@ -601,7 +603,7 @@
             </div>
             
             <div style="margin-bottom: 25px; display: flex; gap: 15px;">
-                <button class="btn" onclick="EngineController.returnToMainMenu()">Return to Main Repository</button>
+                <button id="return-btn" class="btn" type="button">Return to Main Repository</button>
             </div>
 
             <div id="review-payload-box">
@@ -612,614 +614,474 @@
     </div>
 
     <script>
-// ENGINE RUNTIME CONTROLLER
-        const EngineController = {
-            sessionItems: [],
-            currentActiveIndex: 0,
-            userSelections: {},
-            timerRef: null,
-            secondsRemaining: 0,
+(function () {
+    'use strict';
 
-            init: function() {
-                this.renderSelectionDashboard();
-            },
+    // ── Helpers ─────────────────────────────────────────────────────────────
+    const $ = id => document.getElementById(id);
+    const LETTERS = ['A', 'B', 'C', 'D', 'E'];
 
-            renderSelectionDashboard: function() {
-                const topicMap = {};
-                window.ExamData.questions.forEach(item => {
-                    topicMap[item.topic] = (topicMap[item.topic] || 0) + 1;
-                });
+    // Costruisce un elemento DOM; i testi passano sempre da textContent (niente innerHTML).
+    function el(tag, props, ...children) {
+        const node = document.createElement(tag);
+        Object.entries(props || {}).forEach(([k, v]) => {
+            if (k === 'text') node.textContent = v;
+            else if (k === 'style') node.style.cssText = v;
+            else if (k === 'class') node.className = v;
+            else node[k] = v;
+        });
+        children.forEach(c => c && node.appendChild(c));
+        return node;
+    }
 
-                const distributionPayloadBox = document.getElementById("distribution-payload-box");
-                const configSelectionMode = document.getElementById("config-selection-mode");
-                
-                distributionPayloadBox.innerHTML = "";
-                
-                // Clear and build layout options matching user requirement specifications
-                configSelectionMode.innerHTML = `
-                    <option value="mock20">Standard Mock Exam (${window.ExamData.config.mockStandardCount} Randomized Questions)</option>
-                    <option value="mock40">Official Exam Simulation (${window.ExamData.config.mockOfficialCount} Questions · ${Math.floor(window.ExamData.config.mockOfficialTimeSec/60)} min · Pass ${window.ExamData.config.passThresholdMockOfficial}%)</option>
-                    <option value="all">Comprehensive Blueprint Evaluation (All ${window.ExamData.questions.length} Items)</option>
-                    <optgroup id="topic-group-wrapper" label="Practice by Target Domain Topic"></optgroup>
-                `;
-
-                const topicGroupWrapper = document.getElementById("topic-group-wrapper");
-
-                // Add flat count aggregate row
-                const totalItemCount = window.ExamData.questions.length;
-                distributionPayloadBox.innerHTML += `
-                    <div class="topic-item" style="background-color: var(--primary-light); border-radius: 6px; border-bottom: none; margin-bottom: 10px;">
-                        <span class="topic-name" style="color: var(--primary); font-weight: 700;">Aggregate Active Question Vault Size</span>
-                        <span class="topic-count" style="background-color: var(--primary); color: var(--white);">${totalItemCount} Questions</span>
-                    </div>
-                `;
-
-                Object.keys(topicMap).forEach(topic => {
-                    distributionPayloadBox.innerHTML += `
-                        <div class="topic-item">
-                            <span class="topic-name">${topic}</span>
-                            <span class="topic-count">${topicMap[topic]} Items</span>
-                        </div>
-                    `;
-                    
-                    const selectOption = document.createElement("option");
-                    selectOption.value = topic;
-                    selectOption.textContent = `${topic} (${topicMap[topic]} Items)`;
-                    topicGroupWrapper.appendChild(selectOption);
-                });
-            },
-
-            startExam: function() {
-                const selectedScope = document.getElementById("config-selection-mode").value;
-                this._examMode = selectedScope;
-
-                const byTopic = {};
-                window.ExamData.questions.forEach(q => {
-                    if (!byTopic[q.topic]) byTopic[q.topic] = [];
-                    byTopic[q.topic].push(q);
-                });
-
-                const shuffle = arr => {
-                    const a = [...arr];
-                    for (let i = a.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [a[i], a[j]] = [a[j], a[i]];
-                    }
-                    return a;
-                };
-                const pickOne = topic => shuffle(byTopic[topic] || []).slice(0, 1);
-
-                if (selectedScope === "mock20") {
-                    // Una domanda garantita per topic, il resto casuale
-                    const pool = [];
-                    const used = new Set();
-                    Object.keys(byTopic).forEach(t => {
-                        const q = pickOne(t)[0];
-                        if (q) { pool.push(q); used.add(q.id); }
-                    });
-                    const rest = shuffle(window.ExamData.questions.filter(q => !used.has(q.id)));
-                    pool.push(...rest.slice(0, Math.max(0, window.ExamData.config.mockStandardCount - pool.length)));
-                    this.sessionItems = shuffle(pool).slice(0, window.ExamData.config.mockStandardCount);
-                } else if (selectedScope === "mock40") {
-                    const pool = [];
-                    const used = new Set();
-
-                    const addWeighted = (topics, total) => {
-                        let remaining = total;
-                        let round = 0;
-                        while (remaining > 0 && round < 50) {
-                            for (const topic of shuffle(topics)) {
-                                if (remaining <= 0) break;
-                                const candidates = shuffle((byTopic[topic] || []).filter(q => !used.has(q.id)));
-                                if (!candidates.length) continue;
-                                const q = candidates[0];
-                                used.add(q.id);
-                                pool.push(q);
-                                remaining--;
-                            }
-                            round++;
-                        }
-                    };
-
-                    window.ExamData.config.macroGroups.forEach(function(group) {
-                        addWeighted(group.topics, group.weight);
-                    });
-
-                    if (pool.length < window.ExamData.config.mockOfficialCount) {
-                        const remaining = shuffle(window.ExamData.questions.filter(q => !used.has(q.id)));
-                        pool.push(...remaining.slice(0, window.ExamData.config.mockOfficialCount - pool.length));
-                    }
-
-                    this.sessionItems = shuffle(pool).slice(0, window.ExamData.config.mockOfficialCount);
-                } else if (selectedScope === "all") {
-                    this.sessionItems = [...window.ExamData.questions];
-                } else {
-                    this.sessionItems = window.ExamData.questions.filter(item => item.topic === selectedScope);
-                }
-
-                this.currentActiveIndex = 0;
-                this.userSelections = {};
-                this.validatedAnswers = {};
-
-                document.getElementById("main-dashboard").classList.add("hidden");
-                document.getElementById("runtime-interface").classList.remove("hidden");
-
-                const allocatedSec = selectedScope === "mock40" ? window.ExamData.config.mockOfficialTimeSec : this.sessionItems.length * window.ExamData.config.timePerQuestionSec;
-                this.initializeClock(allocatedSec);
-                this.renderActiveQuestion();
-                this.buildMatrixGrid();
-            },
-
-            initializeClock: function(allocatedSeconds) {
-                clearInterval(this.timerRef);
-                this.secondsRemaining = allocatedSeconds;
-                const clockDisplayBox = document.getElementById("runtime-timer-box");
-                clockDisplayBox.classList.remove("hidden");
-
-                const updateClockString = () => {
-                    if (this.secondsRemaining <= 0) {
-                        clearInterval(this.timerRef);
-                        this.submitExam();
-                        return;
-                    }
-                    this.secondsRemaining--;
-                    const minutesCount = Math.floor(this.secondsRemaining / 60);
-                    const remSeconds = this.secondsRemaining % 60;
-                    document.getElementById("runtime-clock-string").innerText = 
-                        `${minutesCount.toString().padStart(2, '0')}:${remSeconds.toString().padStart(2, '0')}`;
-                };
-
-                updateClockString();
-                this.timerRef = setInterval(updateClockString, 1000);
-            },
-
-            renderActiveQuestion: function() {
-                const questionObj = this.sessionItems[this.currentActiveIndex];
-                
-                document.getElementById("runtime-topic-tag").innerText = questionObj.topic;
-                document.getElementById("runtime-position-string").innerText = `Question ${this.currentActiveIndex + 1} of ${this.sessionItems.length}`;
-                document.getElementById("runtime-question-text").innerText = questionObj.question;
-
-                const optionsBox = document.getElementById("runtime-options-box");
-                optionsBox.innerHTML = "";
-
-                const letters = ["A", "B", "C", "D", "E"];
-                const stored = this.userSelections[this.currentActiveIndex];
-                const selected = questionObj.type === 'multiple' ? (Array.isArray(stored) ? stored : []) : stored;
-                questionObj.options.forEach((optionText, index) => {
-                    const cardElement = document.createElement("div");
-                    const isSelected = questionObj.type === 'multiple' ? selected.includes(index) : selected === index;
-                    cardElement.className = `option-card ${isSelected ? 'selected' : ''}`;
-                    cardElement.onclick = () => this.selectOption(index);
-
-                    cardElement.innerHTML = `
-                        <div class="option-marker">${questionObj.type === 'multiple' ? '<input type=\"checkbox\" disabled ' + (isSelected ? 'checked' : '') + '/>' : letters[index]}</div><div class="option-text">${optionText}</div>
-                    `;
-                    optionsBox.appendChild(cardElement);
-                });
-
-                const dynamicTrigger = document.getElementById("session-action-trigger");
-                if (this.currentActiveIndex === this.sessionItems.length - 1) {
-                    dynamicTrigger.innerText = "Commit Final Selections";
-                    dynamicTrigger.style.backgroundColor = "var(--dark)";
-                } else {
-                    dynamicTrigger.innerText = "Next Question";
-                    dynamicTrigger.style.backgroundColor = "var(--primary)";
-                }
-            },
-
-            buildMatrixGrid: function() {
-                const matrixBox = document.getElementById("runtime-matrix-grid");
-                matrixBox.innerHTML = "";
-                const validated = this.validatedAnswers || {};
-
-                this.sessionItems.forEach((questionObj, index) => {
-                    const gridButton = document.createElement("div");
-                    const isActive = this.currentActiveIndex === index;
-                    const hasAnswer = this.userSelections[index] !== undefined;
-
-                    let stateClass = '';
-                    if (validated[index] === true) {
-                        stateClass = 'answered-correct';
-                    } else if (validated[index] === false) {
-                        stateClass = 'answered-wrong';
-                    } else if (hasAnswer) {
-                        stateClass = 'answered';
-                    }
-
-                    gridButton.className = `nav-grid-btn ${isActive ? 'active' : ''} ${stateClass}`;
-                    gridButton.innerText = index + 1;
-                    gridButton.onclick = () => this.jumpToQuestion(index);
-                    matrixBox.appendChild(gridButton);
-                });
-            },
-
-            selectOption: function(index) {
-                const q = this.sessionItems[this.currentActiveIndex];
-                if (!q) return;
-                if (q.type === 'multiple') {
-                    const current = Array.isArray(this.userSelections[this.currentActiveIndex]) ? this.userSelections[this.currentActiveIndex] : [];
-                    const next = current.includes(index) ? current.filter(i => i !== index) : [...current, index].sort((a,b)=>a-b);
-                    this.userSelections[this.currentActiveIndex] = next;
-                } else {
-                    this.userSelections[this.currentActiveIndex] = index;
-                }
-                this.renderActiveQuestion();
-                this.buildMatrixGrid();
-            },
-
-            jumpToQuestion: function(targetIndex) {
-                this.currentActiveIndex = targetIndex;
-                this.renderActiveQuestion();
-                this.buildMatrixGrid();
-            },
-
-            nextQuestion: function() {
-                if (this.currentActiveIndex === this.sessionItems.length - 1) {
-                    this.submitExam();
-                } else {
-                    this.currentActiveIndex++;
-                    this.renderActiveQuestion();
-                    this.buildMatrixGrid();
-                }
-            },
-
-            prevQuestion: function() {
-                if (this.currentActiveIndex > 0) {
-                    this.currentActiveIndex--;
-                    this.renderActiveQuestion();
-                    this.buildMatrixGrid();
-                }
-            },
-
-            submitExam: function() {
-                clearInterval(this.timerRef);
-                document.getElementById("runtime-timer-box").classList.add("hidden");
-                document.getElementById("runtime-interface").classList.add("hidden");
-                document.getElementById("summary-dashboard").classList.remove("hidden");
-
-                const reviewPayloadBox = document.getElementById("review-payload-box");
-                reviewPayloadBox.innerHTML = "";
-
-                let calculatedCorrectSum = 0;
-                const totalItemCount = this.sessionItems.length;
-
-                this.sessionItems.forEach((questionObj, index) => {
-                    const chosen = this.userSelections[index];
-                    const correct = Array.isArray(questionObj.answer) ? questionObj.answer.slice().sort((a,b)=>a-b) : [questionObj.answer];
-                    const chosenArr = Array.isArray(chosen) ? chosen.slice().sort((a,b)=>a-b) : [chosen];
-                    const statusIsCorrect = JSON.stringify(chosenArr) === JSON.stringify(correct);
-
-                    if (statusIsCorrect) calculatedCorrectSum++;
-
-                    const itemCard = document.createElement("div");
-                    itemCard.className = `review-item-card ${statusIsCorrect ? 'is-correct' : 'is-incorrect'}`;
-
-                    let optionsListString = "";
-                    const letters = ["A", "B", "C", "D", "E"];
-                    
-                    questionObj.options.forEach((opt, optIdx) => {
-                        let trackingStyle = "";
-                        if (correct.includes(optIdx)) {
-                            trackingStyle = "color: var(--success); font-weight: 600; background-color: var(--success-light); border-radius: 4px; padding: 2px 6px;";
-                        } else if (chosenArr.includes(optIdx) && !statusIsCorrect) {
-                            trackingStyle = "color: var(--error); font-weight: 600; background-color: var(--error-light); border-radius: 4px; padding: 2px 6px;";
-                        }
-
-                        optionsListString += `<p style="margin: 6px 0; ${trackingStyle}"><strong>${letters[optIdx]}:</strong> ${opt}</p>`;
-                    });
-
-                    itemCard.innerHTML = `
-                        <span class="review-status-badge">${statusIsCorrect ? 'Verification Success' : 'Anomaly Flagged'}</span>
-                        <h3 style="font-size:1.05rem; margin-bottom:10px;">Question ${index + 1}: ${questionObj.question}</h3>
-                        <div style="margin-bottom:15px; font-size:0.95rem;">${optionsListString}</div>
-                        <div class="explanation-box" style="margin-top:15px;">
-                            <h4 style="font-size:0.95rem;">Rationale</h4>
-                            <p style="font-size:0.9rem;">${questionObj.explanation}</p>
-                        </div>
-                    `;
-                    reviewPayloadBox.appendChild(itemCard);
-                });
-
-                const metricScorePercentage = Math.round((calculatedCorrectSum / totalItemCount) * 100);
-                document.getElementById("metric-percentage").innerText = `${metricScorePercentage}%`;
-                (() => {
-                        const passThreshold = (EngineController._examMode === "mock40") ? window.ExamData.config.passThresholdMockOfficial : window.ExamData.config.passThresholdDefault;
-                        const passed = metricScorePercentage >= passThreshold;
-                        document.getElementById("metric-percentage").style.borderColor = passed ? "var(--success)" : "var(--error)";
-                        document.getElementById("metric-percentage").style.color = passed ? "var(--success)" : "var(--error)";
-                        // Show pass/fail badge
-                        const existingBadge = document.getElementById("exam-result-badge");
-                        if (existingBadge) existingBadge.remove();
-                        const badge = document.createElement("p");
-                        badge.id = "exam-result-badge";
-                        badge.style.cssText = "font-size:1rem;font-weight:700;margin-top:8px;color:" + (passed ? "var(--success)" : "var(--error)");
-                        badge.textContent = passed
-                            ? "✅ PASS — Soglia " + passThreshold + "% raggiunta"
-                            : "❌ FAIL — Soglia " + passThreshold + "% non raggiunta";
-                        document.getElementById("metric-percentage").parentNode.appendChild(badge);
-                    })();
-                    void 0;
-                document.getElementById("metric-raw-string").innerText = `You correctly answered ${calculatedCorrectSum} out of ${totalItemCount} questions.`;
-            },
-
-            returnToMainMenu: function() {
-                this.validatedAnswers = {};
-                document.getElementById("exam-result-badge") && document.getElementById("exam-result-badge").remove();
-                document.getElementById("summary-dashboard").classList.add("hidden");
-                document.getElementById("runtime-interface").classList.add("hidden");
-                document.getElementById("main-dashboard").classList.remove("hidden");
-                window.scrollTo(0, 0);
-                this.renderSelectionDashboard();
-            }
-        };
-
-        // init() called by dynamic loader
-    
-    </script>
-
-    <script>
-function normalizeQuestions() {
-    const stripLetter = t => String(t).replace(/^\s*[A-Ea-e][\)\.]\s+/, '');
-    window.ExamData.questions.forEach(q => {
-        if (!Array.isArray(q.options)) return;
-        if (!Array.isArray(q.answer)) q.answer = [q.answer];
-
-        // Le lettere sono assegnate dal motore: rimuove "A) " dal testo
-        q.options = q.options.map(stripLetter);
-
-        // Tipo domanda derivato dal numero di risposte corrette
-        q.type = q.answer.length > 1 ? 'multiple' : 'single';
-
-        // Fisher-Yates shuffle degli indici, poi ricalcolo di answer
-        const indices = q.options.map((_, i) => i);
-        for (let i = indices.length - 1; i > 0; i--) {
+    function shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [indices[i], indices[j]] = [indices[j], indices[i]];
+            [a[i], a[j]] = [a[j], a[i]];
         }
-        q.options = indices.map(i => q.options[i]);
-        q.answer  = q.answer.map(oldIdx => indices.indexOf(oldIdx)).sort((a, b) => a - b);
-    });
-}
-
-let enhancementsApplied = false;
-function initExamEnhancements() {
-    normalizeQuestions();
-    if (enhancementsApplied) return;
-    enhancementsApplied = true;
-
-    // ── 3. STATO ─────────────────────────────────────────────────────────────
-    let isValidated   = false;
-    let lastQIdx      = -1;
-
-    // ── 4. INJECT VALIDATE BUTTON (event-driven, non setInterval) ───────────
-    // Sostituisce il monkey-patching ogni volta che renderActiveQuestion scatta
-    function injectValidateBtn() {
-        if (document.getElementById('validate-btn')) return;
-        const nextBtn = document.getElementById('session-action-trigger');
-        if (!nextBtn) return;
-
-        const btn = document.createElement('button');
-        btn.id        = 'validate-btn';
-        btn.innerText = 'Validate Answer';
-        btn.type      = 'button';
-        btn.addEventListener('click', executeValidation);
-        nextBtn.parentNode.insertBefore(btn, nextBtn);
+        return a;
     }
 
-    // Intercetta renderActiveQuestion per resettare stato e iniettare bottone
-    function patchEngine() {
-        
+    const sameSet = (a, b) => {
+        const x = [...a].sort((p, q) => p - q), y = [...b].sort((p, q) => p - q);
+        return x.length === y.length && x.every((v, i) => v === y[i]);
+    };
 
-        const origRender = EngineController.renderActiveQuestion.bind(EngineController);
-        EngineController.renderActiveQuestion = function() {
-            origRender();
+    const data = () => window.ExamData;
+    const cfg = () => window.ExamData.config;
 
-            // Reset stato se domanda cambiata
-            if (EngineController.currentActiveIndex !== lastQIdx) {
-                lastQIdx   = EngineController.currentActiveIndex;
-                isValidated = false;
-                document.querySelector('.dynamic-explanation-box')?.remove();
-            }
+    // ── Preparazione dati ───────────────────────────────────────────────────
+    // Lettere assegnate dal motore, tipo derivato da answer, opzioni rimescolate.
+    function normalizeQuestions() {
+        const stripLetter = t => String(t).replace(/^\s*[A-Ea-e][)\.]\s+/, '');
+        data().questions.forEach(q => {
+            if (!Array.isArray(q.options)) return;
+            if (!Array.isArray(q.answer)) q.answer = [q.answer];
+            q.type = q.answer.length > 1 ? 'multiple' : 'single';
 
-            injectValidateBtn();
-        };
-
-        // Inietta anche alla prima render già eseguita
-        injectValidateBtn();
-    }
-
-    // ── 5. LOGICA DI VALIDAZIONE ─────────────────────────────────────────────
-    function executeValidation() {
-        if (isValidated) return;
-
-        const activeIdx     = EngineController.currentActiveIndex;
-        const currentItem   = EngineController.sessionItems[activeIdx];
-        if (!currentItem) return;
-
-        const hasSelection = EngineController.userSelections[activeIdx] !== undefined;
-        if (!hasSelection) { alert("Seleziona un'opzione prima di validare!"); return; }
-
-        isValidated = true;
-
-        const optionCards = Array.from(document.querySelectorAll('.option-card'));
-
-        const chosenRaw = EngineController.userSelections[activeIdx];
-        const chosen = Array.isArray(chosenRaw) ? chosenRaw : (chosenRaw === undefined ? [] : [chosenRaw]);
-        const correct = Array.isArray(currentItem.answer) ? currentItem.answer : [currentItem.answer];
-        const isCorrect = JSON.stringify([...chosen].sort((a,b)=>a-b)) === JSON.stringify([...correct].sort((a,b)=>a-b));
-
-        // Colora verde le risposte corrette
-        correct.forEach(correctIdx => {
-            optionCards[correctIdx]?.classList.add('correct-reveal');
+            const order = shuffle(q.options.map((_, i) => i));
+            const opts = q.options.map(stripLetter);
+            q.options = order.map(i => opts[i]);
+            q.answer = q.answer.map(old => order.indexOf(old)).sort((a, b) => a - b);
         });
-
-        // Colora rosso la risposta sbagliata scelta
-        optionCards.forEach((card, idx) => {
-            if (card.classList.contains('selected') && !correct.includes(idx)) {
-                card.classList.add('incorrect-reveal');
-            }
-        });
-
-        // Aggiorna validatedAnswers e ridisegna la matrix con i colori
-        if (!EngineController.validatedAnswers) EngineController.validatedAnswers = {};
-        EngineController.validatedAnswers[activeIdx] = isCorrect;
-        EngineController.buildMatrixGrid();
-
-        // Mostra spiegazione
-        const optionsBox = document.getElementById('runtime-options-box');
-        if (optionsBox && !document.querySelector('.dynamic-explanation-box')) {
-            const expBox = document.createElement('div');
-            expBox.className = 'dynamic-explanation-box';
-            expBox.innerHTML = `
-                <h4 style="font-size:1rem;color:#111;margin-bottom:6px;font-weight:700;">Architectural Rationale</h4>
-                <p style="font-size:0.92rem;color:#444;line-height:1.5;margin:0;">${currentItem.explanation || 'No explanation available.'}</p>
-            `;
-            optionsBox.parentNode.insertBefore(expBox, optionsBox.nextSibling);
-        }
     }
 
-    // ── 8. localStorage: salva/ripristina progressione mid-session ───────────
-    function enableSessionPersistence() {
-        
+    // ── Stato ───────────────────────────────────────────────────────────────
+    const state = {
+        items: [],
+        index: 0,
+        selections: {},   // indice -> number | number[]
+        validated: {},    // indice -> boolean (risposta corretta?)
+        mode: null,
+        secondsLeft: 0,
+        timer: null
+    };
 
-        const storeKey = () => 'exam_session_' + window.ExamData.config.examCode;
+    const storeKey = () => 'exam_session_' + cfg().examCode;
 
-        // Salva dopo ogni selezione
-        const origSelect = EngineController.selectOption.bind(EngineController);
-        EngineController.selectOption = function(index) {
-            origSelect(index);
-            try {
-                localStorage.setItem(storeKey(), JSON.stringify({
-                    sessionItems  : this.sessionItems,
-                    currentIndex  : this.currentActiveIndex,
-                    userSelections: this.userSelections
-                }));
-            } catch(e) {}
-        };
-
-        // Tentativo di ripristino all'avvio
-        const origStart = EngineController.startExam.bind(EngineController);
-        EngineController.startExam = function() {
-            localStorage.removeItem(storeKey()); // nuova sessione = pulito
-            EngineController.validatedAnswers = {}; // reset colori matrix
-            origStart();
-        };
-
-        // Ripristino se c'è una sessione salvata e la pagina è stata ricaricata a metà
+    function saveSession() {
         try {
-            const saved = JSON.parse(localStorage.getItem(storeKey()));
-            if (saved && saved.sessionItems && saved.sessionItems.length > 0) {
-                if (confirm("È stata trovata una sessione precedente non completata. Vuoi riprenderla?")) {
-                    EngineController.sessionItems       = saved.sessionItems;
-                    EngineController.currentActiveIndex = saved.currentIndex;
-                    EngineController.userSelections     = saved.userSelections;
-
-                    document.getElementById("main-dashboard").classList.add("hidden");
-                    document.getElementById("runtime-interface").classList.remove("hidden");
-                    EngineController.initializeClock(saved.sessionItems.length * window.ExamData.config.timePerQuestionSec);
-                    EngineController.renderActiveQuestion();
-                    EngineController.buildMatrixGrid();
-                } else {
-                    localStorage.removeItem(storeKey());
-                }
-            }
-        } catch(e) {}
-
-        // Pulizia al submit
-        const origSubmitP = EngineController.submitExam.bind(EngineController);
-        EngineController.submitExam = function() {
-            localStorage.removeItem(storeKey());
-            origSubmitP();
-        };
+            localStorage.setItem(storeKey(), JSON.stringify({
+                items: state.items, index: state.index, selections: state.selections,
+                validated: state.validated, mode: state.mode, secondsLeft: state.secondsLeft
+            }));
+        } catch (e) { /* storage non disponibile */ }
     }
 
-    patchEngine();
-    enableSessionPersistence();
+    function clearSession() {
+        try { localStorage.removeItem(storeKey()); } catch (e) { /* ignora */ }
+    }
 
+    function isCorrect(i) {
+        const sel = state.selections[i];
+        if (sel === undefined) return false;
+        return sameSet(Array.isArray(sel) ? sel : [sel], state.items[i].answer);
+    }
 
-}
-    </script>
+    // ── Schermate ───────────────────────────────────────────────────────────
+    function show(id) {
+        ['main-dashboard', 'runtime-interface', 'summary-dashboard'].forEach(s =>
+            $(s).classList.toggle('hidden', s !== id));
+    }
 
-    <script>
-    (function() {
-        var params = new URLSearchParams(window.location.search);
-        var contentName = params.get('content');
-        var msg = document.getElementById('no-content-message');
-        var msgBody = document.getElementById('no-content-body');
+    function renderDashboard() {
+        const questions = data().questions;
+        const counts = {};
+        questions.forEach(q => { counts[q.topic] = (counts[q.topic] || 0) + 1; });
 
-        function showError(html) {
-            msgBody.innerHTML = html;
-            msg.classList.remove('hidden');
-            document.getElementById('main-dashboard').classList.add('hidden');
+        const select = $('config-selection-mode');
+        select.textContent = '';
+        const addOpt = (parent, value, label) =>
+            parent.appendChild(el('option', { value: value, text: label }));
+        addOpt(select, 'mock20', `Standard Mock Exam (${cfg().mockStandardCount} Randomized Questions)`);
+        addOpt(select, 'mock40', `Official Exam Simulation (${cfg().mockOfficialCount} Questions · ${Math.floor(cfg().mockOfficialTimeSec / 60)} min · Pass ${cfg().passThresholdMockOfficial}%)`);
+        addOpt(select, 'all', `Comprehensive Blueprint Evaluation (All ${questions.length} Items)`);
+        const group = el('optgroup', { label: 'Practice by Target Domain Topic' });
+        select.appendChild(group);
+
+        const box = $('distribution-payload-box');
+        box.textContent = '';
+        box.appendChild(el('div', {
+            class: 'topic-item',
+            style: 'background-color: var(--primary-light); border-radius: 6px; border-bottom: none; margin-bottom: 10px;'
+        },
+            el('span', { class: 'topic-name', style: 'color: var(--primary); font-weight: 700;', text: 'Aggregate Active Question Vault Size' }),
+            el('span', { class: 'topic-count', style: 'background-color: var(--primary); color: var(--white);', text: `${questions.length} Questions` })
+        ));
+        Object.keys(counts).forEach(topic => {
+            box.appendChild(el('div', { class: 'topic-item' },
+                el('span', { class: 'topic-name', text: topic }),
+                el('span', { class: 'topic-count', text: `${counts[topic]} Items` })
+            ));
+            addOpt(group, topic, `${topic} (${counts[topic]} Items)`);
+        });
+    }
+
+    // ── Selezione domande ───────────────────────────────────────────────────
+    function pickItems(mode) {
+        const questions = data().questions;
+        const byTopic = {};
+        questions.forEach(q => (byTopic[q.topic] = byTopic[q.topic] || []).push(q));
+
+        if (mode === 'mock20') {
+            // Una domanda garantita per topic, il resto casuale
+            const pool = Object.keys(byTopic).map(t => shuffle(byTopic[t])[0]);
+            const used = new Set(pool.map(q => q.id));
+            const rest = shuffle(questions.filter(q => !used.has(q.id)));
+            pool.push(...rest.slice(0, Math.max(0, cfg().mockStandardCount - pool.length)));
+            return shuffle(pool).slice(0, cfg().mockStandardCount);
         }
-
-        function validExamData(d) {
-            return d && d.config && Array.isArray(d.questions) && d.questions.length > 0 &&
-                d.questions.every(function(q) {
-                    return q && q.topic && q.question && Array.isArray(q.options) &&
-                        q.answer !== undefined;
-                });
-        }
-
-        function startApp() {
-            var cfg = window.ExamData.config;
-            document.title = cfg.examTitle || 'Exam Simulator';
-            document.getElementById('logo-exam-code').textContent  = cfg.examCode || 'EXAM';
-            document.getElementById('logo-version').textContent    = cfg.version  || '';
-            document.getElementById('dashboard-title').textContent = (cfg.examCode || 'Exam') + ' Exam Practice Repository';
-            document.getElementById('dashboard-subtitle').textContent = cfg.subtitle || '';
-            msg.classList.add('hidden');
-            document.getElementById('main-dashboard').classList.remove('hidden');
-            initExamEnhancements();
-            EngineController.init();
-        }
-
-        function loadFromFile(file) {
-            var reader = new FileReader();
-            reader.onerror = function() { alert('Impossibile leggere il file.'); };
-            reader.onload = function() {
-                var previous = window.ExamData;
-                try {
-                    window.ExamData = undefined;
-                    if (/\.json$/i.test(file.name)) {
-                        window.ExamData = JSON.parse(reader.result);
-                    } else {
-                        // file .js: assegna window.ExamData
-                        (0, eval)(reader.result);
+        if (mode === 'mock40') {
+            const pool = [];
+            const used = new Set();
+            cfg().macroGroups.forEach(group => {
+                let remaining = group.weight;
+                for (let round = 0; remaining > 0 && round < 50; round++) {
+                    for (const topic of shuffle(group.topics)) {
+                        if (remaining <= 0) break;
+                        const q = shuffle((byTopic[topic] || []).filter(x => !used.has(x.id)))[0];
+                        if (!q) continue;
+                        used.add(q.id);
+                        pool.push(q);
+                        remaining--;
                     }
-                    if (!validExamData(window.ExamData)) throw new Error('Formato non valido: servono config e questions.');
-                } catch (e) {
-                    window.ExamData = previous;
-                    alert('Errore nel file "' + file.name + '": ' + e.message);
-                    return;
                 }
-                startApp();
-            };
-            reader.readAsText(file);
+            });
+            if (pool.length < cfg().mockOfficialCount) {
+                const rest = shuffle(questions.filter(q => !used.has(q.id)));
+                pool.push(...rest.slice(0, cfg().mockOfficialCount - pool.length));
+            }
+            return shuffle(pool).slice(0, cfg().mockOfficialCount);
+        }
+        if (mode === 'all') return [...questions];
+        return questions.filter(q => q.topic === mode);
+    }
+
+    // ── Sessione ────────────────────────────────────────────────────────────
+    function startExam() {
+        state.mode = $('config-selection-mode').value;
+        state.items = pickItems(state.mode);
+        state.index = 0;
+        state.selections = {};
+        state.validated = {};
+        const seconds = state.mode === 'mock40'
+            ? cfg().mockOfficialTimeSec
+            : state.items.length * cfg().timePerQuestionSec;
+        beginSession(seconds);
+    }
+
+    function beginSession(seconds) {
+        show('runtime-interface');
+        startClock(seconds);
+        renderQuestion();
+        renderMatrix();
+        saveSession();
+    }
+
+    function startClock(seconds) {
+        clearInterval(state.timer);
+        state.secondsLeft = seconds;
+        $('runtime-timer-box').classList.remove('hidden');
+        const tick = () => {
+            if (state.secondsLeft <= 0) { submitExam(); return; }
+            state.secondsLeft--;
+            const m = String(Math.floor(state.secondsLeft / 60)).padStart(2, '0');
+            const s = String(state.secondsLeft % 60).padStart(2, '0');
+            $('runtime-clock-string').textContent = `${m}:${s}`;
+        };
+        tick();
+        state.timer = setInterval(tick, 1000);
+    }
+
+    function renderQuestion() {
+        const q = state.items[state.index];
+        const multiple = q.type === 'multiple';
+        const sel = state.selections[state.index];
+        const chosen = multiple ? (Array.isArray(sel) ? sel : []) : [sel];
+        const validated = state.validated[state.index] !== undefined;
+
+        $('runtime-topic-tag').textContent = q.topic;
+        $('runtime-position-string').textContent = `Question ${state.index + 1} of ${state.items.length}`;
+        $('runtime-question-text').textContent = q.question;
+
+        const box = $('runtime-options-box');
+        box.textContent = '';
+        q.options.forEach((text, i) => {
+            const picked = chosen.includes(i);
+            let cls = 'option-card' + (picked ? ' selected' : '');
+            if (validated && q.answer.includes(i)) cls += ' correct-reveal';
+            else if (validated && picked) cls += ' incorrect-reveal';
+
+            const marker = el('div', { class: 'option-marker' });
+            if (multiple) marker.appendChild(el('input', { type: 'checkbox', disabled: true, checked: picked }));
+            else marker.textContent = LETTERS[i];
+
+            const card = el('div', { class: cls }, marker, el('div', { class: 'option-text', text: text }));
+            card.addEventListener('click', () => selectOption(i));
+            box.appendChild(card);
+        });
+
+        // Spiegazione dopo la validazione
+        const oldExp = document.querySelector('.dynamic-explanation-box');
+        if (oldExp) oldExp.remove();
+        if (validated) {
+            box.parentNode.insertBefore(el('div', { class: 'dynamic-explanation-box' },
+                el('h4', { style: 'font-size:1rem;color:#111;margin-bottom:6px;font-weight:700;', text: 'Architectural Rationale' }),
+                el('p', { style: 'font-size:0.92rem;color:#444;line-height:1.5;margin:0;', text: q.explanation || 'No explanation available.' })
+            ), box.nextSibling);
         }
 
-        var input = document.getElementById('exam-file-input');
-        input.addEventListener('change', function() {
+        $('validate-btn').disabled = validated;
+        const next = $('session-action-trigger');
+        const last = state.index === state.items.length - 1;
+        next.textContent = last ? 'Commit Final Selections' : 'Next Question';
+        next.style.backgroundColor = last ? 'var(--dark)' : 'var(--primary)';
+    }
+
+    function renderMatrix() {
+        const box = $('runtime-matrix-grid');
+        box.textContent = '';
+        state.items.forEach((_, i) => {
+            let cls = 'nav-grid-btn' + (i === state.index ? ' active' : '');
+            if (state.validated[i] === true) cls += ' answered-correct';
+            else if (state.validated[i] === false) cls += ' answered-wrong';
+            else if (state.selections[i] !== undefined) cls += ' answered';
+            const btn = el('div', { class: cls, text: String(i + 1) });
+            btn.addEventListener('click', () => goTo(i));
+            box.appendChild(btn);
+        });
+    }
+
+    function selectOption(i) {
+        if (state.validated[state.index] !== undefined) return; // bloccata dopo la validazione
+        const q = state.items[state.index];
+        if (q.type === 'multiple') {
+            const cur = Array.isArray(state.selections[state.index]) ? state.selections[state.index] : [];
+            state.selections[state.index] = cur.includes(i)
+                ? cur.filter(x => x !== i)
+                : [...cur, i].sort((a, b) => a - b);
+        } else {
+            state.selections[state.index] = i;
+        }
+        renderQuestion();
+        renderMatrix();
+        saveSession();
+    }
+
+    function validateAnswer() {
+        const idx = state.index;
+        if (state.validated[idx] !== undefined) return;
+        const sel = state.selections[idx];
+        if (sel === undefined || (Array.isArray(sel) && sel.length === 0)) {
+            alert("Seleziona un'opzione prima di validare!");
+            return;
+        }
+        state.validated[idx] = isCorrect(idx);
+        renderQuestion();
+        renderMatrix();
+        saveSession();
+    }
+
+    function goTo(i) {
+        if (i < 0 || i >= state.items.length) return;
+        state.index = i;
+        renderQuestion();
+        renderMatrix();
+        saveSession();
+    }
+
+    function nextQuestion() {
+        if (state.index === state.items.length - 1) submitExam();
+        else goTo(state.index + 1);
+    }
+
+    // ── Risultati ───────────────────────────────────────────────────────────
+    function submitExam() {
+        clearInterval(state.timer);
+        clearSession();
+        $('runtime-timer-box').classList.add('hidden');
+        show('summary-dashboard');
+
+        const review = $('review-payload-box');
+        review.textContent = '';
+        let correctCount = 0;
+
+        state.items.forEach((q, i) => {
+            const ok = isCorrect(i);
+            if (ok) correctCount++;
+            const sel = state.selections[i];
+            const chosen = Array.isArray(sel) ? sel : (sel === undefined ? [] : [sel]);
+
+            const optionsBox = el('div', { style: 'margin-bottom:15px; font-size:0.95rem;' });
+            q.options.forEach((opt, k) => {
+                let style = 'margin: 6px 0;';
+                if (q.answer.includes(k)) {
+                    style += 'color: var(--success); font-weight: 600; background-color: var(--success-light); border-radius: 4px; padding: 2px 6px;';
+                } else if (chosen.includes(k)) {
+                    style += 'color: var(--error); font-weight: 600; background-color: var(--error-light); border-radius: 4px; padding: 2px 6px;';
+                }
+                optionsBox.appendChild(el('p', { style: style },
+                    el('strong', { text: LETTERS[k] + ': ' }),
+                    document.createTextNode(opt)));
+            });
+
+            review.appendChild(el('div', { class: 'review-item-card ' + (ok ? 'is-correct' : 'is-incorrect') },
+                el('span', { class: 'review-status-badge', text: ok ? 'Verification Success' : 'Anomaly Flagged' }),
+                el('h3', { style: 'font-size:1.05rem; margin-bottom:10px;', text: `Question ${i + 1}: ${q.question}` }),
+                optionsBox,
+                el('div', { class: 'explanation-box', style: 'margin-top:15px;' },
+                    el('h4', { style: 'font-size:0.95rem;', text: 'Rationale' }),
+                    el('p', { style: 'font-size:0.9rem;', text: q.explanation || '' }))
+            ));
+        });
+
+        const pct = Math.round((correctCount / state.items.length) * 100);
+        const threshold = state.mode === 'mock40' ? cfg().passThresholdMockOfficial : cfg().passThresholdDefault;
+        const passed = pct >= threshold;
+        const color = passed ? 'var(--success)' : 'var(--error)';
+
+        const score = $('metric-percentage');
+        score.textContent = pct + '%';
+        score.style.borderColor = color;
+        score.style.color = color;
+
+        const oldBadge = $('exam-result-badge');
+        if (oldBadge) oldBadge.remove();
+        score.parentNode.appendChild(el('p', {
+            id: 'exam-result-badge',
+            style: 'font-size:1rem;font-weight:700;margin-top:8px;color:' + color,
+            text: passed ? `✅ PASS — Soglia ${threshold}% raggiunta` : `❌ FAIL — Soglia ${threshold}% non raggiunta`
+        }));
+        $('metric-raw-string').textContent =
+            `You correctly answered ${correctCount} out of ${state.items.length} questions.`;
+    }
+
+    function returnToMainMenu() {
+        const badge = $('exam-result-badge');
+        if (badge) badge.remove();
+        show('main-dashboard');
+        window.scrollTo(0, 0);
+        renderDashboard();
+    }
+
+    // ── Ripristino sessione interrotta ──────────────────────────────────────
+    function offerResume() {
+        let saved;
+        try { saved = JSON.parse(localStorage.getItem(storeKey())); } catch (e) { return; }
+        if (!saved || !Array.isArray(saved.items) || !saved.items.length) return;
+        if (!confirm('È stata trovata una sessione precedente non completata. Vuoi riprenderla?')) {
+            clearSession();
+            return;
+        }
+        state.items = saved.items;
+        state.index = Math.min(saved.index || 0, saved.items.length - 1);
+        state.selections = saved.selections || {};
+        state.validated = saved.validated || {};
+        state.mode = saved.mode;
+        beginSession(saved.secondsLeft > 0 ? saved.secondsLeft : saved.items.length * cfg().timePerQuestionSec);
+    }
+
+    // ── Caricamento dell'esame ──────────────────────────────────────────────
+    const msg = $('no-content-message');
+
+    function validExamData(d) {
+        return !!(d && d.config && Array.isArray(d.questions) && d.questions.length > 0 &&
+            d.questions.every(q => q && q.topic && q.question && Array.isArray(q.options) && q.answer !== undefined));
+    }
+
+    function startApp() {
+        clearInterval(state.timer);
+        state.items = [];
+        $('runtime-timer-box').classList.add('hidden');
+        normalizeQuestions();
+
+        document.title = cfg().examTitle || 'Exam Simulator';
+        $('logo-exam-code').textContent = cfg().examCode || 'EXAM';
+        $('logo-version').textContent = cfg().version || '';
+        $('dashboard-title').textContent = (cfg().examCode || 'Exam') + ' Exam Practice Repository';
+        $('dashboard-subtitle').textContent = cfg().subtitle || '';
+        msg.classList.add('hidden');
+        show('main-dashboard');
+        renderDashboard();
+        offerResume();
+    }
+
+    function loadFromFile(file) {
+        const reader = new FileReader();
+        reader.onerror = () => alert('Impossibile leggere il file.');
+        reader.onload = () => {
+            const previous = window.ExamData;
+            try {
+                window.ExamData = undefined;
+                if (/\.json$/i.test(file.name)) window.ExamData = JSON.parse(reader.result);
+                else (0, eval)(reader.result); // file .js: assegna window.ExamData
+                if (!validExamData(window.ExamData)) throw new Error('Formato non valido: servono config e questions.');
+            } catch (e) {
+                window.ExamData = previous;
+                alert('Errore nel file "' + file.name + '": ' + e.message);
+                return;
+            }
+            startApp();
+        };
+        reader.readAsText(file);
+    }
+
+    function showLoadError(name) {
+        const body = $('no-content-body');
+        body.textContent = '';
+        body.appendChild(el('h1', { style: 'font-size:1.5rem;margin-bottom:15px;color:var(--error);', text: 'Failed to load exam file' }));
+        body.appendChild(el('p', { style: 'color:var(--gray);' },
+            document.createTextNode('Could not load '),
+            el('strong', { text: name + '.js' }),
+            document.createTextNode('. Check the name, or load the file manually.')));
+        msg.classList.remove('hidden');
+    }
+
+    function bindControls() {
+        $('start-btn').addEventListener('click', startExam);
+        $('prev-btn').addEventListener('click', () => goTo(state.index - 1));
+        $('session-action-trigger').addEventListener('click', nextQuestion);
+        $('validate-btn').addEventListener('click', validateAnswer);
+        $('submit-btn').addEventListener('click', submitExam);
+        $('return-btn').addEventListener('click', returnToMainMenu);
+
+        const input = $('exam-file-input');
+        input.addEventListener('change', () => {
             if (input.files && input.files[0]) loadFromFile(input.files[0]);
             input.value = '';
         });
-        document.querySelectorAll('.upload-exam-btn').forEach(function(b) {
-            b.addEventListener('click', function() { input.click(); });
-        });
+        document.querySelectorAll('.upload-exam-btn').forEach(b =>
+            b.addEventListener('click', () => input.click()));
+    }
 
-        if (validExamData(window.ExamData)) {
-            startApp();
-        } else if (contentName) {
-            var safeName = document.createElement('strong');
-            safeName.textContent = contentName + '.js';
-            showError('<h1 style="font-size:1.5rem;margin-bottom:15px;color:var(--error);">Failed to load exam file</h1>' +
-                '<p style="color:var(--gray);">Could not load <span id="failed-name"></span>. Check the name, or load the file manually.</p>');
-            document.getElementById('failed-name').appendChild(safeName);
-        } else {
-            msg.classList.remove('hidden');
-        }
-    })();
+    // ── Avvio ───────────────────────────────────────────────────────────────
+    bindControls();
+    const contentName = new URLSearchParams(window.location.search).get('content');
+    if (validExamData(window.ExamData)) startApp();
+    else if (contentName) showLoadError(contentName);
+    else msg.classList.remove('hidden');
+})();
     </script>
 </body>
 </html>
