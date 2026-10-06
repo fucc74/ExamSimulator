@@ -1,5 +1,5 @@
 {
-  "name": "exam-simulator",
+  "name": "qz",
   "version": "3.0.0",
   "private": true,
   "description": "Exam-agnostic practice engine (single-file HTML build)",

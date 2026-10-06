@@ -6,9 +6,8 @@
         App.state.exam = exam;
         App.state.loadError = null;
         App.state.dash = {};
-        $('logo-exam-code').textContent = exam.code || exam.id;
-        $('logo-version').textContent = exam.version || '';
-        document.title = App.loc(exam.title) + ' — Exam Simulator';
+        $('logo-version').textContent = [exam.code, exam.version].filter(Boolean).join(' · ');
+        document.title = App.loc(exam.title) + ' — QZ';
         App.ui.renderDashboard();
         App.ui.show('dashboard');
         App.events.emit('examLoaded', { exam });
@@ -18,9 +17,8 @@
     function showPicker(errorLines) {
         App.state.exam = null;
         App.state.loadError = errorLines || null;
-        $('logo-exam-code').textContent = 'EXAM';
         $('logo-version').textContent = '';
-        document.title = 'Exam Simulator';
+        document.title = 'QZ';
         App.ui.renderPicker();
         App.ui.show('picker');
     }

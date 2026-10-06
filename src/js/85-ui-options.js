@@ -227,7 +227,7 @@
     function about() {
         const upd = el('p', { class: 'hint', id: 'opt-update-status' });
         return section('about', App.t('optAbout'), 'bolt',
-            el('p', { text: 'Exam Simulator ' + App.version }),
+            el('p', { text: 'QZ ' + App.version }),
             el('div', { class: 'toolbar' },
                 App.ui.btn(App.t('shortcutsBtn'), 'grid', 'btn-ghost btn-sm', () => App.ui.showShortcuts()),
                 App.ui.btn(App.t('checkUpdate'), 'refresh', 'btn-ghost btn-sm', async () => { upd.textContent = App.t('updateChecking'); upd.textContent = await App.ui.checkForUpdate(); }, { id: 'opt-check-update' })),

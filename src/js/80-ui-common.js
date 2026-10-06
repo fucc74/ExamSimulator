@@ -163,7 +163,6 @@ App.ui = {};
     App.ui.applyStatic = function () {
         document.documentElement.lang = App.lang;
         paintHeader();
-        $('logo-simulator').textContent = App.t('simulator');
         $('skip-link').textContent = App.t('skipLink');
         const mark = $('brand-mark');
         if (!mark.firstChild) mark.appendChild(icon('check', 20));

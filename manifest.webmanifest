@@ -1,7 +1,7 @@
 {
-  "name": "Exam Simulator",
-  "short_name": "ExamSim",
-  "description": "Exam-agnostic practice simulator",
+  "name": "QZ",
+  "short_name": "QZ",
+  "description": "QZ — exam-agnostic practice engine for any quiz or certification exam",
   "start_url": "exam.html",
   "scope": "./",
   "display": "standalone",
