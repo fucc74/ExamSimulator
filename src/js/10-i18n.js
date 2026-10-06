@@ -2,6 +2,10 @@
    Exam content may be a plain string or an object {en, it}; strings are used as-is. */
 App.I18N = {
     en: {
+        chooseMode: 'Choose how to practice', nTopics: '{n} topics', passChip: 'Pass {p}%', masteredShort: 'mastered',
+        attemptsChip: '{n} attempts', attemptOne: '1 attempt', inProgressChip: 'In progress', correctKpi: 'Correct', wrongKpi: 'Incorrect', unansweredKpi: 'Unanswered', timeKpi: 'Time',
+        filterAll: 'All', filterWrong: 'Incorrect', filterUnanswered: 'Unanswered', filterFlagged: 'Flagged', answeredOf: '{a}/{n}',
+        topicBreakdown: 'Results by topic', scoreWord: 'score',
         simulator: 'SIMULATOR', timeRemaining: 'Time remaining:',
         noExamTitle: 'Choose an exam', noExamText: 'Select one of the available exams below to start practicing.',
         availableExams: 'Available exams', switchExam: 'Exams:', noCatalog: 'No exams are listed. Add .exam files and rebuild the catalog (npm run build).',
@@ -66,6 +70,10 @@ App.I18N = {
         continueSession: 'Continue', done: 'done'
     },
     it: {
+        chooseMode: 'Scegli come esercitarti', nTopics: '{n} argomenti', passChip: 'Soglia {p}%', masteredShort: 'padroneggiato',
+        attemptsChip: '{n} tentativi', attemptOne: '1 tentativo', inProgressChip: 'In corso', correctKpi: 'Corrette', wrongKpi: 'Errate', unansweredKpi: 'Senza risposta', timeKpi: 'Tempo',
+        filterAll: 'Tutte', filterWrong: 'Errate', filterUnanswered: 'Senza risposta', filterFlagged: 'Segnate', answeredOf: '{a}/{n}',
+        topicBreakdown: 'Risultati per argomento', scoreWord: 'punteggio',
         simulator: 'SIMULATORE', timeRemaining: 'Tempo rimanente:',
         noExamTitle: 'Scegli un esame', noExamText: 'Seleziona uno degli esami disponibili qui sotto per iniziare.',
         availableExams: 'Esami disponibili', switchExam: 'Esami:', noCatalog: 'Nessun esame elencato. Aggiungi file .exam e rigenera il catalogo (npm run build).',

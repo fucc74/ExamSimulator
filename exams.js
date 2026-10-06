@@ -2,6 +2,7 @@
 window.ExamCatalog = [
   {
     "file": "demo",
+    "id": "demo",
     "title": {
       "en": "Engine Demo — all question types",
       "it": "Demo del motore — tutti i tipi di domanda"
@@ -17,6 +18,7 @@ window.ExamCatalog = [
   },
   {
     "file": "managedServices",
+    "id": "managedServices",
     "title": "HPE Managed Services Expertise Exam Simulator",
     "description": "Comprehensive validation bank for HPE Managed Services knowledge across ITSM, delivery, tooling, security, and partner programs.",
     "code": "MS-EXPERTISE",
@@ -26,6 +28,7 @@ window.ExamCatalog = [
   },
   {
     "file": "v31",
+    "id": "v31",
     "title": "V31 Practice Test",
     "description": "Practice test, scenario-based and advanced questions on AI fundamentals, HPE Private Cloud AI architecture and sizing, deployment and administration, NVIDIA and AI Essentials, operations, edge AI and HPC.",
     "code": "V31",
@@ -35,6 +38,7 @@ window.ExamCatalog = [
   },
   {
     "file": "v31advanced",
+    "id": "v31advanced",
     "title": "V31 Advanced Practice Test",
     "description": "Expert-level scenario questions on HPE Private Cloud AI sizing, AI Essentials resource governance, MLIS/NIM model serving, air-gapped deployments, edge inferencing and HPC/AI.",
     "code": "V31-ADV",

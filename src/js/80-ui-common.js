@@ -1,9 +1,9 @@
-/* UI: shared state, view switching, toast, theme/language, import/export helpers. */
+/* UI: shared state, view switching, toast, theme/language, header, small widgets. */
 App.state = { exam: null, session: null, screen: 'picker', loadError: null, lastResult: null, dash: {}, clockTimer: null, persistTimer: null };
 App.ui = {};
 
 (function () {
-    const { el } = App.util;
+    const { el, icon } = App.util;
     const $ = id => document.getElementById(id);
     App.ui.$ = $;
 
@@ -11,14 +11,14 @@ App.ui = {};
     App.ui.show = function (view) {
         App.state.screen = view;
         VIEWS.forEach(v => $('view-' + v).classList.toggle('hidden', v !== view));
+        document.body.dataset.view = view;
         window.scrollTo(0, 0);
         App.events.emit('viewChange', { view });
     };
 
     App.ui.toast = function (msg, ms) {
-        const box = $('toast');
         const node = el('div', { class: 'toast-msg', text: msg });
-        box.appendChild(node);
+        $('toast').appendChild(node);
         setTimeout(() => node.remove(), ms || 3500);
     };
     App.events.on('storageError', () => App.ui.toast(App.t('storageError'), 6000));
@@ -38,23 +38,59 @@ App.ui = {};
         return App.t('daysAgo', { n: Math.round(d / 86400) });
     };
 
+    // Button with an icon and a text label
+    App.ui.btn = function (label, iconName, cls, onclick, extra) {
+        return el('button', Object.assign({ type: 'button', class: 'btn ' + (cls || ''), onclick }, extra || {}), iconName ? icon(iconName, 17) : null, label ? el('span', { text: label }) : null);
+    };
+
+    // Circular progress ring (SVG). Returns {svg}; animates from empty.
+    App.ui.ring = function (pct, color, size, stroke) {
+        const NS = 'http://www.w3.org/2000/svg';
+        const r = 52, c = 2 * Math.PI * r;
+        const svg = document.createElementNS(NS, 'svg');
+        svg.setAttribute('viewBox', '0 0 120 120');
+        svg.setAttribute('aria-hidden', 'true');
+        const mk = (cls, stk) => {
+            const circ = document.createElementNS(NS, 'circle');
+            circ.setAttribute('cx', 60); circ.setAttribute('cy', 60); circ.setAttribute('r', r);
+            circ.setAttribute('fill', 'none'); circ.setAttribute('stroke-width', stroke || 10); circ.setAttribute('stroke-linecap', 'round');
+            circ.setAttribute('class', cls); if (stk) circ.setAttribute('stroke', stk);
+            return circ;
+        };
+        const bg = mk('ring-bg'); bg.setAttribute('stroke', 'currentColor'); bg.style.opacity = '0.18';
+        const fg = mk('ring-fg', color);
+        fg.setAttribute('stroke-dasharray', c); fg.setAttribute('stroke-dashoffset', c);
+        svg.appendChild(bg); svg.appendChild(fg);
+        requestAnimationFrame(() => requestAnimationFrame(() => fg.setAttribute('stroke-dashoffset', c * (1 - Math.max(0, Math.min(100, pct)) / 100))));
+        return svg;
+    };
+
     // ---- theme / language ----
     App.ui.theme = () => document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    function paintHeader() {
+        const dark = App.ui.theme() === 'dark';
+        const tb = $('theme-btn'); tb.textContent = ''; tb.appendChild(icon(dark ? 'sun' : 'moon', 18));
+        const lb = $('lang-btn'); lb.textContent = ''; lb.appendChild(icon('globe', 17)); lb.appendChild(el('span', { text: App.lang.toUpperCase() }));
+        lb.title = App.t('langTitle'); lb.setAttribute('aria-label', App.t('langTitle'));
+        tb.title = App.t('themeTitle'); tb.setAttribute('aria-label', App.t('themeTitle'));
+    }
     App.ui.setTheme = function (theme) {
         document.documentElement.setAttribute('data-theme', theme);
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', theme === 'dark' ? '#0a0e14' : '#00a67e');
         App.storage.setPref('theme', theme);
-        $('theme-btn').textContent = theme === 'dark' ? '☀' : '☾';
+        paintHeader();
     };
     App.ui.applyStatic = function () {
         document.documentElement.lang = App.lang;
-        $('lang-btn').textContent = App.lang.toUpperCase();
-        $('lang-btn').title = App.t('langTitle');
-        $('lang-btn').setAttribute('aria-label', App.t('langTitle'));
-        $('theme-btn').title = App.t('themeTitle');
-        $('theme-btn').setAttribute('aria-label', App.t('themeTitle'));
-        $('theme-btn').textContent = App.ui.theme() === 'dark' ? '☀' : '☾';
+        paintHeader();
         $('logo-simulator').textContent = App.t('simulator');
         $('skip-link').textContent = App.t('skipLink');
+        const mark = $('brand-mark');
+        if (!mark.firstChild) mark.appendChild(icon('check', 20));
+        const ti = $('timer-icon');
+        if (!ti.firstChild) ti.appendChild(icon('clock', 16));
+        $('brand-link').setAttribute('href', window.location.pathname.split('/').pop() || 'exam.html');
     };
     App.ui.setLang = function (lang) {
         App.setLang(lang);
@@ -63,7 +99,6 @@ App.ui = {};
         App.ui.rerender();
     };
 
-    // Re-renders the visible screen (after a language change)
     App.ui.rerender = function () {
         const s = App.state.screen;
         if (s === 'picker') App.ui.renderPicker();
@@ -99,10 +134,9 @@ App.ui = {};
 
     App.ui.toolbarButtons = function (opts) {
         const bar = el('div', { class: 'toolbar' });
-        const btn = (label, fn) => bar.appendChild(el('button', { type: 'button', class: 'btn btn-ghost btn-small', text: label, onclick: fn }));
-        if (opts.stats) btn('📊 ' + App.t('statsBtn'), () => App.ui.openStats());
-        btn('⬇ ' + App.t('exportBtn'), () => App.ui.exportProgress(opts.examIds));
-        btn('⬆ ' + App.t('importBtn'), () => App.ui.importProgress());
+        if (opts.stats) bar.appendChild(App.ui.btn(App.t('statsBtn'), 'chart', 'btn-ghost btn-sm', () => App.ui.openStats()));
+        bar.appendChild(App.ui.btn(App.t('exportBtn'), 'download', 'btn-ghost btn-sm', () => App.ui.exportProgress(opts.examIds)));
+        bar.appendChild(App.ui.btn(App.t('importBtn'), 'upload', 'btn-ghost btn-sm', () => App.ui.importProgress()));
         return bar;
     };
 })();

@@ -30,27 +30,27 @@
 </head>
 <body>
 <a class="skip-link" href="#main" id="skip-link">Skip to content</a>
-<header>
-    <div class="header-container">
-        <div class="logo-area">
-            <div class="hpe-element"></div>
-            <div class="logo-text"><span id="logo-exam-code">EXAM</span> <span id="logo-simulator">SIMULATOR</span> <span id="logo-version" style="font-size:0.7rem;color:var(--gray);font-weight:400;"></span></div>
-        </div>
-        <div class="header-controls">
-            <div id="runtime-timer-box" class="q-number hidden"><span id="timer-label"></span> <span id="runtime-clock-string" style="color: var(--dark); font-weight: 600;">--:--</span></div>
-            <button type="button" id="lang-btn" class="icon-btn">EN</button>
-            <button type="button" id="theme-btn" class="icon-btn">☾</button>
+<header class="app-header">
+    <div class="app-header-inner">
+        <a class="brand" href="exam.html" id="brand-link">
+            <span class="brand-mark" id="brand-mark"></span>
+            <span class="brand-text"><span id="logo-exam-code">Exam</span> <span id="logo-simulator">Simulator</span><small id="logo-version"></small></span>
+        </a>
+        <div class="header-actions">
+            <div id="runtime-timer-box" class="timer-pill hidden" role="timer"><span id="timer-icon"></span><span id="timer-label" class="timer-label"></span><span id="runtime-clock-string">--:--</span></div>
+            <button type="button" id="lang-btn" class="icon-btn"></button>
+            <button type="button" id="theme-btn" class="icon-btn"></button>
         </div>
     </div>
 </header>
 
 <main id="main" class="main-wrapper" tabindex="-1">
-    <section id="view-picker" class="card hidden"></section>
-    <section id="view-dashboard" class="card hidden"></section>
-    <section id="view-runtime" class="hidden"></section>
-    <section id="view-review" class="card hidden"></section>
-    <section id="view-summary" class="card hidden"></section>
-    <section id="view-stats" class="card hidden"></section>
+    <section id="view-picker" class="view hidden"></section>
+    <section id="view-dashboard" class="view hidden"></section>
+    <section id="view-runtime" class="view hidden"></section>
+    <section id="view-review" class="view hidden"></section>
+    <section id="view-summary" class="view hidden"></section>
+    <section id="view-stats" class="view hidden"></section>
 </main>
 <div id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="import-file" accept=".json,application/json" class="hidden">

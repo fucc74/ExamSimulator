@@ -10,7 +10,7 @@ Add as many exams as you like: each exam is one `NAME.exam` file.
 - **Timers:** total, per question, or none.
 - **Flag & notes** per question; statistics (history, accuracy by topic, hardest questions); export/import of all progress.
 - **Keyboard:** `1–6`/`A–F` select, `←/→` move, `Enter` check/next, `M` flag.
-- English/Italian UI toggle, light/dark theme, installable and usable offline (when served over http/https).
+- Responsive design for phone, tablet and desktop (bottom action bar and collapsible progress grid on phones), English/Italian UI toggle, light/dark theme, installable and usable offline (when served over http/https).
 
 ## Adding an exam
 1. Create `NAME.exam` (format 2 — see [docs/EXAM-FORMAT.md](docs/EXAM-FORMAT.md)).

@@ -64,13 +64,13 @@ module.exports = {
         check('no check button in exam mode', !(await p.locator('#validate-btn').isVisible()));
         const kind = await p.evaluate(() => ExamSim.App.state.session.item().kind);
         await p.click('#session-action-trigger');           // skip a question without answering
-        await p.click('#view-runtime .btn-danger-outline'); // end and score → review
+        await p.click('#finish-btn'); // end and score → review
         await p.waitForSelector('#view-review:not(.hidden)');
         const text = await p.locator('#view-review .subtitle').innerText();
         check('review lists unanswered questions', /10 unanswered/.test(text), text);
         await p.click('text=Back to the exam');
         check('back to the exam works', await p.locator('#view-runtime').isVisible());
-        await p.click('#view-runtime .btn-danger-outline');
+        await p.click('#finish-btn');
         await p.click('#submit-btn');
         check('results shown', await p.locator('#metric-percentage').isVisible());
         check('unanswered counted as such', (await p.locator('.review-item-card.is-unanswered').count()) === 10);
@@ -117,13 +117,13 @@ module.exports = {
         await fresh(p, URL_BASE, 'demo');
         await runAll(p, 'all');
         await p.click('#return-btn');
-        await p.click('text=📊 Statistics');
+        await p.click('#view-dashboard >> text=Statistics');
         await p.waitForSelector('.tiles');
         const tiles = await p.locator('.tiles').innerText();
         check('stats show 1 attempt and 100% accuracy', /1\s*\nAttempts/.test(tiles) && /100%\s*\nOverall accuracy/.test(tiles), tiles);
-        check('history chart rendered', (await p.locator('.chart-box svg circle').count()) === 1);
-        check('topic bars rendered', (await p.locator('.bar-row').count()) === 3);
-        await p.click('text=← Back');
+        check('history chart rendered', (await p.locator('#view-stats .chart-box svg circle').count()) === 1);
+        check('topic bars rendered', (await p.locator('#view-stats .bar-row').count()) === 3);
+        await p.click('#view-stats >> text=Back');
         check('back to dashboard', await p.locator('#start-btn').isVisible());
     },
 
@@ -135,7 +135,7 @@ module.exports = {
         const wrongIdx = await p.evaluate(() => { const it = ExamSim.App.state.session.item(); return it.kind === 'single' || it.kind === 'multiple' ? [0, 1, 2, 3].find(i => !it.answer.includes(i)) : -1; });
         if (wrongIdx >= 0) { await p.locator('#q-body .option-card').nth(wrongIdx).click(); await p.click('#validate-btn'); }
         else { check('first question is choice-based', false, wrongIdx); }
-        await p.click('#view-runtime .btn-danger-outline');
+        await p.click('#finish-btn');
         await p.click('#submit-btn');
         await p.click('#return-btn');
         const mistakes = await p.locator('#cfg-mode option[value="mistakes"]').innerText();
@@ -152,7 +152,7 @@ module.exports = {
         const ok = await p.evaluate(() => { const s = ExamSim.App.state.session; return s.item().answer; });
         for (const k of ok) await p.locator('#q-body .option-card').nth(k).click();
         await p.click('#validate-btn');
-        await p.click('#view-runtime .btn-danger-outline'); await p.click('#submit-btn'); await p.click('#return-btn');
+        await p.click('#finish-btn'); await p.click('#submit-btn'); await p.click('#return-btn');
         const after = await p.locator('#cfg-mode option[value="mistakes"]').innerText();
         check('mistake leaves the list after a correct answer', /\(0\)/.test(after), after);
     },
@@ -235,7 +235,7 @@ module.exports = {
         await fresh(p, URL_BASE, 'demo');
         await runAll(p, 'all');
         await p.click('#return-btn');
-        const [dl] = await Promise.all([p.waitForEvent('download'), p.click('text=⬇ Export progress')]);
+        const [dl] = await Promise.all([p.waitForEvent('download'), p.click('#view-dashboard >> text=Export progress')]);
         const file = path.join(require('os').tmpdir(), 'examsim-e2e-export.json');
         await dl.saveAs(file);
         const data = JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -245,7 +245,7 @@ module.exports = {
         await p.waitForSelector('#start-btn');
         await p.setInputFiles('#import-file', file);
         await p.waitForSelector('.toast-msg');
-        await p.click('text=📊 Statistics');
+        await p.click('#view-dashboard >> text=Statistics');
         check('statistics restored after import', /1\s*\nAttempts/.test(await p.locator('.tiles').innerText()));
         await p.setInputFiles('#import-file', { name: 'x.json', mimeType: 'application/json', buffer: Buffer.from('{"nope":1}') });
         await p.waitForFunction(() => /Could not import/.test(document.getElementById('toast').innerText));
@@ -274,8 +274,12 @@ module.exports = {
         await p.waitForSelector('#start-btn');
         const dash = await p.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
         check('dashboard has no horizontal scroll', dash);
+        const order = await p.evaluate(() => { const y = s => document.querySelector(s).getBoundingClientRect().top; return y('.mode-grid') < y('#setup-card') && y('#setup-card') < y('.topic-list'); });
+        check('on phones: modes, then setup, then topics', order);
         await p.selectOption('#cfg-mode', 'all');
         await p.click('#start-btn');
+        const bar = await p.evaluate(() => { const r = document.querySelector('.actionbar').getBoundingClientRect(); return { bottom: Math.round(r.bottom), h: window.innerHeight, pos: getComputedStyle(document.querySelector('.actionbar')).position }; });
+        check('action bar is pinned to the bottom of the phone screen', bar.pos === 'fixed' && bar.bottom === bar.h, bar);
         for (let i = 0; i < 12; i++) {
             const ok = await p.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
             if (!ok) { check('question ' + (i + 1) + ' fits the screen', false); break; }

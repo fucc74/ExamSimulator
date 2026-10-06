@@ -1,8 +1,11 @@
 /* UI: review before finishing, results and per-question review. */
 (function () {
-    const { el } = App.util;
+    const { el, icon } = App.util;
     const $ = App.ui.$;
     const S = () => App.state.session;
+
+    const kpi = (value, label, cls) => el('div', { class: 'kpi ' + (cls || '') }, el('b', { text: String(value) }), el('span', { text: label }));
+    const resume = i => { S().goTo(i); App.ui.show('runtime'); App.ui.refreshRuntime(); };
 
     App.ui.openReview = function () {
         App.ui.show('review');
@@ -18,31 +21,36 @@
         const flagged = [];
         for (let i = 0; i < s.length; i++) { const st = stats[s.item(i).uid]; if (st && st.flag) flagged.push(i); }
 
-        v.appendChild(el('h1', { text: App.t('reviewTitle') }));
-        v.appendChild(el('p', { class: 'subtitle', text: App.t('reviewText', { a: s.length - unanswered.length, n: s.length, u: unanswered.length, f: flagged.length }) }));
+        const card = el('div', { class: 'card' });
+        card.appendChild(el('h1', { text: App.t('reviewTitle') }));
+        card.appendChild(el('p', { class: 'subtitle', text: App.t('reviewText', { a: s.length - unanswered.length, n: s.length, u: unanswered.length, f: flagged.length }) }));
+        card.appendChild(el('div', { class: 'kpis' },
+            kpi(s.length - unanswered.length, App.t('legendAnswered'), 'ok'),
+            kpi(unanswered.length, App.t('reviewUnanswered'), unanswered.length ? 'warn' : ''),
+            kpi(flagged.length, App.t('reviewFlagged'))));
 
         const grid = el('div', { class: 'review-grid' });
         for (let i = 0; i < s.length; i++) {
             let cls = 'nav-grid-btn' + (s.hasAnswer(i) ? ' answered' : ' unanswered-hint');
             if (flagged.includes(i)) cls += ' flagged';
-            grid.appendChild(el('button', { type: 'button', class: cls, text: String(i + 1), onclick: () => { s.goTo(i); App.ui.show('runtime'); App.ui.refreshRuntime(); },
-                aria: { label: App.t('questionOf', { i: i + 1, n: s.length }) } }));
+            grid.appendChild(el('button', { type: 'button', class: cls, text: String(i + 1), onclick: () => resume(i), aria: { label: App.t('questionOf', { i: i + 1, n: s.length }) } }));
         }
-        v.appendChild(grid);
+        card.appendChild(grid);
 
         const pills = (title, list) => {
             if (!list.length) return;
             const box = el('div', { class: 'review-block' }, el('h2', { text: title + ' (' + list.length + ')' }));
             const pl = el('div', { class: 'pill-list' });
-            list.forEach(i => pl.appendChild(el('button', { type: 'button', class: 'pill', text: '#' + (i + 1), onclick: () => { s.goTo(i); App.ui.show('runtime'); App.ui.refreshRuntime(); } })));
-            box.appendChild(pl); v.appendChild(box);
+            list.forEach(i => pl.appendChild(el('button', { type: 'button', class: 'pill', text: '#' + (i + 1), onclick: () => resume(i) })));
+            box.appendChild(pl); card.appendChild(box);
         };
         pills(App.t('reviewUnanswered'), unanswered);
         pills(App.t('reviewFlagged'), flagged);
 
-        v.appendChild(el('div', { class: 'toolbar', style: 'margin-top:20px;' },
-            el('button', { type: 'button', class: 'btn btn-secondary', text: App.t('reviewBack'), onclick: () => { App.ui.show('runtime'); App.ui.refreshRuntime(); } }),
-            el('button', { type: 'button', class: 'btn', id: 'submit-btn', text: App.t('reviewSubmit'), onclick: () => App.ui.submit(false) })));
+        card.appendChild(el('div', { class: 'toolbar', style: 'margin-top:22px' },
+            App.ui.btn(App.t('reviewBack'), 'back', 'btn-secondary', () => { App.ui.show('runtime'); App.ui.refreshRuntime(); }),
+            App.ui.btn(App.t('reviewSubmit'), 'check', 'btn-lg', () => App.ui.submit(false), { id: 'submit-btn' })));
+        v.appendChild(card);
     };
 
     App.ui.submit = function (auto) {
@@ -55,53 +63,107 @@
         App.storage.addAttempt(s.examId, attempt);
         App.storage.deleteSession(s.examId, s.id);
         App.state.lastResult = { attempt, session: s };
+        App.state.reviewFilter = 'all';
         App.ui.show('summary');
         App.ui.renderSummary();
     };
+
+    function topicBreakdown(s, exam) {
+        const by = {};
+        for (let i = 0; i < s.length; i++) {
+            const t = s.item(i).topic;
+            by[t] = by[t] || { total: 0, ok: 0 };
+            by[t].total++; if (s.isCorrect(i)) by[t].ok++;
+        }
+        const keys = Object.keys(by);
+        if (keys.length < 2) return null;
+        const box = el('div', { class: 'stat-section' }, el('h2', { text: App.t('topicBreakdown') }));
+        keys.forEach(t => {
+            const pct = Math.round(100 * by[t].ok / by[t].total);
+            const name = exam && exam.topics && exam.topics[t] ? App.loc(exam.topics[t]) : t;
+            box.appendChild(el('div', { class: 'bar-row' },
+                el('span', { text: name }),
+                el('div', { class: 'bar-track' }, el('div', { class: 'bar-fill' + (pct < 50 ? ' low' : (pct < 75 ? ' mid' : '')), style: 'width:' + pct + '%' })),
+                el('span', { class: 'bar-pct', text: pct + '%' })));
+        });
+        return box;
+    }
 
     App.ui.renderSummary = function () {
         const r = App.state.lastResult;
         if (!r) return;
         const { attempt, session: s } = r;
+        const exam = App.state.exam;
         const v = $('view-summary');
         v.textContent = '';
-        v.appendChild(el('h1', { text: App.t('resultsTitle') }));
-        v.appendChild(el('p', { class: 'subtitle', text: App.t('resultsSubtitle') }));
-
         const color = attempt.passed ? 'var(--success)' : 'var(--error)';
-        v.appendChild(el('div', { class: 'metrics-summary-box' },
-            el('div', { class: 'score-circle', id: 'metric-percentage', style: 'border-color:' + color + ';color:' + color, text: attempt.pct + '%' }),
-            el('div', {},
-                el('h2', { id: 'metric-raw-string', style: 'font-size:1.3rem;font-weight:600;margin-bottom:4px;', text: App.t('scoreLine', { c: attempt.correct, n: attempt.total }) }),
-                el('p', { id: 'exam-result-badge', style: 'font-size:1rem;font-weight:700;color:' + color, text: App.t(attempt.passed ? 'pass' : 'fail', { t: attempt.threshold }) }),
-                el('p', { class: 'hint', text: s.modeLabel + ' · ' + App.t('resultTime', { m: App.ui.fmtTime(attempt.durationSec) }) }))));
+        const card = el('div', { class: 'card' });
+        card.appendChild(el('h1', { text: App.t('resultsTitle') }));
+        card.appendChild(el('p', { class: 'subtitle', text: App.t('resultsSubtitle') }));
+
+        const ring = el('div', { class: 'score-ring' });
+        ring.appendChild(App.ui.ring(attempt.pct, color, 168, 10));
+        ring.appendChild(el('div', { class: 'score-num' }, el('span', { id: 'metric-percentage', text: attempt.pct + '%' }), el('small', { text: App.t('scoreWord') })));
+        const unanswered = attempt.answers.filter(a => !a[3]).length;
+        const wrongN = attempt.total - attempt.correct - unanswered;
+        card.appendChild(el('div', { class: 'score-hero', style: 'margin-top:20px' }, ring,
+            el('div', { style: 'flex:1 1 260px;min-width:0' },
+                el('div', { class: 'verdict ' + (attempt.passed ? 'pass' : 'fail'), id: 'exam-result-badge' }, icon(attempt.passed ? 'trophy' : 'x', 18), el('span', { text: App.t(attempt.passed ? 'pass' : 'fail', { t: attempt.threshold }).replace(/^[^\w]*\s*/, '') })),
+                el('p', { id: 'metric-raw-string', style: 'font-weight:600;font-size:1.05rem', text: App.t('scoreLine', { c: attempt.correct, n: attempt.total }) }),
+                el('p', { class: 'hint', text: s.modeLabel }))));
+
+        card.appendChild(el('div', { class: 'kpis' },
+            kpi(attempt.correct, App.t('correctKpi'), 'ok'),
+            kpi(wrongN, App.t('wrongKpi'), wrongN ? 'bad' : ''),
+            kpi(unanswered, App.t('unansweredKpi'), unanswered ? 'warn' : ''),
+            kpi(App.ui.fmtTime(attempt.durationSec), App.t('timeKpi'))));
+
+        const tb = topicBreakdown(s, exam);
+        if (tb) card.appendChild(tb);
 
         const wrong = [];
         for (let i = 0; i < s.length; i++) if (!s.isCorrect(i)) wrong.push(s.item(i).uid);
         const bar = el('div', { class: 'toolbar' },
-            el('button', { type: 'button', class: 'btn', id: 'return-btn', text: App.t('backToMenu'), onclick: () => { App.ui.renderDashboard(); App.ui.show('dashboard'); } }));
-        if (wrong.length) bar.appendChild(el('button', { type: 'button', class: 'btn btn-ghost', text: App.t('retryWrong') + ' (' + wrong.length + ')', onclick: () => App.ui.retry(wrong) }));
-        bar.appendChild(el('button', { type: 'button', class: 'btn btn-ghost', text: '📊 ' + App.t('statsBtn'), onclick: () => App.ui.openStats() }));
-        v.appendChild(bar);
+            App.ui.btn(App.t('backToMenu'), 'home', '', () => { App.ui.renderDashboard(); App.ui.show('dashboard'); }, { id: 'return-btn' }));
+        if (wrong.length) bar.appendChild(App.ui.btn(App.t('retryWrong') + ' (' + wrong.length + ')', 'refresh', 'btn-ghost', () => App.ui.retry(wrong)));
+        bar.appendChild(App.ui.btn(App.t('statsBtn'), 'chart', 'btn-ghost', () => App.ui.openStats()));
+        card.appendChild(bar);
 
+        // filter chips + review cards
+        const stats = App.storage.allQStats(s.examId);
+        const filters = [['all', App.t('filterAll')], ['wrong', App.t('filterWrong')], ['unanswered', App.t('filterUnanswered')], ['flagged', App.t('filterFlagged')]];
+        const chips = el('div', { class: 'filter-chips', role: 'group' });
         const box = el('div', { id: 'review-payload-box' });
+        const cards = [];
         for (let i = 0; i < s.length; i++) {
             const item = s.item(i);
             const answered = s.hasAnswer(i), ok = s.isCorrect(i);
+            const st = stats[item.uid];
             const cls = ok ? 'is-correct' : (answered ? 'is-incorrect' : 'is-unanswered');
             const badge = ok ? App.t('correct') : (answered ? App.t('incorrect') : App.t('unansweredBadge'));
             const meta = [item.topic, item.difficulty ? '★'.repeat(item.difficulty) : '', (s.times[i] || 0) + 's'].filter(Boolean).join(' · ');
-            const card = el('div', { class: 'review-item-card ' + cls },
-                el('span', { class: 'review-status-badge', text: badge }),
+            const c = el('div', { class: 'review-item-card ' + cls },
+                el('span', { class: 'review-status-badge' }, icon(ok ? 'check' : (answered ? 'x' : 'clock'), 12), el('span', { text: badge })),
                 el('div', { class: 'meta', text: meta }),
-                el('h3', { style: 'font-size:1.05rem;margin-bottom:10px;white-space:pre-line;', text: App.t('questionN', { n: i + 1, q: App.loc(item.text) }) }),
+                el('h3', { text: App.t('questionN', { n: i + 1, q: App.loc(item.text) }) }),
                 App.types[item.kind].renderReview(item, s.value(i)),
-                item.explanation ? el('div', { class: 'explanation-box', style: 'margin-top:15px;' },
-                    el('h4', { style: 'font-size:0.95rem;', text: App.t('explanation') }),
-                    el('p', { style: 'font-size:0.9rem;', text: App.loc(item.explanation) })) : null);
-            box.appendChild(card);
+                item.explanation ? el('div', { class: 'explanation-box' }, el('h4', { text: App.t('explanation') }), el('p', { text: App.loc(item.explanation) })) : null);
+            cards.push({ node: c, ok, answered, flagged: !!(st && st.flag) });
+            box.appendChild(c);
         }
-        v.appendChild(box);
+        function applyFilter(f) {
+            App.state.reviewFilter = f;
+            chips.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.f === f ? 'true' : 'false'));
+            cards.forEach(c => {
+                const show = f === 'all' || (f === 'wrong' && !c.ok && c.answered) || (f === 'unanswered' && !c.answered) || (f === 'flagged' && c.flagged);
+                c.node.classList.toggle('hidden', !show);
+            });
+        }
+        filters.forEach(([f, label]) => chips.appendChild(el('button', { type: 'button', class: 'filter-chip', text: label, dataset: { f }, onclick: () => applyFilter(f) })));
+        card.appendChild(chips);
+        card.appendChild(box);
+        v.appendChild(card);
+        applyFilter(App.state.reviewFilter || 'all');
     };
 
     // New study session with the questions that were wrong/unanswered

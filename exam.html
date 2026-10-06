@@ -9,692 +9,465 @@
     <link rel="icon" href="icon.svg" type="image/svg+xml">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #01a982;
-            --primary-hover: #018566;
-            --primary-light: #e0f5ef;
-            --dark: #111111;
-            --dark-gray: #444444;
-            --gray: #888888;
-            --light-gray: #f4f6f8;
-            --border: #e2e8f0;
-            --white: #ffffff;
-            --success: #10b981;
-            --success-light: #d1fae5;
-            --error: #ef4444;
-            --error-light: #fee2e2;
-            --warning: #f59e0b;
-            --on-accent: #ffffff;
-            --shadow: rgba(0,0,0,0.05);
-            --reveal-ok-bg: #d1fae5; --reveal-ok-fg: #065f46;
-            --reveal-bad-bg: #fee2e2; --reveal-bad-fg: #991b1b;
-        }
-
-        :root[data-theme="dark"] {
-            --primary: #10c79a;
-            --primary-hover: #0ea982;
-            --primary-light: #0f3a30;
-            --dark: #e8edf2;
-            --dark-gray: #c3ccd6;
-            --gray: #94a3b8;
-            --light-gray: #0e1216;
-            --border: #2b333c;
-            --white: #181d23;
-            --success: #34d399;
-            --success-light: #123d2e;
-            --error: #f87171;
-            --error-light: #4a1f1f;
-            --warning: #fbbf24;
-            --on-accent: #06251d;
-            --shadow: rgba(0,0,0,0.4);
-            --reveal-ok-bg: #123d2e; --reveal-ok-fg: #a7f3d0;
-            --reveal-bad-bg: #4a1f1f; --reveal-bad-fg: #fecaca;
-        }
-        html { color-scheme: light; }
-        :root[data-theme="dark"] { color-scheme: dark; }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--light-gray);
-            color: var(--dark);
-            line-height: 1.5;
-            padding-bottom: 40px;
-        }
-
-        header {
-            background-color: var(--white);
-            border-bottom: 1px solid var(--border);
-            padding: 15px 20px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            box-shadow: 0 2px 4px var(--shadow);
-        }
-
-        .header-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .hpe-element {
-            width: 40px;
-            height: 16px;
-            border: 4px solid var(--primary);
-            border-radius: 2px;
-        }
-
-        .logo-text {
-            font-weight: 700;
-            font-size: 1.1rem;
-            letter-spacing: -0.5px;
-        }
-
-        .logo-text span {
-            color: var(--primary);
-        }
-
-        .main-wrapper {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-
-        .card {
-            background-color: var(--white);
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            padding: 30px;
-            box-shadow: 0 4px 6px var(--shadow);
-            margin-bottom: 25px;
-        }
-
-        h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: var(--dark);
-        }
-
-        p.subtitle {
-            color: var(--gray);
-            font-size: 1rem;
-            margin-bottom: 25px;
-        }
-
-        .grid-dashboard {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 25px;
-        }
-
-        @media (max-width: 900px) {
-            .grid-dashboard {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .topic-list {
-            margin-top: 15px;
-        }
-
-        .topic-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 15px;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.95rem;
-        }
-
-        .topic-item:last-child {
-            border-bottom: none;
-        }
-
-        .topic-name {
-            font-weight: 500;
-            color: var(--dark-gray);
-            max-width: 75%;
-        }
-
-        .topic-count {
-            background-color: var(--light-gray);
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--gray);
-        }
-
-        .setup-box {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        label {
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: var(--dark-gray);
-        }
-
-        select, input {
-            padding: 10px 12px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            font-size: 0.95rem;
-            outline: none;
-            width: 100%;
-            background-color: var(--white);
-        }
-
-        select:focus, input:focus {
-            border-color: var(--primary);
-        }
-
-        .btn {
-            background-color: var(--primary);
-            color: var(--on-accent);
-            border: none;
-            padding: 12px 20px;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            text-align: center;
-            display: inline-block;
-        }
-
-        .btn:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .btn-secondary {
-            background-color: var(--light-gray);
-            color: var(--dark-gray);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            background-color: var(--border);
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        /* Runtime Styles */
-        .runtime-layout {
-            display: grid;
-            grid-template-columns: 1fr 300px;
-            gap: 25px;
-        }
-
-        @media (max-width: 900px) {
-            .runtime-layout {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .question-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .tag-topic {
-            background-color: var(--primary-light);
-            color: var(--primary);
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .q-number {
-            font-weight: 600;
-            color: var(--gray);
-            font-size: 0.95rem;
-        }
-
-        .question-text { white-space: pre-line;
-            font-size: 1.15rem;
-            font-weight: 600;
-            margin-bottom: 25px;
-            color: var(--dark);
-        }
-
-        .options-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 30px;
-        }
-
-        .option-card {
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 15px 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            transition: all 0.2s;
-        }
-
-        .option-card:hover {
-            border-color: var(--primary);
-            background-color: rgba(1, 169, 130, 0.01);
-        }
-
-        .option-card.selected {
-            border-color: var(--primary);
-            background-color: var(--primary-light);
-        }
-
-        .option-marker {
-            width: 22px;
-            height: 22px;
-            border: 2px solid var(--border);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--gray);
-            background-color: var(--white);
-            flex-shrink: 0;
-            margin-top: 1px;
-        }
-
-        .option-card.selected .option-marker {
-            border-color: var(--primary);
-            background-color: var(--primary);
-            color: var(--on-accent);
-        }
-
-        .option-text {
-            font-size: 0.95rem;
-            color: var(--dark-gray);
-            font-weight: 400;
-        }
-
-        .option-card.selected .option-text {
-            color: var(--dark);
-            font-weight: 500;
-        }
-
-        .nav-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* Sidebar Grid Navigation */
-        .sidebar-box {
-            background-color: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            height: fit-content;
-        }
-
-        .sidebar-title {
-            font-weight: 700;
-            font-size: 1rem;
-            margin-bottom: 15px;
-            color: var(--dark);
-        }
-
-        .grid-navigation {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .nav-grid-btn {
-            height: 40px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            background-color: var(--white);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .nav-grid-btn:hover {
-            border-color: var(--dark);
-        }
-
-        .nav-grid-btn.active {
-            border-color: var(--primary);
-            background-color: var(--primary-light);
-            color: var(--primary);
-        }
-
-        .nav-grid-btn.answered {
-            background-color: var(--dark);
-            color: var(--white);
-            border-color: var(--dark);
-        }
-
-        .nav-grid-btn.answered.active {
-            box-shadow: 0 0 0 2px var(--primary);
-        }
-
-        .nav-grid-btn.answered-correct {
-            background-color: var(--success);
-            color: var(--on-accent);
-            border-color: var(--success);
-        }
-
-        .nav-grid-btn.answered-wrong {
-            background-color: var(--error);
-            color: var(--on-accent);
-            border-color: var(--error);
-        }
-
-        .nav-grid-btn.answered-correct.active,
-        .nav-grid-btn.answered-wrong.active {
-            box-shadow: 0 0 0 3px rgba(0,0,0,0.25);
-            outline: 2px solid var(--primary);
-            outline-offset: 2px;
-        }
-
-        /* Summary Dashboard Metrics */
-        .metrics-summary-box {
-            display: flex;
-            align-items: center;
-            gap: 30px;
-            margin-bottom: 30px;
-            padding-bottom: 25px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        @media (max-width: 600px) {
-            .metrics-summary-box {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 20px;
-            }
-        }
-
-        .score-circle {
-            width: 100px;
-            height: 100px;
-            border: 8px solid var(--border);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-
-        .review-item-card {
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 20px;
-            margin-bottom: 20px;
-            background-color: var(--white);
-        }
-
-        .review-item-card.is-correct {
-            border-left: 5px solid var(--success);
-        }
-
-        .review-item-card.is-incorrect {
-            border-left: 5px solid var(--error);
-        }
-
-        .review-status-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
-
-        .is-correct .review-status-badge {
-            background-color: var(--success-light);
-            color: var(--success);
-        }
-
-        .is-incorrect .review-status-badge {
-            background-color: var(--error-light);
-            color: var(--error);
-        }
-
-        .explanation-box {
-            background-color: var(--light-gray);
-            border-radius: 4px;
-            padding: 15px;
-            border-left: 3px solid var(--gray);
-        }
-    
-        .option-marker input[type='checkbox']{ width:18px; height:18px; transform:translateY(-1px);}
-
-        #validate-btn {
-            background-color: var(--dark); color: var(--white);
-            border: 2px solid var(--dark); padding: 12px 20px;
-            border-radius: 6px; font-size: 1rem; font-weight: 600;
-            cursor: pointer; transition: all 0.2s ease; margin-right: 12px;
-        }
-        #validate-btn:hover { opacity: 0.85; }
-        #validate-btn:disabled { opacity: 0.5; cursor: default; }
-        .correct-reveal  { background-color: var(--reveal-ok-bg) !important; border: 2px solid var(--success) !important; color: var(--reveal-ok-fg) !important; }
-        .correct-reveal .option-text, .incorrect-reveal .option-text { color: inherit; }
-        .incorrect-reveal{ background-color: var(--reveal-bad-bg) !important; border: 2px solid var(--error) !important; color: var(--reveal-bad-fg) !important; }
-        .dynamic-explanation-box {
-            background-color: var(--light-gray); border-left: 4px solid var(--primary);
-            padding: 16px; margin-top: 20px; margin-bottom: 20px;
-            border-radius: 0 8px 8px 0; box-shadow: 0 1px 3px var(--shadow);
-        }
-        .dynamic-explanation-box h4 { font-size: 1rem; color: var(--dark); margin-bottom: 6px; font-weight: 700; }
-        .dynamic-explanation-box p { font-size: 0.92rem; color: var(--dark-gray); line-height: 1.5; margin: 0; }
-        .btn-final { background-color: var(--dark) !important; color: var(--white) !important; }
-        .btn-danger-outline { width: 100%; border-color: var(--error); color: var(--error); }
-        .question-text { white-space: pre-line; }
-
-        .header-controls { display: flex; align-items: center; gap: 10px; }
-        .icon-btn {
-            min-width: 40px; height: 36px; padding: 0 10px; border-radius: 6px;
-            border: 1px solid var(--border); background: var(--white); color: var(--dark);
-            font-size: 0.85rem; font-weight: 700; cursor: pointer;
-        }
-        .icon-btn:hover { border-color: var(--primary); color: var(--primary); }
-
-        .exam-card {
-            display: block; padding: 14px 16px; margin-bottom: 10px;
-            border: 1px solid var(--border); border-radius: 8px;
-            text-decoration: none; color: var(--dark); background: var(--white);
-        }
-        .exam-card:hover, .exam-card.current { border-color: var(--primary); }
-        .exam-card-title { font-weight: 700; color: var(--primary); }
-        .exam-card-desc { font-size: 0.9rem; color: var(--gray); margin-top: 4px; }
-        .exam-switcher { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
-        .exam-switcher-label { font-weight: 600; font-size: 0.9rem; color: var(--gray); }
-        .exam-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-        .exam-chip {
-            padding: 6px 14px; border-radius: 999px; font-size: 0.85rem; font-weight: 600;
-            border: 1px solid var(--border); color: var(--dark-gray); text-decoration: none; background: var(--white);
-        }
-        .exam-chip:hover { border-color: var(--primary); color: var(--primary); }
-        .exam-chip.current { background: var(--primary); border-color: var(--primary); color: var(--on-accent); }
-
-        .topic-total { background-color: var(--primary-light); border-radius: 6px; border-bottom: none; margin-bottom: 10px; }
-        .review-option { margin: 6px 0; }
-        .review-correct { color: var(--success); font-weight: 600; background-color: var(--success-light); border-radius: 4px; padding: 2px 6px; }
-        .review-wrong { color: var(--error); font-weight: 600; background-color: var(--error-light); border-radius: 4px; padding: 2px 6px; }
-    
-
-
-/* ===== Engine v2 components ===== */
-.skip-link { position: absolute; left: -999px; top: 8px; background: var(--primary); color: var(--on-accent); padding: 8px 14px; border-radius: 6px; z-index: 100; }
+/* ===== Design tokens, reset, typography ===== */
+:root {
+    --font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+    --bg: #f4f7fb;
+    --bg-glow-a: rgba(1, 169, 130, 0.14);
+    --bg-glow-b: rgba(59, 130, 246, 0.10);
+    --surface: #ffffff;
+    --surface-2: #f6f8fb;
+    --surface-3: #eef2f7;
+    --border: #e3e8ef;
+    --border-strong: #cbd5e1;
+    --text: #0f172a;
+    --text-2: #334155;
+    --muted: #64748b;
+
+    --primary: #00a67e;
+    --primary-600: #008a69;
+    --primary-soft: #e3f7f1;
+    --primary-ink: #ffffff;
+    --accent: #3b82f6;
+    --grad: linear-gradient(135deg, #00b38a 0%, #0a9bb8 55%, #3b82f6 100%);
+
+    --success: #12a150;
+    --success-soft: #e0f6e9;
+    --error: #e5484d;
+    --error-soft: #fdeaea;
+    --warning: #f59e0b;
+    --warning-soft: #fff4dc;
+
+    --header-bg: rgba(255, 255, 255, 0.78);
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 6px 18px rgba(15, 23, 42, 0.08);
+    --shadow-lg: 0 18px 44px rgba(15, 23, 42, 0.14);
+    --ring: 0 0 0 3px rgba(0, 166, 126, 0.35);
+
+    --r-sm: 8px; --r-md: 12px; --r-lg: 18px; --r-pill: 999px;
+    --space: clamp(14px, 2.4vw, 24px);
+
+    /* legacy aliases used by inline styles */
+    --dark: var(--text); --dark-gray: var(--text-2); --gray: var(--muted);
+    --white: var(--surface); --light-gray: var(--surface-2);
+    --on-accent: var(--primary-ink); --shadow: rgba(15, 23, 42, 0.08);
+    color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+    --bg: #0a0e14;
+    --bg-glow-a: rgba(25, 211, 162, 0.10);
+    --bg-glow-b: rgba(96, 165, 250, 0.08);
+    --surface: #121822;
+    --surface-2: #171e2a;
+    --surface-3: #1e2736;
+    --border: #243042;
+    --border-strong: #34445c;
+    --text: #e8eef6;
+    --text-2: #c2cedd;
+    --muted: #8b9bb2;
+
+    --primary: #1ad3a4;
+    --primary-600: #12b88d;
+    --primary-soft: #0f2f2a;
+    --primary-ink: #04221b;
+    --accent: #60a5fa;
+    --grad: linear-gradient(135deg, #12c79a 0%, #2aa6d6 55%, #6366f1 100%);
+
+    --success: #34d399;
+    --success-soft: #0f2e22;
+    --error: #f87171;
+    --error-soft: #3a1c20;
+    --warning: #fbbf24;
+    --warning-soft: #3a2f12;
+
+    --header-bg: rgba(10, 14, 20, 0.78);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 8px 22px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.6);
+    --ring: 0 0 0 3px rgba(26, 211, 164, 0.4);
+    --shadow: rgba(0, 0, 0, 0.45);
+    color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+    font-family: var(--font); font-size: 16px; line-height: 1.55; color: var(--text);
+    background:
+        radial-gradient(900px 420px at 8% -10%, var(--bg-glow-a), transparent 60%),
+        radial-gradient(800px 380px at 100% 0%, var(--bg-glow-b), transparent 60%),
+        var(--bg);
+    background-attachment: fixed;
+    min-height: 100vh; padding-bottom: calc(40px + env(safe-area-inset-bottom));
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: var(--primary); }
+h1 { font-size: clamp(1.55rem, 1.1rem + 2vw, 2.3rem); line-height: 1.15; letter-spacing: -0.02em; font-weight: 800; }
+h2 { font-size: clamp(1.05rem, 1rem + 0.5vw, 1.3rem); font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: 1rem; font-weight: 700; }
+.hidden { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.icon { flex-shrink: 0; vertical-align: -0.2em; }
+:focus-visible { outline: none; box-shadow: var(--ring); border-radius: var(--r-sm); }
+.skip-link { position: absolute; left: -999px; top: 8px; background: var(--primary); color: var(--primary-ink); padding: 8px 14px; border-radius: var(--r-sm); z-index: 100; font-weight: 600; }
 .skip-link:focus { left: 8px; }
-:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
-button { font-family: inherit; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pop { 0% { transform: scale(0.96); } 60% { transform: scale(1.015); } 100% { transform: scale(1); } }
+@keyframes pulse { 50% { opacity: 0.55; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 
-/* Real inputs inside option cards: visually hidden, still focusable */
-.option-input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; padding: 0; border: 0; }
-.option-card { position: relative; }
-.option-card:focus-within { outline: 3px solid var(--primary); outline-offset: 2px; }
-.option-card.selected .option-text { color: var(--dark); }
-.nav-grid-btn { padding: 0; font-family: inherit; color: var(--dark); background-color: var(--white); position: relative; }
-.nav-grid-btn.flagged::after { content: "⚑"; position: absolute; top: -6px; right: -4px; font-size: 0.72rem; color: var(--warning); }
-.nav-grid-btn.unanswered-hint { border-style: dashed; }
+/* ===== App shell and layout ===== */
+.app-header { position: sticky; top: 0; z-index: 30; background: var(--header-bg); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); border-bottom: 1px solid var(--border); padding-top: env(safe-area-inset-top); }
+.app-header-inner { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px var(--space); }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); min-width: 0; }
+.brand-mark { width: 34px; height: 34px; border-radius: 10px; background: var(--grad); display: grid; place-items: center; color: #fff; box-shadow: var(--shadow-md); flex-shrink: 0; }
+.brand-text { font-weight: 800; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brand-text small { font-weight: 500; color: var(--muted); font-size: 0.72rem; margin-left: 6px; }
+.header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.icon-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 38px; height: 38px; padding: 0 11px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); font-size: 0.8rem; font-weight: 700; transition: border-color .15s, color .15s, transform .15s; }
+.icon-btn:hover { border-color: var(--primary); color: var(--primary); }
+.icon-btn:active { transform: scale(0.96); }
 
-.card-title-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-.toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 16px; }
-.btn-small { padding: 7px 14px; font-size: 0.85rem; border-radius: 6px; }
-.btn-ghost { background: transparent; color: var(--primary); border: 1px solid var(--primary); font-weight: 600; cursor: pointer; }
-.btn-ghost:hover { background: var(--primary-light); }
-.btn:disabled { opacity: 0.5; cursor: default; }
-.sessions-box { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 18px; background: var(--white); }
-.sessions-box h3 { font-size: 1rem; margin-bottom: 8px; }
-.session-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--border); flex-wrap: wrap; }
+.timer-pill { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border-radius: var(--r-pill); background: var(--surface); border: 1px solid var(--border); font-variant-numeric: tabular-nums; font-weight: 700; color: var(--text); }
+.timer-pill .timer-label { font-weight: 500; color: var(--muted); font-size: 0.8rem; }
+.timer-pill.warn { border-color: var(--warning); color: var(--warning); }
+.timer-pill.danger { border-color: var(--error); color: var(--error); animation: pulse 1s infinite; }
+
+.main-wrapper { max-width: 1180px; margin: 0 auto; padding: var(--space); outline: none; }
+.view { animation: fadeIn .25s ease; }   /* opacity only: a transform here would break position:fixed children */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); padding: clamp(16px, 3vw, 28px); margin-bottom: var(--space); }
+.card.flat { box-shadow: none; }
+.stack > * + * { margin-top: var(--space); }
+.row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.row.between { justify-content: space-between; }
+.muted { color: var(--muted); }
+.subtitle { color: var(--muted); font-size: 1rem; max-width: 70ch; }
+
+/* Hero */
+.hero { position: relative; overflow: hidden; border-radius: var(--r-lg); padding: clamp(20px, 4vw, 36px); margin-bottom: var(--space); color: #fff; background: var(--grad); box-shadow: var(--shadow-lg); }
+.hero::before { content: ""; position: absolute; width: 380px; height: 380px; right: -90px; top: -140px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.28), transparent 65%); pointer-events: none; }
+.hero::after { content: ""; position: absolute; width: 260px; height: 260px; left: -60px; bottom: -150px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.16), transparent 65%); pointer-events: none; }
+.hero > * { position: relative; z-index: 1; }
+.hero h1 { color: #fff; }
+.hero .subtitle { color: rgba(255,255,255,0.88); margin-top: 8px; }
+.hero-eyebrow { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(255,255,255,0.18); padding: 4px 10px; border-radius: var(--r-pill); margin-bottom: 12px; }
+.hero-grid { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.hero-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.hero-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 600; background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.22); padding: 5px 12px; border-radius: var(--r-pill); }
+
+.dash-grid { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: var(--space); align-items: start; }
+.dash-side { position: sticky; top: 84px; }
+.picker-head { text-align: center; padding: clamp(8px, 3vw, 28px) 0; }
+.picker-head h1 { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.picker-head .subtitle { margin: 10px auto 0; }
+
+@media (max-width: 960px) {
+    .dash-grid { display: flex; flex-direction: column; gap: var(--space); }
+    .dash-main { display: contents; }
+    .dash-side { position: static; }
+    .ord-sessions { order: 1; } .ord-modes { order: 2; } .dash-side { order: 3; } .ord-topics { order: 4; }
+}
+@media (max-width: 600px) {
+    .app-header-inner { padding: 8px 12px; }
+    .brand-text small { display: none; }
+    .timer-pill .timer-label { display: none; }
+    .timer-pill { padding: 0 11px; height: 36px; }
+    .icon-btn { height: 36px; min-width: 36px; padding: 0 9px; }
+    .hero-grid { gap: 14px; }
+    .hero-ring { display: none; }
+}
+
+/* ===== Components ===== */
+/* Buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 20px; border-radius: 11px; border: 1px solid transparent; background: var(--primary); color: var(--primary-ink); font-weight: 700; font-size: 0.95rem; line-height: 1.2; text-decoration: none; transition: transform .12s, box-shadow .15s, background .15s, border-color .15s, opacity .15s; box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset, var(--shadow-sm); }
+.btn:hover:not(:disabled) { background: var(--primary-600); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.btn:active:not(:disabled) { transform: translateY(0) scale(0.99); }
+.btn:disabled { opacity: 0.5; cursor: default; box-shadow: none; }
+.btn-secondary { background: var(--surface); color: var(--text); border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
+.btn-secondary:hover:not(:disabled) { background: var(--surface-2); border-color: var(--primary); color: var(--primary); }
+.btn-ghost { background: transparent; color: var(--primary); border-color: var(--border-strong); box-shadow: none; }
+.btn-ghost:hover:not(:disabled) { background: var(--primary-soft); border-color: var(--primary); box-shadow: none; }
+.btn-danger { background: transparent; color: var(--error); border-color: var(--error); box-shadow: none; }
+.btn-danger:hover:not(:disabled) { background: var(--error-soft); }
+.btn-dark { background: var(--text); color: var(--surface); }
+.btn-dark:hover:not(:disabled) { background: var(--text-2); }
+.btn-sm, .btn-small { padding: 7px 13px; font-size: 0.84rem; border-radius: 9px; }
+.btn-lg { padding: 14px 26px; font-size: 1.05rem; border-radius: 13px; }
+.btn-block { width: 100%; }
+
+/* Chips / badges */
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: var(--r-pill); font-size: 0.78rem; font-weight: 600; background: var(--surface-3); color: var(--text-2); }
+.chip.primary { background: var(--primary-soft); color: var(--primary); }
+.chip.warn { background: var(--warning-soft); color: var(--warning); }
+.chip.ok { background: var(--success-soft); color: var(--success); }
+.chip.bad { background: var(--error-soft); color: var(--error); }
+
+/* Forms */
+label { font-weight: 600; font-size: 0.88rem; color: var(--text-2); }
+select, input[type="number"], input[type="text"], textarea { width: 100%; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); font-size: 0.95rem; transition: border-color .15s, box-shadow .15s; }
+select:hover, input:hover, textarea:hover { border-color: var(--muted); }
+select:focus, input:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: var(--ring); }
+select { appearance: none; -webkit-appearance: none; padding-right: 38px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.hint { font-size: 0.82rem; color: var(--muted); }
+.switch-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); margin-bottom: 8px; cursor: pointer; }
+.switch-row input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.switch { position: relative; width: 42px; height: 24px; border-radius: 99px; background: var(--border-strong); transition: background .2s; flex-shrink: 0; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: var(--shadow-sm); transition: transform .2s; }
+.switch-row input:checked + .switch { background: var(--primary); }
+.switch-row input:checked + .switch::after { transform: translateX(18px); }
+.switch-row input:focus-visible + .switch { box-shadow: var(--ring); }
+.switch-label { font-weight: 600; font-size: 0.9rem; color: var(--text); }
+
+/* Segmented exam switcher */
+.exam-switcher { display: flex; align-items: center; gap: 10px; margin-bottom: var(--space); }
+.exam-switcher-label { font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; flex-shrink: 0; }
+.exam-chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px; -webkit-overflow-scrolling: touch; }
+.exam-chips::-webkit-scrollbar { display: none; }
+.exam-chip { white-space: nowrap; padding: 8px 15px; border-radius: var(--r-pill); font-size: 0.86rem; font-weight: 600; border: 1px solid var(--border); color: var(--text-2); background: var(--surface); text-decoration: none; transition: all .15s; }
+.exam-chip:hover { border-color: var(--primary); color: var(--primary); }
+.exam-chip.current { background: var(--text); border-color: var(--text); color: var(--surface); }
+
+/* Exam cards (picker) */
+.exam-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: var(--space); }
+.exam-card { position: relative; display: flex; flex-direction: column; gap: 10px; padding: 20px; border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--border); text-decoration: none; color: var(--text); box-shadow: var(--shadow-sm); transition: transform .18s, box-shadow .18s, border-color .18s; overflow: hidden; }
+.exam-card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 4px; background: var(--grad); }
+.exam-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--primary); }
+.exam-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.exam-card-title { font-weight: 800; font-size: 1.12rem; line-height: 1.25; letter-spacing: -0.01em; color: var(--text); }
+.exam-card-desc { font-size: 0.9rem; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.exam-card-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 6px; }
+.exam-card-icon { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: var(--primary-soft); color: var(--primary); flex-shrink: 0; }
+.mini-ring { position: relative; width: 46px; height: 46px; flex-shrink: 0; }
+.mini-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.mini-ring span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 0.7rem; font-weight: 800; }
+
+/* Mode tiles */
+.section-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 12px; }
+.mode-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 10px; margin-bottom: var(--space); }
+.mode-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; text-align: left; padding: 14px; border-radius: var(--r-md); border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-sm); transition: all .15s; }
+.mode-tile:hover:not(:disabled) { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.mode-tile[aria-pressed="true"] { border-color: var(--primary); background: var(--primary-soft); box-shadow: var(--ring); }
+.mode-tile:disabled { opacity: 0.45; cursor: default; }
+.mode-tile .mode-icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--surface-3); color: var(--text-2); }
+.mode-tile[aria-pressed="true"] .mode-icon { background: var(--primary); color: var(--primary-ink); }
+.mode-tile .mode-name { font-weight: 700; font-size: 0.92rem; line-height: 1.25; color: var(--text); }
+.mode-tile .mode-sub { font-size: 0.78rem; color: var(--muted); }
+
+/* Topic list */
+.topic-list { display: flex; flex-direction: column; gap: 6px; }
+.topic-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 14px; align-items: center; width: 100%; text-align: left; padding: 11px 14px; border-radius: 11px; border: 1px solid var(--border); background: var(--surface); transition: all .15s; }
+.topic-row:hover { border-color: var(--primary); background: var(--surface-2); }
+.topic-row .topic-name { font-weight: 600; font-size: 0.92rem; overflow-wrap: anywhere; }
+.topic-row .topic-count { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+.topic-row .topic-bar { grid-column: 1 / -1; height: 5px; border-radius: 99px; background: var(--surface-3); overflow: hidden; }
+.topic-row .topic-bar > i { display: block; height: 100%; background: var(--grad); border-radius: 99px; }
+
+/* Sessions in progress */
+.sessions-box { border: 1px solid var(--primary); background: var(--primary-soft); border-radius: var(--r-md); padding: 14px 16px; margin-bottom: var(--space); }
+.sessions-box h3 { margin-bottom: 8px; display: flex; align-items: center; gap: 8px; color: var(--primary); }
+.session-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 0; border-top: 1px solid color-mix(in srgb, var(--primary) 25%, transparent); flex-wrap: wrap; }
 .session-row:first-of-type { border-top: 0; }
-.session-info { font-size: 0.9rem; color: var(--dark-gray); }
-.checkbox-row { display: flex; align-items: center; gap: 8px; margin: 10px 0; }
-.checkbox-row input { width: 18px; height: 18px; padding: 0; }
-.checkbox-row label { margin: 0; font-weight: 500; }
-.hint { font-size: 0.82rem; color: var(--gray); margin: 4px 0 10px; }
-.mini-acc { display: inline-block; min-width: 46px; text-align: right; font-size: 0.78rem; color: var(--gray); margin-left: 8px; }
-.topic-count-wrap { display: flex; align-items: center; }
-
-/* Question area */
-.question-actions { display: flex; align-items: center; gap: 8px; }
-.flag-btn { border: 1px solid var(--border); background: var(--white); color: var(--gray); border-radius: 6px; padding: 4px 10px; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
-.flag-btn[aria-pressed="true"] { border-color: var(--warning); color: var(--warning); }
-.note-box { margin: 0 0 18px; }
-.note-box summary { cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--gray); }
-.note-box textarea { width: 100%; min-height: 70px; margin-top: 8px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--white); color: var(--dark); font-size: 0.9rem; resize: vertical; }
-.nav-controls { gap: 10px; flex-wrap: wrap; }
-.nav-controls .spacer { flex: 1; }
-.kbd-help { font-size: 0.78rem; color: var(--gray); margin-top: 14px; }
-.legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.75rem; color: var(--gray); margin-bottom: 14px; }
-.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; background: var(--white); border: 1px solid var(--border); }
-.legend .lg-answered::before { background: var(--dark); border-color: var(--dark); }
-.legend .lg-flagged::before { content: "⚑"; width: auto; height: auto; border: 0; background: none; color: var(--warning); }
-.type-hint { font-size: 0.85rem; color: var(--gray); margin-bottom: 10px; }
-
-/* Ordering / matching / numeric / scenario */
-.ordering-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
-.ordering-row { display: flex; align-items: center; gap: 12px; border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; background: var(--white); }
-.order-pos { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--gray); flex-shrink: 0; }
-.order-text { flex: 1; font-size: 0.95rem; }
-.order-btns { display: flex; gap: 6px; }
-.mini-btn { width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 6px; background: var(--white); color: var(--dark); cursor: pointer; font-size: 1rem; }
-.mini-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
-.mini-btn:disabled { opacity: 0.35; cursor: default; }
-.row-ok { border-color: var(--success) !important; background: var(--success-light); }
-.row-bad { border-color: var(--error) !important; background: var(--error-light); }
-.match-row { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 8px; flex-wrap: wrap; background: var(--white); }
-.match-left { flex: 1 1 200px; font-weight: 600; font-size: 0.95rem; }
-.match-select { flex: 1 1 220px; width: auto; }
-.match-correct { flex-basis: 100%; font-size: 0.85rem; color: var(--success); font-weight: 600; }
-.numeric-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-.numeric-input { max-width: 220px; font-size: 1.1rem; }
-.numeric-unit { color: var(--gray); font-weight: 600; }
-.scenario-context { background: var(--light-gray); border-left: 4px solid var(--primary); padding: 14px 16px; border-radius: 0 8px 8px 0; margin-bottom: 18px; white-space: pre-line; font-size: 0.95rem; }
-.scenario-part { margin-bottom: 22px; }
-.scenario-part-title { font-size: 1rem; margin-bottom: 10px; white-space: pre-line; }
-.part-expl { font-size: 0.88rem; color: var(--dark-gray); margin-top: 6px; }
-.review-options .type-hint { margin: 8px 0 2px; }
-
-/* Review before finishing */
-.review-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 8px; margin: 16px 0; }
-.review-block { margin: 14px 0; }
-.review-block h3 { font-size: 1rem; margin-bottom: 8px; }
-.pill-list { display: flex; flex-wrap: wrap; gap: 6px; }
-.pill { border: 1px solid var(--border); background: var(--white); color: var(--dark); border-radius: 999px; padding: 4px 12px; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
-.pill:hover { border-color: var(--primary); color: var(--primary); }
-.review-item-card .meta { font-size: 0.78rem; color: var(--gray); margin-bottom: 6px; }
-.review-item-card.is-unanswered { border-left: 5px solid var(--warning); }
-.is-unanswered .review-status-badge { background-color: var(--light-gray); color: var(--warning); }
-
-/* Statistics */
-.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 16px 0 22px; }
-.tile { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; background: var(--white); }
-.tile .tile-value { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
-.tile .tile-label { font-size: 0.78rem; color: var(--gray); }
-.stat-section { margin: 22px 0; }
-.stat-section h3 { font-size: 1.05rem; margin-bottom: 10px; }
-.bar-row { display: grid; grid-template-columns: minmax(120px, 38%) 1fr 52px; gap: 10px; align-items: center; padding: 5px 0; font-size: 0.88rem; }
-.bar-track { height: 12px; border-radius: 6px; background: var(--light-gray); border: 1px solid var(--border); overflow: hidden; }
-.bar-fill { height: 100%; background: var(--primary); }
-.bar-fill.low { background: var(--error); } .bar-fill.mid { background: var(--warning); }
-.bar-pct { text-align: right; font-weight: 600; color: var(--dark-gray); }
-.chart-box svg { width: 100%; height: 170px; display: block; }
-.chart-axis { stroke: var(--border); } .chart-line { stroke: var(--primary); fill: none; stroke-width: 2.5; }
-.chart-dot { fill: var(--primary); } .chart-dot.fail { fill: var(--error); }
-.chart-thr { stroke: var(--warning); stroke-dasharray: 4 4; } .chart-label { fill: var(--gray); font-size: 10px; }
-.hard-row { padding: 8px 0; border-top: 1px solid var(--border); font-size: 0.9rem; }
-.hard-row:first-of-type { border-top: 0; }
-.hard-meta { font-size: 0.78rem; color: var(--gray); }
+.session-info { font-size: 0.9rem; color: var(--text-2); font-weight: 500; }
+.session-actions { display: flex; gap: 8px; }
 
 /* Toast */
-#toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 50; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
-.toast-msg { background: var(--dark); color: var(--white); padding: 10px 16px; border-radius: 8px; font-size: 0.9rem; box-shadow: 0 6px 20px var(--shadow); max-width: 90vw; }
+#toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 60; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; width: min(92vw, 460px); }
+.toast-msg { background: var(--text); color: var(--surface); padding: 11px 18px; border-radius: 12px; font-size: 0.9rem; font-weight: 500; box-shadow: var(--shadow-lg); animation: fadeUp .25s both; text-align: center; }
 
-.error-box { text-align: left; background: var(--error-light); border: 1px solid var(--error); border-radius: 8px; padding: 12px 16px; margin: 14px auto; max-width: 720px; font-size: 0.9rem; }
-.error-box p { margin: 4px 0; }
+.error-box { background: var(--error-soft); border: 1px solid var(--error); border-radius: var(--r-md); padding: 14px 18px; margin: 16px auto; max-width: 720px; font-size: 0.92rem; text-align: left; }
+.error-box p + p { margin-top: 4px; }
+.loading { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 60px 0; color: var(--muted); }
+.spinner { width: 22px; height: 22px; border-radius: 50%; border: 3px solid var(--border-strong); border-top-color: var(--primary); animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; }
 
-@media (max-width: 600px) {
-    .main-wrapper { padding: 14px 10px; }
-    .card { padding: 18px 14px; }
-    .grid-navigation { grid-template-columns: repeat(6, 1fr); }
-    .bar-row { grid-template-columns: 1fr 52px; }
-    .bar-row .bar-track { grid-column: 1 / -1; order: 3; }
-    .nav-controls .btn, .nav-controls #validate-btn { flex: 1 1 40%; margin-right: 0; }
-    .header-controls { gap: 6px; }
-    .q-number { font-size: 0.78rem; }
-    .runtime-layout .sidebar-box { order: 2; }
+/* ===== Exam runtime ===== */
+.run-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: var(--space); align-items: start; }
+.run-side { position: sticky; top: 84px; }
+.q-card { position: relative; padding-top: clamp(20px, 3vw, 30px); }
+.q-bar { position: absolute; inset: -1px -1px auto -1px; height: 6px; border-radius: var(--r-lg) var(--r-lg) 0 0; background: var(--surface-3); overflow: hidden; }
+.q-bar > i { display: block; height: 100%; width: 0; background: var(--grad); transition: width .35s ease; }
+.q-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.tag-topic { display: inline-flex; align-items: center; max-width: 100%; padding: 4px 12px; border-radius: var(--r-pill); font-size: 0.74rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; background: var(--primary-soft); color: var(--primary); }
+.q-meta { display: flex; align-items: center; gap: 8px; }
+.q-number { font-size: 0.85rem; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.flag-btn { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: var(--r-pill); border: 1px solid var(--border-strong); background: var(--surface); color: var(--muted); font-size: 0.8rem; font-weight: 700; transition: all .15s; }
+.flag-btn:hover { border-color: var(--warning); color: var(--warning); }
+.flag-btn[aria-pressed="true"] { border-color: var(--warning); background: var(--warning-soft); color: var(--warning); }
+.question-text { font-size: clamp(1.08rem, 1rem + 0.5vw, 1.3rem); font-weight: 700; line-height: 1.45; letter-spacing: -0.01em; white-space: pre-line; margin-bottom: 20px; overflow-wrap: anywhere; }
+
+.options-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.option-card { position: relative; display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border: 1.5px solid var(--border); border-radius: 14px; background: var(--surface); cursor: pointer; transition: border-color .15s, background .15s, transform .15s, box-shadow .15s; font-weight: 500; color: var(--text); }
+.option-card:hover { border-color: var(--primary); transform: translateX(2px); box-shadow: var(--shadow-sm); }
+.option-card:focus-within { box-shadow: var(--ring); }
+.option-input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.option-marker { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; flex-shrink: 0; font-weight: 800; font-size: 0.82rem; background: var(--surface-3); color: var(--text-2); transition: all .15s; }
+.option-text { font-size: 0.98rem; line-height: 1.5; padding-top: 3px; overflow-wrap: anywhere; color: var(--text); }
+.option-card.selected { border-color: var(--primary); background: var(--primary-soft); box-shadow: 0 0 0 1px var(--primary) inset; animation: pop .18s ease; }
+.option-card.selected .option-marker { background: var(--primary); color: var(--primary-ink); }
+.option-card.correct-reveal { border-color: var(--success); background: var(--success-soft); box-shadow: 0 0 0 1px var(--success) inset; }
+.option-card.correct-reveal .option-marker { background: var(--success); color: #fff; font-size: 0; }
+.option-card.correct-reveal .option-marker::after { content: "✓"; font-size: 1rem; }
+.option-card.incorrect-reveal { border-color: var(--error); background: var(--error-soft); box-shadow: 0 0 0 1px var(--error) inset; }
+.option-card.incorrect-reveal .option-marker { background: var(--error); color: #fff; font-size: 0; }
+.option-card.incorrect-reveal .option-marker::after { content: "✕"; font-size: 0.95rem; }
+.option-input:disabled ~ .option-text { opacity: 1; }
+.option-input:disabled { cursor: default; }
+
+.explain, .dynamic-explanation-box { display: flex; gap: 12px; padding: 14px 16px; border-radius: var(--r-md); background: var(--surface-2); border: 1px solid var(--border); border-left: 4px solid var(--primary); margin-bottom: 18px; animation: fadeUp .25s both; }
+.dynamic-explanation-box h3 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--primary); margin-bottom: 4px; }
+.dynamic-explanation-box p { font-size: 0.93rem; color: var(--text-2); white-space: pre-line; }
+.note-box { margin-bottom: 18px; }
+.note-box summary { cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 700; color: var(--muted); list-style: none; padding: 4px 0; }
+.note-box summary::-webkit-details-marker { display: none; }
+.note-box textarea { margin-top: 8px; min-height: 80px; resize: vertical; }
+
+.actionbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-top: 6px; }
+.actionbar .spacer { flex: 1; }
+.kbd-help { font-size: 0.76rem; color: var(--muted); margin-top: 14px; }
+
+/* Progress grid */
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 18px; box-shadow: var(--shadow-sm); }
+.panel > summary { list-style: none; cursor: default; }
+.panel > summary::-webkit-details-marker { display: none; }
+.panel-title { display: flex; align-items: center; justify-content: space-between; font-weight: 800; font-size: 0.95rem; margin-bottom: 12px; }
+.panel-title .count { font-weight: 600; color: var(--muted); font-size: 0.82rem; }
+.legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.72rem; color: var(--muted); margin-bottom: 12px; }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend span::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--surface); border: 1px solid var(--border-strong); }
+.legend .lg-answered::before { background: var(--primary); border-color: var(--primary); }
+.legend .lg-flagged::before { content: "⚑"; width: auto; height: auto; border: 0; background: none; color: var(--warning); font-size: 0.8rem; }
+.grid-navigation, .review-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(38px, 1fr)); gap: 7px; margin-bottom: 16px; }
+.nav-grid-btn { position: relative; height: 38px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-2); font-weight: 700; font-size: 0.8rem; padding: 0; transition: all .12s; }
+.nav-grid-btn:hover { border-color: var(--primary); color: var(--primary); }
+.nav-grid-btn.answered { background: var(--primary-soft); border-color: var(--primary); color: var(--primary); }
+.nav-grid-btn.answered-correct { background: var(--success); border-color: var(--success); color: #fff; }
+.nav-grid-btn.answered-wrong { background: var(--error); border-color: var(--error); color: #fff; }
+.nav-grid-btn.unanswered-hint { border-style: dashed; }
+.nav-grid-btn.active { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--primary); }
+.nav-grid-btn.flagged::after { content: ""; position: absolute; top: -3px; right: -3px; width: 10px; height: 10px; border-radius: 50%; background: var(--warning); border: 2px solid var(--surface); }
+
+/* ===== Question types ===== */
+.type-hint { font-size: 0.85rem; color: var(--muted); margin-bottom: 10px; }
+.ordering-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.ordering-row { display: flex; align-items: center; gap: 12px; border: 1.5px solid var(--border); border-radius: 12px; padding: 10px 12px; background: var(--surface); }
+.order-pos { width: 28px; height: 28px; border-radius: 9px; background: var(--surface-3); display: grid; place-items: center; font-size: 0.78rem; font-weight: 800; color: var(--text-2); flex-shrink: 0; }
+.order-text { flex: 1; font-size: 0.96rem; overflow-wrap: anywhere; }
+.order-btns { display: flex; gap: 6px; }
+.mini-btn { width: 36px; height: 36px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--surface); color: var(--text); font-size: 1rem; font-weight: 700; transition: all .12s; }
+.mini-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+.mini-btn:disabled { opacity: 0.3; cursor: default; }
+.row-ok { border-color: var(--success) !important; background: var(--success-soft) !important; }
+.row-bad { border-color: var(--error) !important; background: var(--error-soft) !important; }
+.match-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 12px; margin-bottom: 8px; flex-wrap: wrap; background: var(--surface); }
+.match-left { flex: 1 1 180px; font-weight: 700; font-size: 0.95rem; overflow-wrap: anywhere; }
+.match-select { flex: 1 1 220px; width: auto; }
+.match-correct { flex-basis: 100%; font-size: 0.85rem; color: var(--success); font-weight: 700; }
+.numeric-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.numeric-input { max-width: 240px; font-size: 1.2rem; font-weight: 700; }
+.numeric-unit { color: var(--muted); font-weight: 700; }
+.scenario-context { background: var(--surface-2); border: 1px solid var(--border); border-left: 4px solid var(--accent); padding: 14px 16px; border-radius: var(--r-md); margin-bottom: 18px; white-space: pre-line; font-size: 0.96rem; }
+.scenario-part { margin-bottom: 22px; padding-bottom: 6px; }
+.scenario-part-title { font-size: 1rem; margin-bottom: 10px; white-space: pre-line; }
+.part-expl { font-size: 0.88rem; color: var(--text-2); margin-top: 6px; }
+
+/* ===== Review & results ===== */
+.review-block { margin: 16px 0; }
+.review-block h2 { font-size: 1rem; margin-bottom: 8px; }
+.pill-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill { border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); border-radius: var(--r-pill); padding: 5px 13px; font-size: 0.82rem; font-weight: 700; transition: all .12s; }
+.pill:hover { border-color: var(--primary); color: var(--primary); }
+
+.score-hero { display: flex; align-items: center; gap: clamp(18px, 4vw, 40px); flex-wrap: wrap; }
+.score-ring { position: relative; width: clamp(132px, 28vw, 168px); aspect-ratio: 1; flex-shrink: 0; }
+.score-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.score-ring .ring-bg { stroke: var(--surface-3); }
+.score-ring .ring-fg { transition: stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1); }
+.score-ring .score-num { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; font-size: clamp(1.9rem, 6vw, 2.5rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+.score-ring .score-num small { display: block; font-size: 0.72rem; font-weight: 700; color: var(--muted); letter-spacing: 0.05em; margin-top: 4px; text-transform: uppercase; }
+.verdict { display: inline-flex; max-width: 100%; width: fit-content; align-items: center; gap: 8px; font-weight: 800; font-size: 1.05rem; padding: 6px 14px; border-radius: var(--r-pill); margin: 8px 0; }
+.verdict.pass { background: var(--success-soft); color: var(--success); }
+.verdict.fail { background: var(--error-soft); color: var(--error); }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 20px 0; }
+.kpi { border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px 14px; background: var(--surface-2); }
+.kpi b { display: block; font-size: 1.45rem; font-weight: 800; letter-spacing: -0.02em; }
+.kpi span { font-size: 0.76rem; color: var(--muted); font-weight: 600; }
+.kpi.ok b { color: var(--success); } .kpi.bad b { color: var(--error); } .kpi.warn b { color: var(--warning); }
+
+.filter-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 12px; }
+.filter-chip { padding: 6px 14px; border-radius: var(--r-pill); border: 1px solid var(--border-strong); background: var(--surface); font-size: 0.84rem; font-weight: 700; color: var(--text-2); }
+.filter-chip[aria-pressed="true"] { background: var(--text); color: var(--surface); border-color: var(--text); }
+
+.review-item-card { border: 1px solid var(--border); border-left: 5px solid var(--border-strong); border-radius: var(--r-md); padding: 16px 18px; margin-bottom: 12px; background: var(--surface); }
+.review-item-card.is-correct { border-left-color: var(--success); }
+.review-item-card.is-incorrect { border-left-color: var(--error); }
+.review-item-card.is-unanswered { border-left-color: var(--warning); }
+.review-status-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 10px; border-radius: var(--r-pill); margin-bottom: 8px; }
+.is-correct .review-status-badge { background: var(--success-soft); color: var(--success); }
+.is-incorrect .review-status-badge { background: var(--error-soft); color: var(--error); }
+.is-unanswered .review-status-badge { background: var(--warning-soft); color: var(--warning); }
+.review-item-card .meta { font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; }
+.review-item-card h3 { font-size: 1.02rem; margin-bottom: 10px; white-space: pre-line; overflow-wrap: anywhere; }
+.review-option { margin: 5px 0; padding: 6px 10px; border-radius: 8px; font-size: 0.93rem; overflow-wrap: anywhere; }
+.review-correct { color: var(--success); font-weight: 600; background: var(--success-soft); }
+.review-wrong { color: var(--error); font-weight: 600; background: var(--error-soft); }
+.explanation-box { margin-top: 12px; padding: 12px 14px; border-radius: 10px; background: var(--surface-2); border-left: 3px solid var(--primary); }
+.explanation-box h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--primary); margin-bottom: 3px; }
+.explanation-box p { font-size: 0.9rem; color: var(--text-2); white-space: pre-line; }
+
+/* ===== Statistics ===== */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 18px 0 24px; }
+.tile { display: flex; gap: 12px; align-items: center; border: 1px solid var(--border); border-radius: var(--r-md); padding: 14px; background: var(--surface); box-shadow: var(--shadow-sm); }
+.tile-icon { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; background: var(--primary-soft); color: var(--primary); flex-shrink: 0; }
+.tile-value { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+.tile-label { font-size: 0.74rem; color: var(--muted); font-weight: 600; }
+.stat-section { margin: 26px 0; }
+.stat-section h2 { margin-bottom: 12px; }
+.bar-row { display: grid; grid-template-columns: minmax(120px, 38%) 1fr 48px; gap: 12px; align-items: center; padding: 6px 0; font-size: 0.9rem; }
+.bar-track { height: 12px; border-radius: 99px; background: var(--surface-3); overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 99px; background: var(--grad); transition: width .6s ease; }
+.bar-fill.low { background: var(--error); } .bar-fill.mid { background: var(--warning); }
+.bar-pct { text-align: right; font-weight: 800; color: var(--text-2); }
+.chart-box svg { width: 100%; height: auto; max-height: 260px; display: block; }
+.chart-axis { stroke: var(--border); } .chart-line { stroke: var(--primary); fill: none; stroke-width: 2.5; stroke-linejoin: round; }
+.chart-area { fill: var(--primary); opacity: 0.12; }
+.chart-dot { fill: var(--surface); stroke: var(--primary); stroke-width: 2.5; } .chart-dot.fail { stroke: var(--error); }
+.chart-thr { stroke: var(--warning); stroke-dasharray: 5 5; } .chart-label { fill: var(--muted); font-size: 10px; }
+.hard-row { padding: 10px 0; border-top: 1px solid var(--border); font-size: 0.92rem; }
+.hard-row:first-of-type { border-top: 0; }
+.hard-meta { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+/* ===== Responsive ===== */
+@media (max-width: 960px) {
+    .run-layout { grid-template-columns: 1fr; }
+    .run-side { position: static; }
+    .panel > summary { cursor: pointer; }
 }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
-.question-header { flex-wrap: wrap; gap: 8px; }
-@media (max-width: 600px) {
-    header { padding: 10px 12px; }
-    .header-container { flex-wrap: wrap; gap: 6px; }
-    .logo-text { font-size: 0.95rem; }
-    #timer-label { display: none; }
-    .tag-topic { font-size: 0.7rem; }
+@media (max-width: 700px) {
+    .card { border-radius: 16px; padding: 18px 16px; }
+    .run-layout { padding-bottom: 92px; }
+    .actionbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; margin: 0; padding: 10px 14px calc(10px + env(safe-area-inset-bottom)); background: var(--header-bg); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); border-top: 1px solid var(--border); flex-wrap: nowrap; }
+    .actionbar .btn { flex: 1 1 0; padding: 12px 8px; }
+    .actionbar .spacer { display: none; }
+    .actionbar #prev-btn { flex: 0 0 48px; }
+    .kbd-help { display: none; }
+    .bar-row { grid-template-columns: 1fr 44px; }
+    .bar-row .bar-track { grid-column: 1 / -1; order: 3; }
+    .option-card { padding: 13px 13px; }
+    .mode-grid { grid-template-columns: 1fr 1fr; }
+    .tiles { grid-template-columns: 1fr 1fr; }
+    .tile { padding: 11px; gap: 9px; }
+    .score-hero { justify-content: center; text-align: center; }
+    .score-hero .verdict { margin-left: auto; margin-right: auto; text-align: left; }
+    .match-select { flex-basis: 100%; }
+}
+@media (max-width: 380px) {
+    .mode-grid { grid-template-columns: 1fr; }
 }
 
     </style>
@@ -717,33 +490,33 @@ button { font-family: inherit; }
 </head>
 <body>
 <a class="skip-link" href="#main" id="skip-link">Skip to content</a>
-<header>
-    <div class="header-container">
-        <div class="logo-area">
-            <div class="hpe-element"></div>
-            <div class="logo-text"><span id="logo-exam-code">EXAM</span> <span id="logo-simulator">SIMULATOR</span> <span id="logo-version" style="font-size:0.7rem;color:var(--gray);font-weight:400;"></span></div>
-        </div>
-        <div class="header-controls">
-            <div id="runtime-timer-box" class="q-number hidden"><span id="timer-label"></span> <span id="runtime-clock-string" style="color: var(--dark); font-weight: 600;">--:--</span></div>
-            <button type="button" id="lang-btn" class="icon-btn">EN</button>
-            <button type="button" id="theme-btn" class="icon-btn">☾</button>
+<header class="app-header">
+    <div class="app-header-inner">
+        <a class="brand" href="exam.html" id="brand-link">
+            <span class="brand-mark" id="brand-mark"></span>
+            <span class="brand-text"><span id="logo-exam-code">Exam</span> <span id="logo-simulator">Simulator</span><small id="logo-version"></small></span>
+        </a>
+        <div class="header-actions">
+            <div id="runtime-timer-box" class="timer-pill hidden" role="timer"><span id="timer-icon"></span><span id="timer-label" class="timer-label"></span><span id="runtime-clock-string">--:--</span></div>
+            <button type="button" id="lang-btn" class="icon-btn"></button>
+            <button type="button" id="theme-btn" class="icon-btn"></button>
         </div>
     </div>
 </header>
 
 <main id="main" class="main-wrapper" tabindex="-1">
-    <section id="view-picker" class="card hidden"></section>
-    <section id="view-dashboard" class="card hidden"></section>
-    <section id="view-runtime" class="hidden"></section>
-    <section id="view-review" class="card hidden"></section>
-    <section id="view-summary" class="card hidden"></section>
-    <section id="view-stats" class="card hidden"></section>
+    <section id="view-picker" class="view hidden"></section>
+    <section id="view-dashboard" class="view hidden"></section>
+    <section id="view-runtime" class="view hidden"></section>
+    <section id="view-review" class="view hidden"></section>
+    <section id="view-summary" class="view hidden"></section>
+    <section id="view-stats" class="view hidden"></section>
 </main>
 <div id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="import-file" accept=".json,application/json" class="hidden">
 
 <script>
-window.ExamCatalogDefault = [{"file":"demo","title":{"en":"Engine Demo — all question types","it":"Demo del motore — tutti i tipi di domanda"},"description":{"en":"A tiny exam that shows every question type, localized content, difficulty levels and custom modes.","it":"Un piccolo esame che mostra ogni tipo di domanda, contenuti localizzati, livelli di difficoltà e modalità personalizzate."},"code":"DEMO","version":"1.0","questionCount":12,"topicCount":3},{"file":"managedServices","title":"HPE Managed Services Expertise Exam Simulator","description":"Comprehensive validation bank for HPE Managed Services knowledge across ITSM, delivery, tooling, security, and partner programs.","code":"MS-EXPERTISE","version":"v1.0","questionCount":120,"topicCount":5},{"file":"v31","title":"V31 Practice Test","description":"Practice test, scenario-based and advanced questions on AI fundamentals, HPE Private Cloud AI architecture and sizing, deployment and administration, NVIDIA and AI Essentials, operations, edge AI and HPC.","code":"V31","version":"v1.0","questionCount":200,"topicCount":19},{"file":"v31advanced","title":"V31 Advanced Practice Test","description":"Expert-level scenario questions on HPE Private Cloud AI sizing, AI Essentials resource governance, MLIS/NIM model serving, air-gapped deployments, edge inferencing and HPC/AI.","code":"V31-ADV","version":"v1.0","questionCount":100,"topicCount":7}];
+window.ExamCatalogDefault = [{"file":"demo","id":"demo","title":{"en":"Engine Demo — all question types","it":"Demo del motore — tutti i tipi di domanda"},"description":{"en":"A tiny exam that shows every question type, localized content, difficulty levels and custom modes.","it":"Un piccolo esame che mostra ogni tipo di domanda, contenuti localizzati, livelli di difficoltà e modalità personalizzate."},"code":"DEMO","version":"1.0","questionCount":12,"topicCount":3},{"file":"managedServices","id":"managedServices","title":"HPE Managed Services Expertise Exam Simulator","description":"Comprehensive validation bank for HPE Managed Services knowledge across ITSM, delivery, tooling, security, and partner programs.","code":"MS-EXPERTISE","version":"v1.0","questionCount":120,"topicCount":5},{"file":"v31","id":"v31","title":"V31 Practice Test","description":"Practice test, scenario-based and advanced questions on AI fundamentals, HPE Private Cloud AI architecture and sizing, deployment and administration, NVIDIA and AI Essentials, operations, edge AI and HPC.","code":"V31","version":"v1.0","questionCount":200,"topicCount":19},{"file":"v31advanced","id":"v31advanced","title":"V31 Advanced Practice Test","description":"Expert-level scenario questions on HPE Private Cloud AI sizing, AI Essentials resource governance, MLIS/NIM model serving, air-gapped deployments, edge inferencing and HPC/AI.","code":"V31-ADV","version":"v1.0","questionCount":100,"topicCount":7}];
 </script>
 <script>
 (function () {
@@ -811,10 +584,67 @@ App.events = (function () {
 App.registerType = function (name, handler) { App.types[name] = handler; };
 App.registerMode = function (id, builder) { App.modeBuilders[id] = builder; };
 
+// ---- Icons (inline SVG, stroke style, 24x24). App.util.icon('moon') -> <svg> ----
+App.util.ICONS = {
+    sun: ['c', 12, 12, 4, 'M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4'],
+    moon: ['M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z'],
+    globe: ['c', 12, 12, 10, 'M2 12h20', 'M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z'],
+    chart: ['M3 3v18h18', 'M7 15l4-4 3 3 5-6'],
+    download: ['M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4', 'M7 10l5 5 5-5', 'M12 15V3'],
+    upload: ['M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4', 'M17 8l-5-5-5 5', 'M12 3v12'],
+    flag: ['M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z', 'M4 22v-7'],
+    clock: ['c', 12, 12, 10, 'M12 6v6l4 2'],
+    check: ['M20 6L9 17l-5-5'],
+    x: ['M18 6L6 18M6 6l12 12'],
+    play: ['M6 4l14 8-14 8V4z'],
+    back: ['M19 12H5M12 19l-7-7 7-7'],
+    next: ['M5 12h14M12 5l7 7-7 7'],
+    grid: ['M3 3h7v7H3z', 'M14 3h7v7h-7z', 'M14 14h7v7h-7z', 'M3 14h7v7H3z'],
+    note: ['M12 20h9', 'M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z'],
+    book: ['M4 19.5A2.5 2.5 0 0 1 6.5 17H20', 'M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'],
+    refresh: ['M23 4v6h-6', 'M1 20v-6h6', 'M3.5 9a9 9 0 0 1 14.9-3.4L23 10', 'M1 14l4.6 4.4A9 9 0 0 0 20.5 15'],
+    trash: ['M3 6h18', 'M19 6l-1 14H6L5 6', 'M10 11v6M14 11v6', 'M9 6V4h6v2'],
+    trophy: ['M8 21h8M12 17v4', 'M7 4h10v5a5 5 0 0 1-10 0V4z', 'M17 5h3v2a3 3 0 0 1-3 3', 'M7 5H4v2a3 3 0 0 0 3 3'],
+    bolt: ['M13 2L3 14h9l-1 8 10-12h-9l1-8z'],
+    target: ['c', 12, 12, 10, 'c', 12, 12, 6, 'c', 12, 12, 2],
+    layers: ['M12 2l10 5-10 5L2 7l10-5z', 'M2 17l10 5 10-5', 'M2 12l10 5 10-5'],
+    star: ['M12 2l3 7 7 .6-5.3 4.7 1.6 7.2L12 17.8 5.7 21.5l1.6-7.2L2 9.6 9 9l3-7z'],
+    menu: ['M3 6h18M3 12h18M3 18h18'],
+    chevron: ['M6 9l6 6 6-6'],
+    home: ['M3 10.5L12 3l9 7.5', 'M5 9.5V21h14V9.5']
+};
+App.util.icon = function (name, size) {
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('width', size || 18); svg.setAttribute('height', size || 18);
+    svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '2'); svg.setAttribute('stroke-linecap', 'round'); svg.setAttribute('stroke-linejoin', 'round');
+    svg.setAttribute('aria-hidden', 'true'); svg.setAttribute('focusable', 'false');
+    svg.classList.add('icon');
+    const parts = App.util.ICONS[name] || [];
+    for (let i = 0; i < parts.length; i++) {
+        if (parts[i] === 'c') {
+            const c = document.createElementNS(NS, 'circle');
+            c.setAttribute('cx', parts[i + 1]); c.setAttribute('cy', parts[i + 2]); c.setAttribute('r', parts[i + 3]);
+            svg.appendChild(c); i += 3;
+        } else {
+            const p = document.createElementNS(NS, 'path');
+            p.setAttribute('d', parts[i]);
+            svg.appendChild(p);
+        }
+    }
+    return svg;
+};
+
 /* UI translations (EN/IT) and localized-content helper.
    Exam content may be a plain string or an object {en, it}; strings are used as-is. */
 App.I18N = {
     en: {
+        chooseMode: 'Choose how to practice', nTopics: '{n} topics', passChip: 'Pass {p}%', masteredShort: 'mastered',
+        attemptsChip: '{n} attempts', attemptOne: '1 attempt', inProgressChip: 'In progress', correctKpi: 'Correct', wrongKpi: 'Incorrect', unansweredKpi: 'Unanswered', timeKpi: 'Time',
+        filterAll: 'All', filterWrong: 'Incorrect', filterUnanswered: 'Unanswered', filterFlagged: 'Flagged', answeredOf: '{a}/{n}',
+        topicBreakdown: 'Results by topic', scoreWord: 'score',
         simulator: 'SIMULATOR', timeRemaining: 'Time remaining:',
         noExamTitle: 'Choose an exam', noExamText: 'Select one of the available exams below to start practicing.',
         availableExams: 'Available exams', switchExam: 'Exams:', noCatalog: 'No exams are listed. Add .exam files and rebuild the catalog (npm run build).',
@@ -879,6 +709,10 @@ App.I18N = {
         continueSession: 'Continue', done: 'done'
     },
     it: {
+        chooseMode: 'Scegli come esercitarti', nTopics: '{n} argomenti', passChip: 'Soglia {p}%', masteredShort: 'padroneggiato',
+        attemptsChip: '{n} tentativi', attemptOne: '1 tentativo', inProgressChip: 'In corso', correctKpi: 'Corrette', wrongKpi: 'Errate', unansweredKpi: 'Senza risposta', timeKpi: 'Tempo',
+        filterAll: 'Tutte', filterWrong: 'Errate', filterUnanswered: 'Senza risposta', filterFlagged: 'Segnate', answeredOf: '{a}/{n}',
+        topicBreakdown: 'Risultati per argomento', scoreWord: 'punteggio',
         simulator: 'SIMULATORE', timeRemaining: 'Tempo rimanente:',
         noExamTitle: 'Scegli un esame', noExamText: 'Seleziona uno degli esami disponibili qui sotto per iniziare.',
         availableExams: 'Esami disponibili', switchExam: 'Esami:', noCatalog: 'Nessun esame elencato. Aggiungi file .exam e rigenera il catalogo (npm run build).',
@@ -2058,12 +1892,12 @@ App.loader = (function () {
 
 if (typeof window !== 'undefined') window.ExamSim = { register: d => App.loader.register(d), version: App.version, App };
 
-/* UI: shared state, view switching, toast, theme/language, import/export helpers. */
+/* UI: shared state, view switching, toast, theme/language, header, small widgets. */
 App.state = { exam: null, session: null, screen: 'picker', loadError: null, lastResult: null, dash: {}, clockTimer: null, persistTimer: null };
 App.ui = {};
 
 (function () {
-    const { el } = App.util;
+    const { el, icon } = App.util;
     const $ = id => document.getElementById(id);
     App.ui.$ = $;
 
@@ -2071,14 +1905,14 @@ App.ui = {};
     App.ui.show = function (view) {
         App.state.screen = view;
         VIEWS.forEach(v => $('view-' + v).classList.toggle('hidden', v !== view));
+        document.body.dataset.view = view;
         window.scrollTo(0, 0);
         App.events.emit('viewChange', { view });
     };
 
     App.ui.toast = function (msg, ms) {
-        const box = $('toast');
         const node = el('div', { class: 'toast-msg', text: msg });
-        box.appendChild(node);
+        $('toast').appendChild(node);
         setTimeout(() => node.remove(), ms || 3500);
     };
     App.events.on('storageError', () => App.ui.toast(App.t('storageError'), 6000));
@@ -2098,23 +1932,59 @@ App.ui = {};
         return App.t('daysAgo', { n: Math.round(d / 86400) });
     };
 
+    // Button with an icon and a text label
+    App.ui.btn = function (label, iconName, cls, onclick, extra) {
+        return el('button', Object.assign({ type: 'button', class: 'btn ' + (cls || ''), onclick }, extra || {}), iconName ? icon(iconName, 17) : null, label ? el('span', { text: label }) : null);
+    };
+
+    // Circular progress ring (SVG). Returns {svg}; animates from empty.
+    App.ui.ring = function (pct, color, size, stroke) {
+        const NS = 'http://www.w3.org/2000/svg';
+        const r = 52, c = 2 * Math.PI * r;
+        const svg = document.createElementNS(NS, 'svg');
+        svg.setAttribute('viewBox', '0 0 120 120');
+        svg.setAttribute('aria-hidden', 'true');
+        const mk = (cls, stk) => {
+            const circ = document.createElementNS(NS, 'circle');
+            circ.setAttribute('cx', 60); circ.setAttribute('cy', 60); circ.setAttribute('r', r);
+            circ.setAttribute('fill', 'none'); circ.setAttribute('stroke-width', stroke || 10); circ.setAttribute('stroke-linecap', 'round');
+            circ.setAttribute('class', cls); if (stk) circ.setAttribute('stroke', stk);
+            return circ;
+        };
+        const bg = mk('ring-bg'); bg.setAttribute('stroke', 'currentColor'); bg.style.opacity = '0.18';
+        const fg = mk('ring-fg', color);
+        fg.setAttribute('stroke-dasharray', c); fg.setAttribute('stroke-dashoffset', c);
+        svg.appendChild(bg); svg.appendChild(fg);
+        requestAnimationFrame(() => requestAnimationFrame(() => fg.setAttribute('stroke-dashoffset', c * (1 - Math.max(0, Math.min(100, pct)) / 100))));
+        return svg;
+    };
+
     // ---- theme / language ----
     App.ui.theme = () => document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    function paintHeader() {
+        const dark = App.ui.theme() === 'dark';
+        const tb = $('theme-btn'); tb.textContent = ''; tb.appendChild(icon(dark ? 'sun' : 'moon', 18));
+        const lb = $('lang-btn'); lb.textContent = ''; lb.appendChild(icon('globe', 17)); lb.appendChild(el('span', { text: App.lang.toUpperCase() }));
+        lb.title = App.t('langTitle'); lb.setAttribute('aria-label', App.t('langTitle'));
+        tb.title = App.t('themeTitle'); tb.setAttribute('aria-label', App.t('themeTitle'));
+    }
     App.ui.setTheme = function (theme) {
         document.documentElement.setAttribute('data-theme', theme);
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', theme === 'dark' ? '#0a0e14' : '#00a67e');
         App.storage.setPref('theme', theme);
-        $('theme-btn').textContent = theme === 'dark' ? '☀' : '☾';
+        paintHeader();
     };
     App.ui.applyStatic = function () {
         document.documentElement.lang = App.lang;
-        $('lang-btn').textContent = App.lang.toUpperCase();
-        $('lang-btn').title = App.t('langTitle');
-        $('lang-btn').setAttribute('aria-label', App.t('langTitle'));
-        $('theme-btn').title = App.t('themeTitle');
-        $('theme-btn').setAttribute('aria-label', App.t('themeTitle'));
-        $('theme-btn').textContent = App.ui.theme() === 'dark' ? '☀' : '☾';
+        paintHeader();
         $('logo-simulator').textContent = App.t('simulator');
         $('skip-link').textContent = App.t('skipLink');
+        const mark = $('brand-mark');
+        if (!mark.firstChild) mark.appendChild(icon('check', 20));
+        const ti = $('timer-icon');
+        if (!ti.firstChild) ti.appendChild(icon('clock', 16));
+        $('brand-link').setAttribute('href', window.location.pathname.split('/').pop() || 'exam.html');
     };
     App.ui.setLang = function (lang) {
         App.setLang(lang);
@@ -2123,7 +1993,6 @@ App.ui = {};
         App.ui.rerender();
     };
 
-    // Re-renders the visible screen (after a language change)
     App.ui.rerender = function () {
         const s = App.state.screen;
         if (s === 'picker') App.ui.renderPicker();
@@ -2159,44 +2028,63 @@ App.ui = {};
 
     App.ui.toolbarButtons = function (opts) {
         const bar = el('div', { class: 'toolbar' });
-        const btn = (label, fn) => bar.appendChild(el('button', { type: 'button', class: 'btn btn-ghost btn-small', text: label, onclick: fn }));
-        if (opts.stats) btn('📊 ' + App.t('statsBtn'), () => App.ui.openStats());
-        btn('⬇ ' + App.t('exportBtn'), () => App.ui.exportProgress(opts.examIds));
-        btn('⬆ ' + App.t('importBtn'), () => App.ui.importProgress());
+        if (opts.stats) bar.appendChild(App.ui.btn(App.t('statsBtn'), 'chart', 'btn-ghost btn-sm', () => App.ui.openStats()));
+        bar.appendChild(App.ui.btn(App.t('exportBtn'), 'download', 'btn-ghost btn-sm', () => App.ui.exportProgress(opts.examIds)));
+        bar.appendChild(App.ui.btn(App.t('importBtn'), 'upload', 'btn-ghost btn-sm', () => App.ui.importProgress()));
         return bar;
     };
 })();
 
-/* UI: exam picker and exam dashboard (mode selection, sessions in progress). */
+/* UI: exam picker and exam dashboard (hero, mode tiles, topics, session setup). */
 (function () {
-    const { el } = App.util;
+    const { el, icon } = App.util;
     const $ = App.ui.$;
 
+    const col = pct => pct >= 75 ? 'var(--success)' : (pct >= 50 ? 'var(--warning)' : 'var(--error)');
+
+    function miniRing(pct) {
+        const wrap = el('div', { class: 'mini-ring', title: pct + '%' });
+        wrap.appendChild(App.ui.ring(pct, col(pct), 46, 12));
+        wrap.appendChild(el('span', { text: pct + '%' }));
+        return wrap;
+    }
+
+    // ---------------------------------------------------------------- picker
     App.ui.renderPicker = function () {
         const v = $('view-picker');
         v.textContent = '';
-        v.appendChild(el('h1', { text: App.state.loadError ? App.t('loadFailedTitle') : App.t('noExamTitle'), style: App.state.loadError ? 'color:var(--error)' : '' }));
-        v.appendChild(el('p', { class: 'subtitle', text: App.t('noExamText') }));
-        if (App.state.loadError) {
+        const err = App.state.loadError;
+        v.appendChild(el('div', { class: 'picker-head' },
+            el('h1', { text: err ? App.t('loadFailedTitle') : App.t('noExamTitle'), style: err ? '-webkit-text-fill-color:var(--error);color:var(--error);background:none' : '' }),
+            el('p', { class: 'subtitle', text: App.t('noExamText') })));
+        if (err) {
             const box = el('div', { class: 'error-box', role: 'alert' });
-            App.state.loadError.forEach(line => box.appendChild(el('p', { text: line })));
+            err.forEach(line => box.appendChild(el('p', { text: line })));
             v.appendChild(box);
         }
-        const list = el('div', { id: 'exam-list' });
         const cat = App.loader.catalog();
-        if (!cat.length) list.appendChild(el('p', { class: 'hint', text: App.t('noCatalog') }));
-        else list.appendChild(el('h2', { style: 'font-size:1.05rem;margin:10px 0;', text: App.t('availableExams') }));
+        if (!cat.length) v.appendChild(el('p', { class: 'hint', style: 'text-align:center', text: App.t('noCatalog') }));
+        const grid = el('div', { class: 'exam-grid', id: 'exam-list' });
         cat.forEach(item => {
-            const meta = item.questionCount ? App.t('examCardMeta', { n: item.questionCount, t: item.topicCount || '–' }) : '';
-            list.appendChild(el('a', { href: '?content=' + encodeURIComponent(item.file), class: 'exam-card' },
+            const id = item.id || item.file;
+            const attempts = App.storage.listAttempts(id);
+            const last = attempts[attempts.length - 1];
+            const sessions = App.storage.listSessions(id).length;
+            const top = el('div', { class: 'exam-card-top' }, el('div', { class: 'exam-card-icon' }, icon('book', 22)));
+            if (last) top.appendChild(miniRing(last.pct));
+            const meta = el('div', { class: 'exam-card-meta' });
+            if (item.questionCount) meta.appendChild(el('span', { class: 'chip', text: App.t('examCardMeta', { n: item.questionCount, t: item.topicCount || '–' }) }));
+            if (attempts.length) meta.appendChild(el('span', { class: 'chip primary', text: attempts.length === 1 ? App.t('attemptOne') : App.t('attemptsChip', { n: attempts.length }) }));
+            if (sessions) meta.appendChild(el('span', { class: 'chip warn', text: App.t('inProgressChip') }));
+            grid.appendChild(el('a', { href: '?content=' + encodeURIComponent(item.file), class: 'exam-card' }, top,
                 el('div', { class: 'exam-card-title', text: App.loc(item.title) || item.file }),
-                el('div', { class: 'exam-card-desc', text: App.loc(item.description) }),
-                meta ? el('div', { class: 'hint', text: meta }) : null));
+                el('div', { class: 'exam-card-desc', text: App.loc(item.description) }), meta));
         });
-        v.appendChild(list);
-        v.appendChild(App.ui.toolbarButtons({ stats: false }));
+        v.appendChild(grid);
+        v.appendChild(el('div', { style: 'margin-top:var(--space)' }, App.ui.toolbarButtons({ stats: false })));
     };
 
+    // ------------------------------------------------------------- dashboard
     function examChips() {
         const chips = el('div', { class: 'exam-chips' });
         App.loader.catalog().forEach(item => {
@@ -2210,6 +2098,12 @@ App.ui = {};
         const base = m.label ? App.loc(m.label) : App.t(m.labelKey, Object.assign({}, m.labelParams, m.labelParams && m.labelParams.t ? { t: App.loc(m.labelParams.t) } : {}));
         return m.group === 'exam' ? base : base + ' (' + m.available + ')';
     }
+    function modeTitle(m) {
+        return m.label ? App.loc(m.label) : App.t(m.labelKey, Object.assign({}, m.labelParams, m.labelParams && m.labelParams.t ? { t: App.loc(m.labelParams.t) } : {}));
+    }
+    App.ui.modeTitle = modeTitle;
+
+    const TILE_ICONS = { all: 'layers', review: 'refresh', mistakes: 'target', flagged: 'flag', unseen: 'star' };
 
     App.ui.renderDashboard = function () {
         const exam = App.state.exam;
@@ -2217,59 +2111,62 @@ App.ui = {};
         v.textContent = '';
         const qstats = App.storage.allQStats(exam.id);
         const stats = App.stats.compute(exam, App.storage);
+        const mastery = stats.totalQuestions ? Math.round(100 * stats.mastered / stats.totalQuestions) : 0;
 
-        v.appendChild(el('h1', { text: App.loc(exam.title) }));
-        if (exam.description) v.appendChild(el('p', { class: 'subtitle', text: App.loc(exam.description) }));
+        // hero
+        const official = exam.modes.find(m => m.exam);
+        const hero = el('div', { class: 'hero' });
+        const heroLeft = el('div', { style: 'flex:1 1 320px;min-width:0' },
+            el('span', { class: 'hero-eyebrow' }, icon('book', 14), el('span', { text: [exam.code, exam.version].filter(Boolean).join(' · ') || 'EXAM' })),
+            el('h1', { text: App.loc(exam.title) }),
+            exam.description ? el('p', { class: 'subtitle', text: App.loc(exam.description) }) : null,
+            el('div', { class: 'hero-chips' },
+                el('span', { class: 'hero-chip' }, icon('layers', 14), el('span', { text: App.t('nQuestions', { n: exam.questions.length }) })),
+                el('span', { class: 'hero-chip' }, icon('grid', 14), el('span', { text: App.t('nTopics', { n: exam.topicList.length }) })),
+                el('span', { class: 'hero-chip' }, icon('target', 14), el('span', { text: App.t('passChip', { p: exam.settings.passThreshold }) })),
+                official && official.timeSec ? el('span', { class: 'hero-chip' }, icon('clock', 14), el('span', { text: Math.round(official.timeSec / 60) + ' min' })) : null));
+        hero.appendChild(el('div', { class: 'hero-grid' }, heroLeft, heroMasteryRing(mastery, stats)));
+        v.appendChild(hero);
+
         v.appendChild(el('div', { class: 'exam-switcher' }, el('span', { class: 'exam-switcher-label', text: App.t('switchExam') }), examChips()));
-        v.appendChild(App.ui.toolbarButtons({ stats: true, examIds: [exam.id] }));
+        v.appendChild(el('div', { style: 'margin-bottom:var(--space)' }, App.ui.toolbarButtons({ stats: true, examIds: [exam.id] })));
+
+        const grid = el('div', { class: 'dash-grid' });
+        const main = el('div', { class: 'dash-main' });
+        const side = el('div', { class: 'dash-side' });
 
         // sessions in progress
         const sessions = App.storage.listSessions(exam.id);
         if (sessions.length) {
-            const box = el('div', { class: 'sessions-box' }, el('h3', { text: App.t('resumeTitle') }));
+            const box = el('div', { class: 'sessions-box' }, el('h3', {}, icon('play', 16), el('span', { text: App.t('resumeTitle') })));
             sessions.forEach(sd => {
                 const s = App.Session.fromJSON(sd);
-                const info = App.t('resumeInfo', { mode: s.modeLabel, done: s.answeredCount(), n: s.length, when: App.ui.timeAgo(s.updatedAt) });
                 box.appendChild(el('div', { class: 'session-row' },
-                    el('span', { class: 'session-info', text: info }),
-                    el('span', {},
-                        el('button', { type: 'button', class: 'btn btn-small', text: App.t('resumeBtn'), onclick: () => App.ui.resumeSession(s) }), ' ',
-                        el('button', { type: 'button', class: 'btn btn-ghost btn-small', text: App.t('deleteBtn'), onclick: () => { if (confirm(App.t('confirmDeleteSession'))) { App.storage.deleteSession(exam.id, s.id); App.ui.renderDashboard(); } } }))));
+                    el('span', { class: 'session-info', text: App.t('resumeInfo', { mode: s.modeLabel, done: s.answeredCount(), n: s.length, when: App.ui.timeAgo(s.updatedAt) }) }),
+                    el('span', { class: 'session-actions' },
+                        App.ui.btn(App.t('resumeBtn'), 'play', 'btn-sm', () => App.ui.resumeSession(s)),
+                        App.ui.btn('', 'trash', 'btn-ghost btn-sm', () => { if (confirm(App.t('confirmDeleteSession'))) { App.storage.deleteSession(exam.id, s.id); App.ui.renderDashboard(); } }, { title: App.t('deleteBtn'), 'aria-label': App.t('deleteBtn') }))));
             });
-            v.appendChild(box);
+            box.classList.add('ord-sessions');
+            main.appendChild(box);
         }
 
-        const grid = el('div', { class: 'grid-dashboard' });
-        // left: distribution
-        const left = el('div', {}, el('h2', { style: 'font-size:1.1rem;font-weight:600;margin-bottom:10px;', text: App.t('distribution') }));
-        const list = el('div', { class: 'topic-list' });
-        list.appendChild(el('div', { class: 'topic-item topic-total' },
-            el('span', { class: 'topic-name', style: 'color:var(--primary);font-weight:700;', text: App.t('totalQuestions') }),
-            el('span', { class: 'topic-count', style: 'background:var(--primary);color:var(--on-accent);', text: App.t('nQuestions', { n: exam.questions.length }) })));
-        stats.topics.forEach(t => {
-            const name = exam.topics && exam.topics[t.topic] ? App.loc(exam.topics[t.topic]) : t.topic;
-            list.appendChild(el('div', { class: 'topic-item' },
-                el('span', { class: 'topic-name', text: name }),
-                el('span', { class: 'topic-count-wrap' },
-                    el('span', { class: 'topic-count', text: App.t('nQuestions', { n: t.total }) }),
-                    t.pct !== null ? el('span', { class: 'mini-acc', text: t.pct + '%', title: App.t('statsAccuracy') }) : null)));
-        });
-        left.appendChild(list);
-
-        // right: setup
+        // setup form (side)
         const modes = App.modes.list(exam, qstats);
         const d = App.state.dash;
         const select = el('select', { id: 'cfg-mode' });
         const groups = { exam: el('optgroup', { label: App.t('modeGroupExam') }), practice: el('optgroup', { label: App.t('modeGroupPractice') }), topic: el('optgroup', { label: App.t('modeGroupTopics') }) };
         modes.forEach(m => groups[m.group].appendChild(el('option', { value: m.id, text: modeLabel(m), disabled: m.available === 0 })));
         ['exam', 'practice', 'topic'].forEach(g => { if (groups[g].children.length) select.appendChild(groups[g]); });
-        const count = el('input', { type: 'number', id: 'cfg-count', min: 1, step: 1 });
+        const count = el('input', { type: 'number', id: 'cfg-count', min: 1, step: 1, inputMode: 'numeric' });
         const study = el('input', { type: 'checkbox', id: 'cfg-study' });
         const timer = el('select', { id: 'cfg-timer' });
         const hintEl = el('p', { class: 'hint', id: 'cfg-hint' });
-        const startBtn = el('button', { id: 'start-btn', class: 'btn', type: 'button', text: App.t('startSession') });
+        const startBtn = el('button', { id: 'start-btn', class: 'btn btn-lg btn-block', type: 'button' }, icon('play', 18), el('span', { text: App.t('startSession') }));
+        const tiles = [];
 
         function current() { return modes.find(m => m.id === select.value) || modes[0]; }
+        function paintTiles() { tiles.forEach(t => t.btn.setAttribute('aria-pressed', t.id === select.value ? 'true' : 'false')); }
         function refresh(fromChange) {
             const m = current();
             const defined = m.defined;
@@ -2288,35 +2185,79 @@ App.ui = {};
             timer.appendChild(el('option', { value: 'none', text: App.t('timerNone') }));
             timer.value = keep;
             startBtn.disabled = m.available === 0;
+            paintTiles();
         }
         select.value = d.mode && modes.some(m => m.id === d.mode && m.available) ? d.mode : (modes.find(m => m.available) || modes[0]).id;
         select.addEventListener('change', () => { d.mode = select.value; refresh(true); });
         count.addEventListener('input', () => refresh(false));
         study.addEventListener('change', () => { hintEl.textContent = study.checked ? App.t('studyModeHint') : App.t('examModeHint'); });
+
+        // mode tiles
+        const tileModes = modes.filter(m => m.group === 'exam' || (m.group === 'practice' && TILE_ICONS[m.id]));
+        const tileGrid = el('div', { class: 'mode-grid', role: 'group', aria: { label: App.t('selectMode') } });
+        tileModes.forEach(m => {
+            const sub = m.group === 'exam' ? [m.count ? App.t('nQuestions', { n: m.count }) : '', m.defined && m.defined.timeSec ? Math.round(m.defined.timeSec / 60) + ' min' : ''].filter(Boolean).join(' · ') : App.t('nQuestions', { n: m.available });
+            const iconName = m.group === 'exam' ? (m.defined && m.defined.exam ? 'trophy' : 'bolt') : TILE_ICONS[m.id];
+            const btn = el('button', { type: 'button', class: 'mode-tile', disabled: m.available === 0, aria: { pressed: 'false' },
+                onclick: () => { select.value = m.id; select.dispatchEvent(new Event('change')); } },
+                el('span', { class: 'mode-icon' }, icon(iconName, 18)),
+                el('span', { class: 'mode-name', text: modeTitle(m) }),
+                el('span', { class: 'mode-sub', text: sub }));
+            tiles.push({ id: m.id, btn });
+            tileGrid.appendChild(btn);
+        });
+
         refresh(true);
         if (d.count && d.mode === select.value && !count.disabled) count.value = Math.min(d.count, count.max);
         if (d.study !== undefined && d.mode === select.value) study.checked = d.study;
         if (d.timer) timer.value = d.timer;
         hintEl.textContent = study.checked ? App.t('studyModeHint') : App.t('examModeHint');
-
         startBtn.addEventListener('click', () => {
             Object.assign(d, { mode: select.value, count: Number(count.value), study: study.checked, timer: timer.value });
             App.ui.startFromDashboard(current(), Number(count.value), study.checked, timer.value);
         });
 
-        const setup = el('div', { class: 'sidebar-box', style: 'margin-top:15px;' },
-            el('h2', { class: 'sidebar-title', text: App.t('sessionConfig') }),
-            el('div', { class: 'setup-box' },
-                el('div', { class: 'form-group' }, el('label', { for: 'cfg-mode', text: App.t('selectMode') }), select),
-                el('div', { class: 'form-group' }, el('label', { for: 'cfg-count', text: App.t('count') }), count),
-                el('div', { class: 'checkbox-row' }, study, el('label', { for: 'cfg-study', text: App.t('studyMode') })),
-                hintEl,
-                el('div', { class: 'form-group' }, el('label', { for: 'cfg-timer', text: App.t('timerLabel') }), timer),
-                startBtn));
-        grid.appendChild(left);
-        grid.appendChild(setup);
+        const setup = el('div', { class: 'card', id: 'setup-card', style: 'margin-bottom:0' },
+            el('h2', { style: 'margin-bottom:14px', text: App.t('sessionConfig') }),
+            el('div', { class: 'field' }, el('label', { for: 'cfg-mode', text: App.t('selectMode') }), select),
+            el('div', { class: 'field' }, el('label', { for: 'cfg-count', text: App.t('count') }), count),
+            el('label', { class: 'switch-row', for: 'cfg-study' }, study, el('span', { class: 'switch' }), el('span', { class: 'switch-label', text: App.t('studyMode') })),
+            hintEl,
+            el('div', { class: 'field', style: 'margin-top:12px' }, el('label', { for: 'cfg-timer', text: App.t('timerLabel') }), timer),
+            startBtn);
+        side.appendChild(setup);
+
+        const modesBox = el('div', { class: 'ord-modes' }, el('div', { class: 'section-title' }, el('h2', { text: App.t('chooseMode') })), tileGrid);
+        main.appendChild(modesBox);
+
+        // topics
+        const topicsBox = el('div', { class: 'ord-topics' });
+        topicsBox.appendChild(el('div', { class: 'section-title' }, el('h2', { text: App.t('distribution') }),
+            el('span', { class: 'chip', text: App.t('nQuestions', { n: exam.questions.length }) })));
+        const list = el('div', { class: 'topic-list' });
+        stats.topics.forEach(t => {
+            const name = exam.topics && exam.topics[t.topic] ? App.loc(exam.topics[t.topic]) : t.topic;
+            const row = el('button', { type: 'button', class: 'topic-row', title: App.t('modeTopic', { t: name }),
+                onclick: () => { select.value = 'topic:' + t.topic; select.dispatchEvent(new Event('change')); $('setup-card').scrollIntoView({ behavior: 'smooth', block: 'center' }); } },
+                el('span', { class: 'topic-name', text: name }),
+                el('span', { class: 'topic-count', text: App.t('nQuestions', { n: t.total }) + (t.pct !== null ? ' · ' + t.pct + '%' : '') }),
+                el('span', { class: 'topic-bar' }, el('i', { style: 'width:' + (t.pct === null ? 0 : t.pct) + '%' })));
+            list.appendChild(row);
+        });
+        topicsBox.appendChild(list);
+        main.appendChild(topicsBox);
+
+        grid.appendChild(main);
+        grid.appendChild(side);
         v.appendChild(grid);
     };
+
+    function heroMasteryRing(mastery, stats) {
+        const wrap = el('div', { class: 'score-ring hero-ring', style: 'width:128px;color:#fff;flex-shrink:0', title: App.t('statsMastered') });
+        wrap.appendChild(App.ui.ring(mastery, '#ffffff', 128, 9));
+        wrap.appendChild(el('div', { class: 'score-num', style: 'font-size:1.7rem;color:#fff' }, el('span', { text: mastery + '%' }), el('small', { style: 'color:rgba(255,255,255,.85)', text: App.t('masteredShort') })));
+        return wrap;
+    }
 
     App.ui.startFromDashboard = function (mode, count, studyMode, timerChoice) {
         const exam = App.state.exam;
@@ -2326,11 +2267,10 @@ App.ui = {};
         if (picked.fallback) App.ui.toast(App.t('notDue'), 5000);
         const defined = mode.defined;
         const n = picked.questions.length;
-        let timerMode = timerChoice === 'none' ? 'none' : (timerChoice === 'perQuestion' ? 'perQuestion' : 'total');
+        const timerMode = timerChoice === 'none' ? 'none' : (timerChoice === 'perQuestion' ? 'perQuestion' : 'total');
         const totalSec = (defined && defined.timeSec) ? defined.timeSec : n * exam.settings.timePerQuestionSec;
-        const label = mode.label ? App.loc(mode.label) : App.t(mode.labelKey, Object.assign({}, mode.labelParams, mode.labelParams && mode.labelParams.t ? { t: App.loc(mode.labelParams.t) } : {}));
         const session = App.Session.create(picked.questions, {
-            examId: exam.id, modeId: mode.id, modeLabel: label, studyMode,
+            examId: exam.id, modeId: mode.id, modeLabel: modeTitle(mode), studyMode,
             timerMode, totalSec: timerMode === 'total' ? totalSec : 0, perQuestionSec: exam.settings.timePerQuestionSec,
             threshold: (defined && defined.passThreshold !== undefined) ? defined.passThreshold : exam.settings.passThreshold,
             shuffleOptions: exam.settings.shuffleOptions
@@ -2339,9 +2279,9 @@ App.ui = {};
     };
 })();
 
-/* UI: the exam runtime (question view, progress grid, flags, notes, timers, keyboard). */
+/* UI: the exam runtime (question card, progress grid, flags, notes, timers, keyboard). */
 (function () {
-    const { el } = App.util;
+    const { el, icon } = App.util;
     const $ = App.ui.$;
     let refs = {};
 
@@ -2373,6 +2313,7 @@ App.ui = {};
         const v = $('view-runtime');
         v.textContent = '';
         refs = {};
+        refs.bar = el('i');
         refs.topic = el('span', { class: 'tag-topic' });
         refs.pos = el('span', { class: 'q-number', aria: { live: 'polite' } });
         refs.flag = el('button', { type: 'button', class: 'flag-btn', onclick: () => toggleFlag() });
@@ -2387,22 +2328,28 @@ App.ui = {};
             refs.noteTimer = setTimeout(() => App.storage.patchQStat(s.examId, uid, st => { st.note = refs.noteArea.value; return st; }), 400);
         });
         refs.note = el('details', { class: 'note-box' }, refs.noteSummary, refs.noteArea);
-        refs.prev = el('button', { type: 'button', class: 'btn btn-secondary', onclick: () => go(S().index - 1) });
-        refs.check = el('button', { type: 'button', id: 'validate-btn', onclick: () => checkAnswer() });
+        refs.prev = el('button', { type: 'button', class: 'btn btn-secondary', id: 'prev-btn', onclick: () => go(S().index - 1) });
+        refs.check = el('button', { type: 'button', class: 'btn btn-dark', id: 'validate-btn', onclick: () => checkAnswer() });
         refs.next = el('button', { type: 'button', class: 'btn', id: 'session-action-trigger', onclick: () => nextQuestion() });
         refs.help = el('p', { class: 'kbd-help' });
         refs.legend = el('div', { class: 'legend' });
         refs.grid = el('div', { class: 'grid-navigation', role: 'group' });
-        refs.finish = el('button', { type: 'button', class: 'btn btn-secondary btn-danger-outline', onclick: () => App.ui.openReview() });
+        refs.gridTitle = el('span', {});
+        refs.gridCount = el('span', { class: 'count' });
+        refs.finish = el('button', { type: 'button', class: 'btn btn-danger btn-block', id: 'finish-btn', style: 'margin-top:12px', onclick: () => App.ui.openReview() });
 
-        const main = el('div', { class: 'card', style: 'margin-bottom:0;' },
-            el('div', { class: 'question-header' }, refs.topic, el('span', { class: 'question-actions' }, refs.pos, refs.flag)),
+        const main = el('div', { class: 'card q-card' },
+            el('div', { class: 'q-bar' }, refs.bar),
+            el('div', { class: 'q-top' }, refs.topic, el('div', { class: 'q-meta' }, refs.pos, refs.flag)),
             refs.text, refs.body, refs.expl, refs.note,
-            el('div', { class: 'nav-controls' }, refs.prev, refs.check, el('span', { class: 'spacer' }), refs.next),
+            el('div', { class: 'actionbar' }, refs.prev, refs.check, el('span', { class: 'spacer' }), refs.next),
             refs.help);
-        const side = el('div', { class: 'sidebar-box' }, el('h2', { class: 'sidebar-title', id: 'progress-title' }), refs.legend, refs.grid, refs.finish);
-        refs.progressTitle = side.querySelector('#progress-title');
-        v.appendChild(el('div', { class: 'runtime-layout' }, main, side));
+        const panel = el('details', { class: 'panel', id: 'grid-panel' },
+            el('summary', { class: 'panel-title' }, refs.gridTitle, el('span', { class: 'row', style: 'gap:8px' }, refs.gridCount, icon('chevron', 16))),
+            refs.legend, refs.grid);
+        if (window.matchMedia && window.matchMedia('(min-width: 961px)').matches) panel.open = true;
+        const side = el('aside', { class: 'run-side' }, panel, refs.finish);
+        v.appendChild(el('div', { class: 'run-layout' }, main, side));
     }
 
     function topicName(t) {
@@ -2414,13 +2361,13 @@ App.ui = {};
     App.ui.refreshRuntime = function () {
         const s = S();
         if (!s) return;
-        refs.prev.textContent = App.t('previous');
-        refs.check.textContent = App.t('validate');
+        refs.prev.textContent = ''; refs.prev.appendChild(icon('back', 17)); refs.prev.appendChild(el('span', { text: App.t('previous') }));
+        refs.check.textContent = ''; refs.check.appendChild(icon('check', 17)); refs.check.appendChild(el('span', { text: App.t('validate') }));
         refs.check.classList.toggle('hidden', !s.studyMode);
-        refs.progressTitle.textContent = App.t('progress');
-        refs.finish.textContent = App.t('endScore');
+        refs.gridTitle.textContent = App.t('progress');
+        refs.finish.textContent = ''; refs.finish.appendChild(icon('flag', 16)); refs.finish.appendChild(el('span', { text: App.t('endScore') }));
         refs.help.textContent = App.t('keyboardHelp');
-        refs.noteSummary.textContent = '📝 ' + App.t('note');
+        refs.noteSummary.textContent = ''; refs.noteSummary.appendChild(icon('note', 15)); refs.noteSummary.appendChild(el('span', { text: App.t('note') }));
         refs.noteArea.placeholder = App.t('notePlaceholder');
         refs.legend.textContent = '';
         refs.legend.appendChild(el('span', { class: 'lg-answered', text: App.t('legendAnswered') }));
@@ -2440,7 +2387,6 @@ App.ui = {};
         refs.topic.textContent = topicName(item.topic);
         refs.pos.textContent = App.t('questionOf', { i: i + 1, n: s.length });
         refs.text.textContent = App.loc(item.text);
-        refs.text.setAttribute('aria-label', '');
         refs.body.textContent = '';
         refs.body.appendChild(h.render({
             item, value: s.value(i), locked: checked, reveal: checked, uid: 'q' + i,
@@ -2454,18 +2400,19 @@ App.ui = {};
         }));
         refs.expl.textContent = '';
         if (checked) {
-            refs.expl.appendChild(el('div', { class: 'dynamic-explanation-box' },
+            refs.expl.appendChild(el('div', { class: 'dynamic-explanation-box' }, el('div', {},
                 el('h3', { text: App.t('explanation') }),
-                el('p', { text: App.loc(item.explanation) || App.t('noExplanation') })));
+                el('p', { text: App.loc(item.explanation) || App.t('noExplanation') }))));
         }
         refs.check.disabled = !!checked;
         const last = i === s.length - 1;
-        refs.next.textContent = last ? App.t('finish') : App.t('next');
-        refs.next.classList.toggle('btn-final', last);
+        refs.next.textContent = '';
+        refs.next.appendChild(el('span', { text: last ? App.t('finish') : App.t('next') }));
+        refs.next.appendChild(icon(last ? 'flag' : 'next', 17));
         refs.prev.disabled = i === 0;
         const st = App.storage.getQStat(s.examId, item.uid) || {};
         refs.flag.setAttribute('aria-pressed', st.flag ? 'true' : 'false');
-        refs.flag.textContent = '⚑ ' + (st.flag ? App.t('unflag') : App.t('flag'));
+        refs.flag.textContent = ''; refs.flag.appendChild(icon('flag', 14)); refs.flag.appendChild(el('span', { text: st.flag ? App.t('unflag') : App.t('flag') }));
         refs.noteArea.value = st.note || '';
         refs.note.open = !!st.note;
     }
@@ -2481,10 +2428,12 @@ App.ui = {};
             else if (s.hasAnswer(i)) cls += ' answered';
             const st = stats[s.item(i).uid];
             if (st && st.flag) cls += ' flagged';
-            const b = el('button', { type: 'button', class: cls, text: String(i + 1), onclick: () => go(i),
-                aria: { label: App.t('questionOf', { i: i + 1, n: s.length }), current: i === s.index ? 'true' : 'false' } });
-            refs.grid.appendChild(b);
+            refs.grid.appendChild(el('button', { type: 'button', class: cls, text: String(i + 1), onclick: () => go(i),
+                aria: { label: App.t('questionOf', { i: i + 1, n: s.length }), current: i === s.index ? 'true' : 'false' } }));
         }
+        const answered = s.answeredCount();
+        refs.gridCount.textContent = App.t('answeredOf', { a: answered, n: s.length });
+        refs.bar.style.width = (s.length ? Math.round(100 * answered / s.length) : 0) + '%';
     }
 
     function go(i) {
@@ -2515,10 +2464,16 @@ App.ui = {};
     function updateClock() {
         const s = S();
         const box = $('runtime-timer-box');
-        if (!s || App.state.screen !== 'runtime' || s.timerMode === 'none') { box.classList.add('hidden'); return; }
+        const live = App.state.screen === 'runtime' || (App.state.screen === 'review' && s && s.timerMode === 'total');
+        if (!s || !live || s.timerMode === 'none') { box.classList.add('hidden'); return; }
         box.classList.remove('hidden');
-        $('timer-label').textContent = s.timerMode === 'perQuestion' ? App.t('timerQuestionLabel') : App.t('timeRemaining');
-        $('runtime-clock-string').textContent = App.ui.fmtTime(s.timerMode === 'perQuestion' ? s.qLeft : s.secondsLeft);
+        const per = s.timerMode === 'perQuestion';
+        const left = per ? s.qLeft : s.secondsLeft;
+        $('timer-label').textContent = per ? App.t('timerQuestionLabel') : App.t('timeRemaining');
+        $('runtime-clock-string').textContent = App.ui.fmtTime(left);
+        const warn = per ? 10 : 60, danger = per ? 5 : 15;
+        box.classList.toggle('warn', left <= warn && left > danger);
+        box.classList.toggle('danger', left <= danger);
     }
     App.ui.updateClock = updateClock;
 
@@ -2526,18 +2481,21 @@ App.ui = {};
         clearInterval(App.state.clockTimer);
         App.state.clockTimer = setInterval(() => {
             const s = S();
-            if (!s || App.state.screen !== 'runtime') return;
+            const screen = App.state.screen;
+            // the total timer keeps running on the review screen; per-question timers pause there
+            if (!s || !(screen === 'runtime' || (screen === 'review' && s.timerMode === 'total'))) return;
             const ev = s.tick();
             updateClock();
             if (ev === 'total') { App.ui.submit(true); return; }
-            if (ev === 'question') { if (s.index < s.length - 1) go(s.index + 1); else App.ui.openReview(); return; }
+            if (ev === 'question' && screen === 'runtime') { if (s.index < s.length - 1) go(s.index + 1); else App.ui.openReview(); return; }
             if (s.times[s.index] % 10 === 0) App.ui.persist();
         }, 1000);
     }
     App.ui.stopClock = function () {
         clearInterval(App.state.clockTimer);
         App.state.clockTimer = null;
-        $('runtime-timer-box').classList.add('hidden');
+        const box = $('runtime-timer-box');
+        box.classList.add('hidden'); box.classList.remove('warn', 'danger');
     };
 
     // ---- keyboard ----
@@ -2557,7 +2515,7 @@ App.ui = {};
         else if (key === 'arrowright') { if (s.index < s.length - 1) go(s.index + 1); e.preventDefault(); }
         else if (key === 'arrowleft') { go(s.index - 1); e.preventDefault(); }
         else if (key === 'm') { toggleFlag(); e.preventDefault(); }
-        else if (key === 'enter' && t.tagName !== 'BUTTON' && t.tagName !== 'A') {
+        else if (key === 'enter' && t.tagName !== 'BUTTON' && t.tagName !== 'A' && t.tagName !== 'SUMMARY') {
             if (s.studyMode && !s.isChecked(s.index) && s.hasAnswer(s.index)) checkAnswer(); else nextQuestion();
             e.preventDefault();
         }
@@ -2566,9 +2524,12 @@ App.ui = {};
 
 /* UI: review before finishing, results and per-question review. */
 (function () {
-    const { el } = App.util;
+    const { el, icon } = App.util;
     const $ = App.ui.$;
     const S = () => App.state.session;
+
+    const kpi = (value, label, cls) => el('div', { class: 'kpi ' + (cls || '') }, el('b', { text: String(value) }), el('span', { text: label }));
+    const resume = i => { S().goTo(i); App.ui.show('runtime'); App.ui.refreshRuntime(); };
 
     App.ui.openReview = function () {
         App.ui.show('review');
@@ -2584,31 +2545,36 @@ App.ui = {};
         const flagged = [];
         for (let i = 0; i < s.length; i++) { const st = stats[s.item(i).uid]; if (st && st.flag) flagged.push(i); }
 
-        v.appendChild(el('h1', { text: App.t('reviewTitle') }));
-        v.appendChild(el('p', { class: 'subtitle', text: App.t('reviewText', { a: s.length - unanswered.length, n: s.length, u: unanswered.length, f: flagged.length }) }));
+        const card = el('div', { class: 'card' });
+        card.appendChild(el('h1', { text: App.t('reviewTitle') }));
+        card.appendChild(el('p', { class: 'subtitle', text: App.t('reviewText', { a: s.length - unanswered.length, n: s.length, u: unanswered.length, f: flagged.length }) }));
+        card.appendChild(el('div', { class: 'kpis' },
+            kpi(s.length - unanswered.length, App.t('legendAnswered'), 'ok'),
+            kpi(unanswered.length, App.t('reviewUnanswered'), unanswered.length ? 'warn' : ''),
+            kpi(flagged.length, App.t('reviewFlagged'))));
 
         const grid = el('div', { class: 'review-grid' });
         for (let i = 0; i < s.length; i++) {
             let cls = 'nav-grid-btn' + (s.hasAnswer(i) ? ' answered' : ' unanswered-hint');
             if (flagged.includes(i)) cls += ' flagged';
-            grid.appendChild(el('button', { type: 'button', class: cls, text: String(i + 1), onclick: () => { s.goTo(i); App.ui.show('runtime'); App.ui.refreshRuntime(); },
-                aria: { label: App.t('questionOf', { i: i + 1, n: s.length }) } }));
+            grid.appendChild(el('button', { type: 'button', class: cls, text: String(i + 1), onclick: () => resume(i), aria: { label: App.t('questionOf', { i: i + 1, n: s.length }) } }));
         }
-        v.appendChild(grid);
+        card.appendChild(grid);
 
         const pills = (title, list) => {
             if (!list.length) return;
             const box = el('div', { class: 'review-block' }, el('h2', { text: title + ' (' + list.length + ')' }));
             const pl = el('div', { class: 'pill-list' });
-            list.forEach(i => pl.appendChild(el('button', { type: 'button', class: 'pill', text: '#' + (i + 1), onclick: () => { s.goTo(i); App.ui.show('runtime'); App.ui.refreshRuntime(); } })));
-            box.appendChild(pl); v.appendChild(box);
+            list.forEach(i => pl.appendChild(el('button', { type: 'button', class: 'pill', text: '#' + (i + 1), onclick: () => resume(i) })));
+            box.appendChild(pl); card.appendChild(box);
         };
         pills(App.t('reviewUnanswered'), unanswered);
         pills(App.t('reviewFlagged'), flagged);
 
-        v.appendChild(el('div', { class: 'toolbar', style: 'margin-top:20px;' },
-            el('button', { type: 'button', class: 'btn btn-secondary', text: App.t('reviewBack'), onclick: () => { App.ui.show('runtime'); App.ui.refreshRuntime(); } }),
-            el('button', { type: 'button', class: 'btn', id: 'submit-btn', text: App.t('reviewSubmit'), onclick: () => App.ui.submit(false) })));
+        card.appendChild(el('div', { class: 'toolbar', style: 'margin-top:22px' },
+            App.ui.btn(App.t('reviewBack'), 'back', 'btn-secondary', () => { App.ui.show('runtime'); App.ui.refreshRuntime(); }),
+            App.ui.btn(App.t('reviewSubmit'), 'check', 'btn-lg', () => App.ui.submit(false), { id: 'submit-btn' })));
+        v.appendChild(card);
     };
 
     App.ui.submit = function (auto) {
@@ -2621,53 +2587,107 @@ App.ui = {};
         App.storage.addAttempt(s.examId, attempt);
         App.storage.deleteSession(s.examId, s.id);
         App.state.lastResult = { attempt, session: s };
+        App.state.reviewFilter = 'all';
         App.ui.show('summary');
         App.ui.renderSummary();
     };
+
+    function topicBreakdown(s, exam) {
+        const by = {};
+        for (let i = 0; i < s.length; i++) {
+            const t = s.item(i).topic;
+            by[t] = by[t] || { total: 0, ok: 0 };
+            by[t].total++; if (s.isCorrect(i)) by[t].ok++;
+        }
+        const keys = Object.keys(by);
+        if (keys.length < 2) return null;
+        const box = el('div', { class: 'stat-section' }, el('h2', { text: App.t('topicBreakdown') }));
+        keys.forEach(t => {
+            const pct = Math.round(100 * by[t].ok / by[t].total);
+            const name = exam && exam.topics && exam.topics[t] ? App.loc(exam.topics[t]) : t;
+            box.appendChild(el('div', { class: 'bar-row' },
+                el('span', { text: name }),
+                el('div', { class: 'bar-track' }, el('div', { class: 'bar-fill' + (pct < 50 ? ' low' : (pct < 75 ? ' mid' : '')), style: 'width:' + pct + '%' })),
+                el('span', { class: 'bar-pct', text: pct + '%' })));
+        });
+        return box;
+    }
 
     App.ui.renderSummary = function () {
         const r = App.state.lastResult;
         if (!r) return;
         const { attempt, session: s } = r;
+        const exam = App.state.exam;
         const v = $('view-summary');
         v.textContent = '';
-        v.appendChild(el('h1', { text: App.t('resultsTitle') }));
-        v.appendChild(el('p', { class: 'subtitle', text: App.t('resultsSubtitle') }));
-
         const color = attempt.passed ? 'var(--success)' : 'var(--error)';
-        v.appendChild(el('div', { class: 'metrics-summary-box' },
-            el('div', { class: 'score-circle', id: 'metric-percentage', style: 'border-color:' + color + ';color:' + color, text: attempt.pct + '%' }),
-            el('div', {},
-                el('h2', { id: 'metric-raw-string', style: 'font-size:1.3rem;font-weight:600;margin-bottom:4px;', text: App.t('scoreLine', { c: attempt.correct, n: attempt.total }) }),
-                el('p', { id: 'exam-result-badge', style: 'font-size:1rem;font-weight:700;color:' + color, text: App.t(attempt.passed ? 'pass' : 'fail', { t: attempt.threshold }) }),
-                el('p', { class: 'hint', text: s.modeLabel + ' · ' + App.t('resultTime', { m: App.ui.fmtTime(attempt.durationSec) }) }))));
+        const card = el('div', { class: 'card' });
+        card.appendChild(el('h1', { text: App.t('resultsTitle') }));
+        card.appendChild(el('p', { class: 'subtitle', text: App.t('resultsSubtitle') }));
+
+        const ring = el('div', { class: 'score-ring' });
+        ring.appendChild(App.ui.ring(attempt.pct, color, 168, 10));
+        ring.appendChild(el('div', { class: 'score-num' }, el('span', { id: 'metric-percentage', text: attempt.pct + '%' }), el('small', { text: App.t('scoreWord') })));
+        const unanswered = attempt.answers.filter(a => !a[3]).length;
+        const wrongN = attempt.total - attempt.correct - unanswered;
+        card.appendChild(el('div', { class: 'score-hero', style: 'margin-top:20px' }, ring,
+            el('div', { style: 'flex:1 1 260px;min-width:0' },
+                el('div', { class: 'verdict ' + (attempt.passed ? 'pass' : 'fail'), id: 'exam-result-badge' }, icon(attempt.passed ? 'trophy' : 'x', 18), el('span', { text: App.t(attempt.passed ? 'pass' : 'fail', { t: attempt.threshold }).replace(/^[^\w]*\s*/, '') })),
+                el('p', { id: 'metric-raw-string', style: 'font-weight:600;font-size:1.05rem', text: App.t('scoreLine', { c: attempt.correct, n: attempt.total }) }),
+                el('p', { class: 'hint', text: s.modeLabel }))));
+
+        card.appendChild(el('div', { class: 'kpis' },
+            kpi(attempt.correct, App.t('correctKpi'), 'ok'),
+            kpi(wrongN, App.t('wrongKpi'), wrongN ? 'bad' : ''),
+            kpi(unanswered, App.t('unansweredKpi'), unanswered ? 'warn' : ''),
+            kpi(App.ui.fmtTime(attempt.durationSec), App.t('timeKpi'))));
+
+        const tb = topicBreakdown(s, exam);
+        if (tb) card.appendChild(tb);
 
         const wrong = [];
         for (let i = 0; i < s.length; i++) if (!s.isCorrect(i)) wrong.push(s.item(i).uid);
         const bar = el('div', { class: 'toolbar' },
-            el('button', { type: 'button', class: 'btn', id: 'return-btn', text: App.t('backToMenu'), onclick: () => { App.ui.renderDashboard(); App.ui.show('dashboard'); } }));
-        if (wrong.length) bar.appendChild(el('button', { type: 'button', class: 'btn btn-ghost', text: App.t('retryWrong') + ' (' + wrong.length + ')', onclick: () => App.ui.retry(wrong) }));
-        bar.appendChild(el('button', { type: 'button', class: 'btn btn-ghost', text: '📊 ' + App.t('statsBtn'), onclick: () => App.ui.openStats() }));
-        v.appendChild(bar);
+            App.ui.btn(App.t('backToMenu'), 'home', '', () => { App.ui.renderDashboard(); App.ui.show('dashboard'); }, { id: 'return-btn' }));
+        if (wrong.length) bar.appendChild(App.ui.btn(App.t('retryWrong') + ' (' + wrong.length + ')', 'refresh', 'btn-ghost', () => App.ui.retry(wrong)));
+        bar.appendChild(App.ui.btn(App.t('statsBtn'), 'chart', 'btn-ghost', () => App.ui.openStats()));
+        card.appendChild(bar);
 
+        // filter chips + review cards
+        const stats = App.storage.allQStats(s.examId);
+        const filters = [['all', App.t('filterAll')], ['wrong', App.t('filterWrong')], ['unanswered', App.t('filterUnanswered')], ['flagged', App.t('filterFlagged')]];
+        const chips = el('div', { class: 'filter-chips', role: 'group' });
         const box = el('div', { id: 'review-payload-box' });
+        const cards = [];
         for (let i = 0; i < s.length; i++) {
             const item = s.item(i);
             const answered = s.hasAnswer(i), ok = s.isCorrect(i);
+            const st = stats[item.uid];
             const cls = ok ? 'is-correct' : (answered ? 'is-incorrect' : 'is-unanswered');
             const badge = ok ? App.t('correct') : (answered ? App.t('incorrect') : App.t('unansweredBadge'));
             const meta = [item.topic, item.difficulty ? '★'.repeat(item.difficulty) : '', (s.times[i] || 0) + 's'].filter(Boolean).join(' · ');
-            const card = el('div', { class: 'review-item-card ' + cls },
-                el('span', { class: 'review-status-badge', text: badge }),
+            const c = el('div', { class: 'review-item-card ' + cls },
+                el('span', { class: 'review-status-badge' }, icon(ok ? 'check' : (answered ? 'x' : 'clock'), 12), el('span', { text: badge })),
                 el('div', { class: 'meta', text: meta }),
-                el('h3', { style: 'font-size:1.05rem;margin-bottom:10px;white-space:pre-line;', text: App.t('questionN', { n: i + 1, q: App.loc(item.text) }) }),
+                el('h3', { text: App.t('questionN', { n: i + 1, q: App.loc(item.text) }) }),
                 App.types[item.kind].renderReview(item, s.value(i)),
-                item.explanation ? el('div', { class: 'explanation-box', style: 'margin-top:15px;' },
-                    el('h4', { style: 'font-size:0.95rem;', text: App.t('explanation') }),
-                    el('p', { style: 'font-size:0.9rem;', text: App.loc(item.explanation) })) : null);
-            box.appendChild(card);
+                item.explanation ? el('div', { class: 'explanation-box' }, el('h4', { text: App.t('explanation') }), el('p', { text: App.loc(item.explanation) })) : null);
+            cards.push({ node: c, ok, answered, flagged: !!(st && st.flag) });
+            box.appendChild(c);
         }
-        v.appendChild(box);
+        function applyFilter(f) {
+            App.state.reviewFilter = f;
+            chips.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.f === f ? 'true' : 'false'));
+            cards.forEach(c => {
+                const show = f === 'all' || (f === 'wrong' && !c.ok && c.answered) || (f === 'unanswered' && !c.answered) || (f === 'flagged' && c.flagged);
+                c.node.classList.toggle('hidden', !show);
+            });
+        }
+        filters.forEach(([f, label]) => chips.appendChild(el('button', { type: 'button', class: 'filter-chip', text: label, dataset: { f }, onclick: () => applyFilter(f) })));
+        card.appendChild(chips);
+        card.appendChild(box);
+        v.appendChild(card);
+        applyFilter(App.state.reviewFilter || 'all');
     };
 
     // New study session with the questions that were wrong/unanswered
@@ -2686,7 +2706,7 @@ App.ui = {};
 
 /* UI: statistics screen (history chart, accuracy by topic, hardest questions). */
 (function () {
-    const { el } = App.util;
+    const { el, icon } = App.util;
     const $ = App.ui.$;
     const SVGNS = 'http://www.w3.org/2000/svg';
     const svg = (tag, attrs) => { const n = document.createElementNS(SVGNS, tag); Object.entries(attrs || {}).forEach(([k, v]) => n.setAttribute(k, v)); return n; };
@@ -2695,7 +2715,7 @@ App.ui = {};
 
     function historyChart(attempts, threshold) {
         const list = attempts.slice(-30);
-        const W = 600, H = 170, L = 30, R = 10, T = 12, B = 22;
+        const W = 600, H = 180, L = 30, R = 12, T = 12, B = 22;
         const root = svg('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': App.t('statsHistory') });
         const y = pct => T + (H - T - B) * (1 - pct / 100);
         [0, 50, 100].forEach(p => {
@@ -2704,9 +2724,11 @@ App.ui = {};
         });
         if (threshold !== null) root.appendChild(svg('line', { x1: L, x2: W - R, y1: y(threshold), y2: y(threshold), class: 'chart-thr' }));
         const x = i => list.length === 1 ? (L + W - R) / 2 : L + (W - L - R) * i / (list.length - 1);
-        root.appendChild(svg('polyline', { points: list.map((a, i) => x(i) + ',' + y(a.pct)).join(' '), class: 'chart-line' }));
+        const pts = list.map((a, i) => x(i) + ',' + y(a.pct));
+        if (list.length > 1) root.appendChild(svg('polygon', { points: x(0) + ',' + y(0) + ' ' + pts.join(' ') + ' ' + x(list.length - 1) + ',' + y(0), class: 'chart-area' }));
+        root.appendChild(svg('polyline', { points: pts.join(' '), class: 'chart-line' }));
         list.forEach((a, i) => {
-            const c = svg('circle', { cx: x(i), cy: y(a.pct), r: 4, class: 'chart-dot' + (a.passed ? '' : ' fail') });
+            const c = svg('circle', { cx: x(i), cy: y(a.pct), r: 4.5, class: 'chart-dot' + (a.passed ? '' : ' fail') });
             const title = svg('title'); title.textContent = a.pct + '% · ' + (a.modeLabel || a.mode) + ' · ' + new Date(a.ts).toLocaleDateString(); c.appendChild(title);
             root.appendChild(c);
         });
@@ -2718,25 +2740,26 @@ App.ui = {};
         const v = $('view-stats');
         v.textContent = '';
         const st = App.stats.compute(exam, App.storage);
-        const head = el('div', { class: 'card-title-row' },
-            el('h1', { text: App.t('statsTitle') + ' — ' + App.loc(exam.title) }),
-            el('button', { type: 'button', class: 'btn btn-secondary btn-small', text: '← ' + App.t('backBtn'), onclick: () => { App.ui.renderDashboard(); App.ui.show('dashboard'); } }));
-        v.appendChild(head);
+        const card = el('div', { class: 'card' });
+        card.appendChild(el('div', { class: 'row between', style: 'margin-bottom:6px' },
+            el('div', {}, el('h1', { text: App.t('statsTitle') }), el('p', { class: 'subtitle', text: App.loc(exam.title) })),
+            App.ui.btn(App.t('backBtn'), 'back', 'btn-secondary btn-sm', () => { App.ui.renderDashboard(); App.ui.show('dashboard'); })));
+        v.appendChild(card);
 
-        if (!st.attemptCount && !st.answered) { v.appendChild(el('p', { class: 'subtitle', text: App.t('statsEmpty') })); return; }
+        if (!st.attemptCount && !st.answered) { card.appendChild(el('p', { class: 'subtitle', style: 'margin-top:14px', text: App.t('statsEmpty') })); return; }
 
-        const tile = (value, label) => el('div', { class: 'tile' }, el('div', { class: 'tile-value', text: String(value) }), el('div', { class: 'tile-label', text: label }));
-        v.appendChild(el('div', { class: 'tiles' },
-            tile(st.attemptCount, App.t('statsAttempts')),
-            tile(st.accuracy === null ? '–' : st.accuracy + '%', App.t('statsAccuracy')),
-            tile(st.bestPct === null ? '–' : st.bestPct + '%', App.t('statsBest')),
-            tile(st.answered, App.t('statsAnswered')),
-            tile(st.mastered + ' / ' + st.totalQuestions, App.t('statsMastered')),
-            tile(st.avgTimeSec === null ? '–' : st.avgTimeSec + ' s', App.t('statsAvgTime'))));
+        const tile = (ic, value, label) => el('div', { class: 'tile' }, el('div', { class: 'tile-icon' }, icon(ic, 19)), el('div', {}, el('div', { class: 'tile-value', text: String(value) }), el('div', { class: 'tile-label', text: label })));
+        card.appendChild(el('div', { class: 'tiles' },
+            tile('layers', st.attemptCount, App.t('statsAttempts')),
+            tile('target', st.accuracy === null ? '–' : st.accuracy + '%', App.t('statsAccuracy')),
+            tile('trophy', st.bestPct === null ? '–' : st.bestPct + '%', App.t('statsBest')),
+            tile('check', st.answered, App.t('statsAnswered')),
+            tile('star', st.mastered + ' / ' + st.totalQuestions, App.t('statsMastered')),
+            tile('clock', st.avgTimeSec === null ? '–' : st.avgTimeSec + ' s', App.t('statsAvgTime'))));
 
         if (st.attempts.length) {
             const thr = st.attempts[st.attempts.length - 1].threshold;
-            v.appendChild(el('div', { class: 'stat-section chart-box' }, el('h2', { text: App.t('statsHistory') }), historyChart(st.attempts, typeof thr === 'number' ? thr : null)));
+            card.appendChild(el('div', { class: 'stat-section chart-box' }, el('h2', { text: App.t('statsHistory') }), historyChart(st.attempts, typeof thr === 'number' ? thr : null)));
         }
 
         const topics = el('div', { class: 'stat-section' }, el('h2', { text: App.t('statsTopics') }));
@@ -2749,14 +2772,14 @@ App.ui = {};
                 el('div', { class: 'bar-track', role: 'img', aria: { label: name + ' ' + (t.pct === null ? '–' : t.pct + '%') } }, el('div', { class: 'bar-fill' + cls, style: 'width:' + pct + '%' })),
                 el('span', { class: 'bar-pct', text: t.pct === null ? '–' : t.pct + '%' })));
         });
-        v.appendChild(topics);
+        card.appendChild(topics);
 
         const hard = el('div', { class: 'stat-section' }, el('h2', { text: App.t('statsHardest') }));
         if (!st.hardest.length) hard.appendChild(el('p', { class: 'hint', text: App.t('statsNoHard') }));
         st.hardest.forEach(h => hard.appendChild(el('div', { class: 'hard-row' },
             el('div', { text: App.loc(h.text).slice(0, 220) }),
             el('div', { class: 'hard-meta', text: h.topic + ' · ' + App.t('statsErrRate', { p: Math.round(h.rate * 100), w: h.wrong, n: h.seen }) }))));
-        v.appendChild(hard);
+        card.appendChild(hard);
     };
 })();
 

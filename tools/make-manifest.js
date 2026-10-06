@@ -16,7 +16,7 @@ function buildCatalog() {
         const questions = (data.questions || []);
         const topics = new Set(questions.map(q => q.topic));
         return {
-            file: name, title: title || name, description: description || '',
+            file: name, id: (legacy ? name : (data.id || name)), title: title || name, description: description || '',
             code: legacy ? data.config.examCode : data.code, version: legacy ? data.config.version : data.version,
             questionCount: questions.length, topicCount: topics.size
         };

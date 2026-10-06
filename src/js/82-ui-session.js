@@ -1,6 +1,6 @@
-/* UI: the exam runtime (question view, progress grid, flags, notes, timers, keyboard). */
+/* UI: the exam runtime (question card, progress grid, flags, notes, timers, keyboard). */
 (function () {
-    const { el } = App.util;
+    const { el, icon } = App.util;
     const $ = App.ui.$;
     let refs = {};
 
@@ -32,6 +32,7 @@
         const v = $('view-runtime');
         v.textContent = '';
         refs = {};
+        refs.bar = el('i');
         refs.topic = el('span', { class: 'tag-topic' });
         refs.pos = el('span', { class: 'q-number', aria: { live: 'polite' } });
         refs.flag = el('button', { type: 'button', class: 'flag-btn', onclick: () => toggleFlag() });
@@ -46,22 +47,28 @@
             refs.noteTimer = setTimeout(() => App.storage.patchQStat(s.examId, uid, st => { st.note = refs.noteArea.value; return st; }), 400);
         });
         refs.note = el('details', { class: 'note-box' }, refs.noteSummary, refs.noteArea);
-        refs.prev = el('button', { type: 'button', class: 'btn btn-secondary', onclick: () => go(S().index - 1) });
-        refs.check = el('button', { type: 'button', id: 'validate-btn', onclick: () => checkAnswer() });
+        refs.prev = el('button', { type: 'button', class: 'btn btn-secondary', id: 'prev-btn', onclick: () => go(S().index - 1) });
+        refs.check = el('button', { type: 'button', class: 'btn btn-dark', id: 'validate-btn', onclick: () => checkAnswer() });
         refs.next = el('button', { type: 'button', class: 'btn', id: 'session-action-trigger', onclick: () => nextQuestion() });
         refs.help = el('p', { class: 'kbd-help' });
         refs.legend = el('div', { class: 'legend' });
         refs.grid = el('div', { class: 'grid-navigation', role: 'group' });
-        refs.finish = el('button', { type: 'button', class: 'btn btn-secondary btn-danger-outline', onclick: () => App.ui.openReview() });
+        refs.gridTitle = el('span', {});
+        refs.gridCount = el('span', { class: 'count' });
+        refs.finish = el('button', { type: 'button', class: 'btn btn-danger btn-block', id: 'finish-btn', style: 'margin-top:12px', onclick: () => App.ui.openReview() });
 
-        const main = el('div', { class: 'card', style: 'margin-bottom:0;' },
-            el('div', { class: 'question-header' }, refs.topic, el('span', { class: 'question-actions' }, refs.pos, refs.flag)),
+        const main = el('div', { class: 'card q-card' },
+            el('div', { class: 'q-bar' }, refs.bar),
+            el('div', { class: 'q-top' }, refs.topic, el('div', { class: 'q-meta' }, refs.pos, refs.flag)),
             refs.text, refs.body, refs.expl, refs.note,
-            el('div', { class: 'nav-controls' }, refs.prev, refs.check, el('span', { class: 'spacer' }), refs.next),
+            el('div', { class: 'actionbar' }, refs.prev, refs.check, el('span', { class: 'spacer' }), refs.next),
             refs.help);
-        const side = el('div', { class: 'sidebar-box' }, el('h2', { class: 'sidebar-title', id: 'progress-title' }), refs.legend, refs.grid, refs.finish);
-        refs.progressTitle = side.querySelector('#progress-title');
-        v.appendChild(el('div', { class: 'runtime-layout' }, main, side));
+        const panel = el('details', { class: 'panel', id: 'grid-panel' },
+            el('summary', { class: 'panel-title' }, refs.gridTitle, el('span', { class: 'row', style: 'gap:8px' }, refs.gridCount, icon('chevron', 16))),
+            refs.legend, refs.grid);
+        if (window.matchMedia && window.matchMedia('(min-width: 961px)').matches) panel.open = true;
+        const side = el('aside', { class: 'run-side' }, panel, refs.finish);
+        v.appendChild(el('div', { class: 'run-layout' }, main, side));
     }
 
     function topicName(t) {
@@ -73,13 +80,13 @@
     App.ui.refreshRuntime = function () {
         const s = S();
         if (!s) return;
-        refs.prev.textContent = App.t('previous');
-        refs.check.textContent = App.t('validate');
+        refs.prev.textContent = ''; refs.prev.appendChild(icon('back', 17)); refs.prev.appendChild(el('span', { text: App.t('previous') }));
+        refs.check.textContent = ''; refs.check.appendChild(icon('check', 17)); refs.check.appendChild(el('span', { text: App.t('validate') }));
         refs.check.classList.toggle('hidden', !s.studyMode);
-        refs.progressTitle.textContent = App.t('progress');
-        refs.finish.textContent = App.t('endScore');
+        refs.gridTitle.textContent = App.t('progress');
+        refs.finish.textContent = ''; refs.finish.appendChild(icon('flag', 16)); refs.finish.appendChild(el('span', { text: App.t('endScore') }));
         refs.help.textContent = App.t('keyboardHelp');
-        refs.noteSummary.textContent = '📝 ' + App.t('note');
+        refs.noteSummary.textContent = ''; refs.noteSummary.appendChild(icon('note', 15)); refs.noteSummary.appendChild(el('span', { text: App.t('note') }));
         refs.noteArea.placeholder = App.t('notePlaceholder');
         refs.legend.textContent = '';
         refs.legend.appendChild(el('span', { class: 'lg-answered', text: App.t('legendAnswered') }));
@@ -99,7 +106,6 @@
         refs.topic.textContent = topicName(item.topic);
         refs.pos.textContent = App.t('questionOf', { i: i + 1, n: s.length });
         refs.text.textContent = App.loc(item.text);
-        refs.text.setAttribute('aria-label', '');
         refs.body.textContent = '';
         refs.body.appendChild(h.render({
             item, value: s.value(i), locked: checked, reveal: checked, uid: 'q' + i,
@@ -113,18 +119,19 @@
         }));
         refs.expl.textContent = '';
         if (checked) {
-            refs.expl.appendChild(el('div', { class: 'dynamic-explanation-box' },
+            refs.expl.appendChild(el('div', { class: 'dynamic-explanation-box' }, el('div', {},
                 el('h3', { text: App.t('explanation') }),
-                el('p', { text: App.loc(item.explanation) || App.t('noExplanation') })));
+                el('p', { text: App.loc(item.explanation) || App.t('noExplanation') }))));
         }
         refs.check.disabled = !!checked;
         const last = i === s.length - 1;
-        refs.next.textContent = last ? App.t('finish') : App.t('next');
-        refs.next.classList.toggle('btn-final', last);
+        refs.next.textContent = '';
+        refs.next.appendChild(el('span', { text: last ? App.t('finish') : App.t('next') }));
+        refs.next.appendChild(icon(last ? 'flag' : 'next', 17));
         refs.prev.disabled = i === 0;
         const st = App.storage.getQStat(s.examId, item.uid) || {};
         refs.flag.setAttribute('aria-pressed', st.flag ? 'true' : 'false');
-        refs.flag.textContent = '⚑ ' + (st.flag ? App.t('unflag') : App.t('flag'));
+        refs.flag.textContent = ''; refs.flag.appendChild(icon('flag', 14)); refs.flag.appendChild(el('span', { text: st.flag ? App.t('unflag') : App.t('flag') }));
         refs.noteArea.value = st.note || '';
         refs.note.open = !!st.note;
     }
@@ -140,10 +147,12 @@
             else if (s.hasAnswer(i)) cls += ' answered';
             const st = stats[s.item(i).uid];
             if (st && st.flag) cls += ' flagged';
-            const b = el('button', { type: 'button', class: cls, text: String(i + 1), onclick: () => go(i),
-                aria: { label: App.t('questionOf', { i: i + 1, n: s.length }), current: i === s.index ? 'true' : 'false' } });
-            refs.grid.appendChild(b);
+            refs.grid.appendChild(el('button', { type: 'button', class: cls, text: String(i + 1), onclick: () => go(i),
+                aria: { label: App.t('questionOf', { i: i + 1, n: s.length }), current: i === s.index ? 'true' : 'false' } }));
         }
+        const answered = s.answeredCount();
+        refs.gridCount.textContent = App.t('answeredOf', { a: answered, n: s.length });
+        refs.bar.style.width = (s.length ? Math.round(100 * answered / s.length) : 0) + '%';
     }
 
     function go(i) {
@@ -174,10 +183,16 @@
     function updateClock() {
         const s = S();
         const box = $('runtime-timer-box');
-        if (!s || App.state.screen !== 'runtime' || s.timerMode === 'none') { box.classList.add('hidden'); return; }
+        const live = App.state.screen === 'runtime' || (App.state.screen === 'review' && s && s.timerMode === 'total');
+        if (!s || !live || s.timerMode === 'none') { box.classList.add('hidden'); return; }
         box.classList.remove('hidden');
-        $('timer-label').textContent = s.timerMode === 'perQuestion' ? App.t('timerQuestionLabel') : App.t('timeRemaining');
-        $('runtime-clock-string').textContent = App.ui.fmtTime(s.timerMode === 'perQuestion' ? s.qLeft : s.secondsLeft);
+        const per = s.timerMode === 'perQuestion';
+        const left = per ? s.qLeft : s.secondsLeft;
+        $('timer-label').textContent = per ? App.t('timerQuestionLabel') : App.t('timeRemaining');
+        $('runtime-clock-string').textContent = App.ui.fmtTime(left);
+        const warn = per ? 10 : 60, danger = per ? 5 : 15;
+        box.classList.toggle('warn', left <= warn && left > danger);
+        box.classList.toggle('danger', left <= danger);
     }
     App.ui.updateClock = updateClock;
 
@@ -185,18 +200,21 @@
         clearInterval(App.state.clockTimer);
         App.state.clockTimer = setInterval(() => {
             const s = S();
-            if (!s || App.state.screen !== 'runtime') return;
+            const screen = App.state.screen;
+            // the total timer keeps running on the review screen; per-question timers pause there
+            if (!s || !(screen === 'runtime' || (screen === 'review' && s.timerMode === 'total'))) return;
             const ev = s.tick();
             updateClock();
             if (ev === 'total') { App.ui.submit(true); return; }
-            if (ev === 'question') { if (s.index < s.length - 1) go(s.index + 1); else App.ui.openReview(); return; }
+            if (ev === 'question' && screen === 'runtime') { if (s.index < s.length - 1) go(s.index + 1); else App.ui.openReview(); return; }
             if (s.times[s.index] % 10 === 0) App.ui.persist();
         }, 1000);
     }
     App.ui.stopClock = function () {
         clearInterval(App.state.clockTimer);
         App.state.clockTimer = null;
-        $('runtime-timer-box').classList.add('hidden');
+        const box = $('runtime-timer-box');
+        box.classList.add('hidden'); box.classList.remove('warn', 'danger');
     };
 
     // ---- keyboard ----
@@ -216,7 +234,7 @@
         else if (key === 'arrowright') { if (s.index < s.length - 1) go(s.index + 1); e.preventDefault(); }
         else if (key === 'arrowleft') { go(s.index - 1); e.preventDefault(); }
         else if (key === 'm') { toggleFlag(); e.preventDefault(); }
-        else if (key === 'enter' && t.tagName !== 'BUTTON' && t.tagName !== 'A') {
+        else if (key === 'enter' && t.tagName !== 'BUTTON' && t.tagName !== 'A' && t.tagName !== 'SUMMARY') {
             if (s.studyMode && !s.isChecked(s.index) && s.hasAnswer(s.index)) checkAnswer(); else nextQuestion();
             e.preventDefault();
         }
