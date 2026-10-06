@@ -134,3 +134,12 @@ kbd { display: inline-block; min-width: 22px; padding: 2px 7px; border-radius: 6
     #clear-btn span, #report-btn span { display: none; }
     #clear-btn, #report-btn { padding: 5px 9px; }
 }
+
+/* Exam discovery + exam menu */
+.discover { margin: 0 auto var(--space); max-width: 760px; text-align: center; }
+.discover .toolbar { justify-content: center; }
+.discover .hint { margin-top: 8px; }
+.link-btn { background: none; border: 0; padding: 0; color: var(--primary); font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }
+.scan-bad { color: var(--error); }
+.scan-bad-line { margin: 6px 0; font-size: 0.9rem; overflow-wrap: anywhere; }
+.exam-switcher select { flex: 1 1 260px; max-width: min(100%, 460px); width: auto; font-weight: 600; }

@@ -27,6 +27,7 @@
         }
         const banner = App.ui.backupBanner();
         if (banner) v.appendChild(banner);
+        v.appendChild(App.ui.discoverBar());
         const cat = App.loader.catalog();
         if (!cat.length) v.appendChild(el('p', { class: 'hint', style: 'text-align:center', text: App.t('noCatalog') }));
         const grid = el('div', { class: 'exam-grid', id: 'exam-list' });
@@ -42,7 +43,8 @@
             if (attempts.length) meta.appendChild(el('span', { class: 'chip primary', text: attempts.length === 1 ? App.t('attemptOne') : App.t('attemptsChip', { n: attempts.length }) }));
             if (sessions) meta.appendChild(el('span', { class: 'chip warn', text: App.t('inProgressChip') }));
             if (item.local) meta.appendChild(el('span', { class: 'chip', text: App.t('localChip') }));
-            grid.appendChild(el('a', { href: '?content=' + encodeURIComponent(item.file), class: 'exam-card' }, top,
+            if (item.disk) meta.appendChild(el('span', { class: 'chip', text: App.t('folderChip') }));
+            grid.appendChild(el('a', { href: '?content=' + encodeURIComponent(item.file), class: 'exam-card', onclick: item.disk ? (e => { e.preventDefault(); App.ui.gotoExam(item.file); }) : undefined }, top,
                 el('div', { class: 'exam-card-title', text: App.loc(item.title) || item.file }),
                 el('div', { class: 'exam-card-desc', text: App.loc(item.description) }), meta));
         });
@@ -54,13 +56,20 @@
     };
 
     // ------------------------------------------------------------- dashboard
-    function examChips() {
-        const chips = el('div', { class: 'exam-chips' });
-        App.loader.catalog().forEach(item => {
-            const cur = item.file === App.state.exam.sourceFile;
-            chips.appendChild(el('a', { href: '?content=' + encodeURIComponent(item.file), class: 'exam-chip' + (cur ? ' current' : ''), text: App.loc(item.title) || item.file, aria: cur ? { current: 'page' } : {} }));
+    // Exam menu: a drop-down scales to any number of exams.
+    function examSelect() {
+        const exam = App.state.exam;
+        const sel = el('select', { id: 'exam-switch', 'aria-label': App.t('switchExam') });
+        const cat = App.loader.catalog();
+        let found = false;
+        cat.forEach(item => {
+            const cur = item.file === exam.sourceFile; if (cur) found = true;
+            sel.appendChild(el('option', { value: item.file, text: (App.loc(item.title) || item.file) + (item.disk ? ' · ' + App.t('folderChip') : (item.local ? ' · ' + App.t('localChip') : '')) }));
+            if (cur) sel.value = item.file;
         });
-        return chips;
+        if (!found) { sel.appendChild(el('option', { value: exam.sourceFile || '', text: App.loc(exam.title) })); sel.value = exam.sourceFile || ''; }
+        sel.addEventListener('change', () => { if (sel.value && sel.value !== exam.sourceFile) App.ui.gotoExam(sel.value); });
+        return sel;
     }
 
     function modeLabel(m) {
@@ -100,7 +109,7 @@
         const bn = App.ui.backupBanner(); if (bn) v.appendChild(bn);
         const cl = App.ui.changelogNotice(exam); if (cl) v.appendChild(cl);
         if (exam.preview) v.appendChild(el('div', { class: 'banner info', id: 'preview-banner' }, icon('play', 18), el('span', { class: 'banner-text', text: App.t('edPreviewBanner') }), App.ui.btn(App.t('edBackToEditor'), 'back', 'btn-sm', () => { App.state.exam = null; App.ui.renderLibrary(); App.ui.show('library'); }, { id: 'preview-back' })));
-        v.appendChild(el('div', { class: 'exam-switcher' }, el('span', { class: 'exam-switcher-label', text: App.t('switchExam') }), examChips()));
+        v.appendChild(el('div', { class: 'exam-switcher' }, el('label', { class: 'exam-switcher-label', for: 'exam-switch', text: App.t('switchExam') }), examSelect()));
         const tb = App.ui.toolbarButtons({ stats: true, examIds: [exam.id] });
         tb.insertBefore(App.ui.btn(App.t('searchBtn'), 'search', 'btn-ghost btn-sm', () => App.ui.openSearch(), { id: 'dash-search' }), tb.children[1] || null);
         tb.appendChild(App.ui.btn(App.t('exportExam'), 'download', 'btn-ghost btn-sm', () => App.ui.exportExamDialog(exam.local ? (App.library.get(exam.id) || exam) : exam, { raw: !!exam.local }), { id: 'dash-export-exam' }));

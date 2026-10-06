@@ -329,3 +329,55 @@ test('every UI string used in the code exists in English and Italian', () => {
     assert.deepEqual(en.filter(k => !it.includes(k)), [], 'keys only in English');
     assert.deepEqual(it.filter(k => !en.includes(k)), [], 'keys only in Italian');
 });
+
+// ------------------------------------------------------------------ exams on disk
+const examText = (id, title, n) => 'ExamSim.register(' + JSON.stringify(mkExam(Array.from({ length: n || 2 }, (_, i) => q({ id: i + 1, topic: i ? 'U' : 'T' })), { id, title })) + ');';
+function fakeDir(name, files) {
+    return {
+        name, kind: 'directory',
+        async *entries() { for (const [n, text] of Object.entries(files)) yield [n, { kind: 'file', getFile: async () => ({ text: async () => text }) }]; yield ['sub', { kind: 'directory' }]; },
+        queryPermission: async () => 'granted'
+    };
+}
+
+test('folder scan: cards come from the files, bad files are reported, folder exams load without a build', async () => {
+    App.backend = App.memoryBackend();
+    const r = await App.folder.useHandle(fakeDir('exams', {
+        'alpha.exam': examText('alpha', 'Alpha exam', 3), 'beta.exam': examText('beta', 'Beta exam', 2),
+        'broken.exam': 'ExamSim.register({ not json', 'invalid.exam': 'ExamSim.register(' + JSON.stringify(mkExam([q({ answer: [9] })], { id: 'inv' })) + ');', 'notes.txt': 'ignore me'
+    }));
+    assert.equal(r.found, 2);
+    assert.deepEqual(App.folder.entries().map(e => [e.id, e.file, e.questionCount, e.topicCount, e.disk]), [['alpha', 'disk:alpha', 3, 2, true], ['beta', 'disk:beta', 2, 2, true]]);
+    assert.deepEqual(App.folder.state.bad.map(b => b.name).sort(), ['broken.exam', 'invalid.exam']);
+    assert.match(App.folder.state.bad.find(b => b.name === 'invalid.exam').message, /answer/);
+    const exam = await App.loader.loadByName('disk:alpha');
+    assert.equal(exam.questions.length, 3);
+    assert.equal(exam.sourceFile, 'disk:alpha');
+    await assert.rejects(() => App.loader.loadByName('disk:missing'), e => e.code === 'diskAccess');
+    // a changed file shows up after the next scan
+    await App.folder.useHandle(fakeDir('exams', { 'alpha.exam': examText('alpha', 'Alpha exam v2', 5) }));
+    assert.deepEqual(App.folder.entries().map(e => e.questionCount), [5]);
+    await App.folder.forget();
+    assert.equal(App.folder.entries().length, 0);
+});
+
+test('catalog merges bundled, own and folder exams; the fresher source wins on the same id', async () => {
+    App.backend = App.memoryBackend();
+    App.library.save(mkExam([q()], { id: 'mine', title: 'Mine' }));
+    await App.folder.useHandle(fakeDir('d', { 'mine.exam': examText('mine', 'Mine on disk', 4), 'new.exam': examText('new', 'New one', 2) }));
+    const cat = App.loader.catalog();
+    assert.deepEqual(cat.map(c => c.id), ['mine', 'new']);
+    assert.equal(cat[0].disk, true);
+    await App.folder.forget();
+});
+
+test('folder import copies exams into the library: new, updated, bundled skipped, bad reported', () => {
+    App.backend = App.memoryBackend();
+    const files = [{ name: 'a.exam', text: examText('a', 'A', 2) }, { name: 'bad.exam', text: 'nonsense' }];
+    let r = App.folder.importFiles(files);
+    assert.deepEqual([r.added, r.updated, r.bundled, r.bad.length], [1, 0, 0, 1]);
+    r = App.folder.importFiles([{ name: 'a.exam', text: examText('a', 'A changed', 4) }]);
+    assert.deepEqual([r.added, r.updated], [0, 1]);
+    assert.equal(App.library.get('a').questions.length, 4);
+    assert.equal(App.library.list().length, 1);
+});

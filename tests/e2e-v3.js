@@ -371,5 +371,68 @@ module.exports = {
         check('page reloaded on the new version', names.includes('examsim-newversion1'), names);
         override('/sw.js', null);
         await ctx.close();
+    },
+
+    'exam discovery: check button, folder scan, folder import, exam menu': async ({ p, check, URL_BASE }) => {
+        const mk = (id, title, n) => 'ExamSim.register(' + JSON.stringify({ format: 2, id, title, description: 'From disk: ' + title, questions: Array.from({ length: n }, (_, i) => ({ id: i + 1, topic: 'Topic', text: 'Question ' + (i + 1) + '?', options: ['a', 'b'], answer: [i % 2] })) }) + ');';
+        // a fake folder that behaves like a File System Access directory handle
+        await p.addInitScript(() => {
+            window.__disk = { 'disk-quiz.exam': null, 'second.exam': null, 'broken.exam': 'ExamSim.register({ nope' };
+            window.showDirectoryPicker = async () => ({
+                name: 'my-exams', kind: 'directory',
+                async *entries() { for (const [n, t] of Object.entries(window.__disk)) yield [n, { kind: 'file', getFile: async () => ({ text: async () => t }) }]; },
+                queryPermission: async () => 'granted'
+            });
+        });
+        await fresh(p, URL_BASE);
+        check('the check button is on the start screen from the start', await p.locator('#scan-btn').isVisible());
+        check('first-time hint explains what it does', /choose the folder/.test(await p.locator('#scan-status').innerText()));
+        await p.evaluate(([a, b]) => { window.__disk['disk-quiz.exam'] = a; window.__disk['second.exam'] = b; }, [mk('disk-quiz', 'Disk Quiz', 3), mk('second', 'Second Disk Exam', 2)]);
+        await p.click('#scan-btn');
+        await p.waitForSelector('.exam-card:has-text("Disk Quiz")');
+        check('cards built from the .exam files', (await p.locator('.exam-card:has-text("Disk Quiz")').innerText()).includes('From disk: Disk Quiz') && /3 questions/.test(await p.locator('.exam-card:has-text("Disk Quiz")').innerText()));
+        check('folder chip shown', (await p.locator('.exam-card:has-text("Disk Quiz") .chip:has-text("Folder")').count()) === 1);
+        check('status line shows the folder and count', /my-exams.*2 exams found/.test(await p.locator('#scan-status').innerText()));
+        check('unreadable file reported', /1 file/.test(await p.locator('#scan-bad').innerText()));
+        await p.click('#scan-bad button');
+        check('details name the broken file', /broken\.exam/.test(await p.locator('.modal-body').innerText()));
+        await p.keyboard.press('Escape');
+        // a file changes on disk: pressing the button picks it up
+        await p.evaluate(a => { window.__disk['disk-quiz.exam'] = a; }, mk('disk-quiz', 'Disk Quiz', 7));
+        await p.click('#scan-btn');
+        await p.waitForFunction(() => /7 questions/.test(document.querySelector('.exam-card:nth-of-type(n)').parentElement.innerText));
+        check('re-scan picks up the changed file', /7 questions/.test(await p.locator('.exam-card:has-text("Disk Quiz")').innerText()));
+        // open a folder exam: no page reload needed
+        await p.evaluate(() => { window.__marker = 'same-page'; });
+        await p.click('.exam-card:has-text("Disk Quiz")');
+        await p.waitForSelector('#start-btn');
+        check('folder exam opens on its dashboard', /Disk Quiz/.test(await p.locator('#view-dashboard h1').innerText()));
+        check('opened without reloading the page', (await p.evaluate(() => window.__marker)) === 'same-page');
+        // exam menu
+        check('exam menu shows the current exam', (await p.locator('#exam-switch option:checked').innerText()).includes('Disk Quiz'));
+        await p.selectOption('#exam-switch', 'disk:second');
+        await p.waitForFunction(() => /Second Disk Exam/.test(document.querySelector('#view-dashboard h1').innerText));
+        check('switching with the menu works for folder exams', true);
+        await p.selectOption('#exam-switch', 'demo');
+        await p.waitForSelector('#view-dashboard h1:has-text("Engine Demo")');
+        check('...and for bundled exams', true);
+
+        // fallback: import a whole folder (works in every browser)
+        const dir = path.join(require('os').tmpdir(), 'examsim-folder-' + Date.now());
+        fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(path.join(dir, 'imported-one.exam'), mk('imported-one', 'Imported One', 2));
+        fs.writeFileSync(path.join(dir, 'imported-two.exam'), mk('imported-two', 'Imported Two', 4));
+        fs.writeFileSync(path.join(dir, 'garbage.exam'), 'not an exam');
+        fs.writeFileSync(path.join(dir, 'readme.txt'), 'ignored');
+        await p.goto(URL_BASE);
+        await p.waitForSelector('#exam-list');
+        const [chooser] = await Promise.all([p.waitForEvent('filechooser'), p.click('#folder-import-btn')]);
+        await chooser.setFiles(dir);
+        await p.waitForFunction(() => ExamSim.App.library.list().length === 2);
+        check('folder import added two exams to My exams', true);
+        await p.waitForSelector('.modal-body:has-text("garbage.exam")');
+        check('the unreadable file is listed', true);
+        await p.keyboard.press('Escape');
+        check('imported exams appear as cards', (await p.locator('.exam-card:has-text("Imported Two") .chip:has-text("My exam")').count()) === 1);
     }
 };

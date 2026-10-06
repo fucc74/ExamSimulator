@@ -83,7 +83,7 @@ module.exports = {
         await p.click('.exam-card >> text=V31 Practice Test');
         await p.waitForSelector('#start-btn');
         check('dashboard opens', /V31/.test(await p.title()));
-        check('exam chips for switching', (await p.locator('.exam-chip').count()) >= 4);
+        check('exam menu lists every exam', (await p.locator('#exam-switch option').count()) >= 4 && (await p.locator('.exam-chip').count()) === 0);
         await p.goto(URL_BASE + '?content=doesnotexist');
         await p.waitForSelector('.error-box');
         check('missing file shows a clear error', /doesnotexist\.exam/.test(await p.locator('.error-box').innerText()));

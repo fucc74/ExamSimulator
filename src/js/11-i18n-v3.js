@@ -1,5 +1,11 @@
 /* UI translations added in engine v3 (options, backup/sync, library, editor, search, reports, quality). */
 Object.assign(App.I18N.en, {
+    scanBtn: "Check for exams", scanImportFolder: "Import a folder…", scanImportHint: "Copies every .exam file found in a folder into My exams (works in every browser)", scanForget: "Forget folder",
+    scanFirstTime: "Press \"Check for exams\" and choose the folder that holds your .exam files. Next time the button re-reads that folder.", scanUnsupported: "This browser cannot remember a folder. Use \"Import a folder…\" to load the exams in it.",
+    scanStatus: "Folder \"{name}\": {n} exams found (checked at {t}).", scanAllow: "Press \"Check for exams\" to allow access to the folder \"{name}\".", scanDenied: "Access to the folder was denied. Press \"Check for exams\" to try again.",
+    scanDone: "{n} exams found in \"{name}\".", scanRefreshed: "List refreshed.", scanNone: "No .exam files in that folder.", scanImported: "Folder imported: {a} added, {u} updated, {s} already bundled, {b} not readable.",
+    scanBadSummary: "{n} file(s) could not be used.", scanBadShow: "Show details", scanBadTitle: "{n} file(s) could not be used", scanBadIntro: "These .exam files were skipped:", folderChip: "Folder",
+    errDiskAccess: "The exam \"{name}\" comes from your exam folder. Press \"Check for exams\" on the start page to allow access to the folder again.",
     formulaLabel: "Formula", closeBtn: "Close", cancelBtn: "Cancel", openBtn: "Open", editBtn: "Edit", renameBtn: "Rename", clearBtn: "Clear", localChip: "My exam",
     optionsTitle: "Options", optionsSub: "Profile: {name}", themeLight: "Light", themeDark: "Dark",
     optGeneral: "General", optLanguage: "Language", optTheme: "Theme",
@@ -66,6 +72,12 @@ Object.assign(App.I18N.en, {
 });
 
 Object.assign(App.I18N.it, {
+    scanBtn: "Cerca esami", scanImportFolder: "Importa una cartella…", scanImportHint: "Copia in I miei esami ogni file .exam trovato in una cartella (funziona in tutti i browser)", scanForget: "Dimentica la cartella",
+    scanFirstTime: "Premi \"Cerca esami\" e scegli la cartella che contiene i tuoi file .exam. Dalla volta dopo il pulsante rilegge quella cartella.", scanUnsupported: "Questo browser non può ricordare una cartella. Usa \"Importa una cartella…\" per caricare gli esami che contiene.",
+    scanStatus: "Cartella \"{name}\": {n} esami trovati (controllata alle {t}).", scanAllow: "Premi \"Cerca esami\" per consentire l'accesso alla cartella \"{name}\".", scanDenied: "Accesso alla cartella negato. Premi \"Cerca esami\" per riprovare.",
+    scanDone: "{n} esami trovati in \"{name}\".", scanRefreshed: "Elenco aggiornato.", scanNone: "Nessun file .exam in quella cartella.", scanImported: "Cartella importata: {a} aggiunti, {u} aggiornati, {s} già inclusi, {b} non leggibili.",
+    scanBadSummary: "{n} file non utilizzabili.", scanBadShow: "Mostra dettagli", scanBadTitle: "{n} file non utilizzabili", scanBadIntro: "Questi file .exam sono stati saltati:", folderChip: "Cartella",
+    errDiskAccess: "L'esame \"{name}\" proviene dalla tua cartella degli esami. Premi \"Cerca esami\" nella pagina iniziale per consentire di nuovo l'accesso alla cartella.",
     formulaLabel: "Formula", closeBtn: "Chiudi", cancelBtn: "Annulla", openBtn: "Apri", editBtn: "Modifica", renameBtn: "Rinomina", clearBtn: "Cancella", localChip: "Mio esame",
     optionsTitle: "Opzioni", optionsSub: "Profilo: {name}", themeLight: "Chiaro", themeDark: "Scuro",
     optGeneral: "Generale", optLanguage: "Lingua", optTheme: "Tema",

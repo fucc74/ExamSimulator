@@ -19,6 +19,10 @@ Add as many exams as you like: each exam is one `NAME.exam` file.
 - **Updates:** the app tells you when a new version is available instead of switching silently.
 - Responsive design for phone, tablet and desktop (bottom action bar and collapsible progress grid on phones), English/Italian UI toggle, light/dark theme, installable and usable offline (when served over http/https).
 
+## Finding exams on disk
+The start screen has a **Check for exams** button. In Chrome/Edge it asks for your exam folder once, remembers it, and every press re-reads the `.exam` files in it (no build needed); cards are built from the files themselves. After a browser restart the browser may ask to allow access again: just press the button. **Import a folder…** (every browser) copies all `.exam` files of a folder into *My exams*. Files that cannot be used are listed with the reason. Exams already bundled are not duplicated. Over http(s) the button also refreshes the bundled list from `exams.js`.
+Inside an exam, the **Exam** menu switches between all available exams.
+
 ## Adding an exam
 1. Create `NAME.exam` (format 2 — see [docs/EXAM-FORMAT.md](docs/EXAM-FORMAT.md)).
 2. `node tools/validate-exam.js NAME.exam` — readable errors and quality hints.

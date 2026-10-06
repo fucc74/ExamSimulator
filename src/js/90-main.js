@@ -30,7 +30,7 @@
         const name = params.get('content');
         const url = params.get('url');
         try {
-            if (name && /^(local:)?[\w.\-]+$/.test(name)) {
+            if (name && (/^(local:)?[\w.\-]+$/.test(name) || /^disk:.+$/.test(name))) {
                 showLoading();
                 openExam(await App.loader.loadByName(name));
             } else if (url) {
@@ -62,6 +62,7 @@
         const pal = $('palette-btn'); pal.appendChild(App.util.icon('search', 18)); pal.title = pal.ariaLabel = App.t('cmdTitle'); pal.addEventListener('click', () => App.ui.openPalette());
         const opt = $('options-btn'); opt.appendChild(App.util.icon('settings', 18)); opt.title = App.t('optionsTitle'); opt.setAttribute('aria-label', App.t('optionsTitle')); opt.addEventListener('click', () => (App.state.screen === 'options' ? App.ui.closeOptions() : App.ui.openOptions()));
         $('import-file').addEventListener('change', e => { if (e.target.files[0]) App.ui.handleImportFile(e.target.files[0]); e.target.value = ''; });
+        try { await App.folder.restore(); } catch (e) { /* folder access is optional */ }
         await route();
         if (location.hash === '#options') App.ui.openOptions();
         App.events.on('sessionEnd', () => { App.backup.writeAuto(); });

@@ -175,7 +175,7 @@
         const add = (label, hint, iconName, run) => out.push({ label, hint, iconName, run });
         const exam = App.state.exam;
         add(App.t('cmdHome'), '', 'home', () => { location.href = location.pathname; });
-        App.loader.catalog().forEach(c => { if (!exam || c.file !== exam.sourceFile) add(App.t('cmdOpenExam', { name: App.loc(c.title) || c.file }), '', 'book', () => { location.href = '?content=' + encodeURIComponent(c.file); }); });
+        App.loader.catalog().forEach(c => { if (!exam || c.file !== exam.sourceFile) add(App.t('cmdOpenExam', { name: App.loc(c.title) || c.file }), '', 'book', () => App.ui.gotoExam(c.file)); });
         if (exam) {
             add(App.t('cmdSearch'), '/', 'grid', () => App.ui.openSearch());
             add(App.t('statsBtn'), '', 'chart', () => App.ui.openStats());
@@ -188,6 +188,7 @@
             });
             add(App.t('cmdExportExam'), '', 'download', () => App.ui.exportExamDialog(exam.local ? App.library.get(exam.id) || exam : exam, { raw: !!exam.local }));
         }
+        add(App.t('scanBtn'), '', 'refresh', () => App.ui.checkExams());
         add(App.t('optionsTitle'), '', 'menu', () => App.ui.openOptions());
         add(App.t('themeTitle'), '', App.ui.theme() === 'dark' ? 'sun' : 'moon', () => App.ui.setTheme(App.ui.theme() === 'dark' ? 'light' : 'dark'));
         add(App.t('langTitle'), '', 'globe', () => App.ui.setLang(App.lang === 'en' ? 'it' : 'en'));

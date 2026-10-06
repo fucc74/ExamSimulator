@@ -667,6 +667,15 @@ kbd { display: inline-block; min-width: 22px; padding: 2px 7px; border-radius: 6
     #clear-btn, #report-btn { padding: 5px 9px; }
 }
 
+/* Exam discovery + exam menu */
+.discover { margin: 0 auto var(--space); max-width: 760px; text-align: center; }
+.discover .toolbar { justify-content: center; }
+.discover .hint { margin-top: 8px; }
+.link-btn { background: none; border: 0; padding: 0; color: var(--primary); font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }
+.scan-bad { color: var(--error); }
+.scan-bad-line { margin: 6px 0; font-size: 0.9rem; overflow-wrap: anywhere; }
+.exam-switcher select { flex: 1 1 260px; max-width: min(100%, 460px); width: auto; font-weight: 600; }
+
     </style>
     <script>
     // Apply the saved theme before first paint (avoids a flash)
@@ -1006,6 +1015,12 @@ App.loc = function (v) {
 
 /* UI translations added in engine v3 (options, backup/sync, library, editor, search, reports, quality). */
 Object.assign(App.I18N.en, {
+    scanBtn: "Check for exams", scanImportFolder: "Import a folder…", scanImportHint: "Copies every .exam file found in a folder into My exams (works in every browser)", scanForget: "Forget folder",
+    scanFirstTime: "Press \"Check for exams\" and choose the folder that holds your .exam files. Next time the button re-reads that folder.", scanUnsupported: "This browser cannot remember a folder. Use \"Import a folder…\" to load the exams in it.",
+    scanStatus: "Folder \"{name}\": {n} exams found (checked at {t}).", scanAllow: "Press \"Check for exams\" to allow access to the folder \"{name}\".", scanDenied: "Access to the folder was denied. Press \"Check for exams\" to try again.",
+    scanDone: "{n} exams found in \"{name}\".", scanRefreshed: "List refreshed.", scanNone: "No .exam files in that folder.", scanImported: "Folder imported: {a} added, {u} updated, {s} already bundled, {b} not readable.",
+    scanBadSummary: "{n} file(s) could not be used.", scanBadShow: "Show details", scanBadTitle: "{n} file(s) could not be used", scanBadIntro: "These .exam files were skipped:", folderChip: "Folder",
+    errDiskAccess: "The exam \"{name}\" comes from your exam folder. Press \"Check for exams\" on the start page to allow access to the folder again.",
     formulaLabel: "Formula", closeBtn: "Close", cancelBtn: "Cancel", openBtn: "Open", editBtn: "Edit", renameBtn: "Rename", clearBtn: "Clear", localChip: "My exam",
     optionsTitle: "Options", optionsSub: "Profile: {name}", themeLight: "Light", themeDark: "Dark",
     optGeneral: "General", optLanguage: "Language", optTheme: "Theme",
@@ -1072,6 +1087,12 @@ Object.assign(App.I18N.en, {
 });
 
 Object.assign(App.I18N.it, {
+    scanBtn: "Cerca esami", scanImportFolder: "Importa una cartella…", scanImportHint: "Copia in I miei esami ogni file .exam trovato in una cartella (funziona in tutti i browser)", scanForget: "Dimentica la cartella",
+    scanFirstTime: "Premi \"Cerca esami\" e scegli la cartella che contiene i tuoi file .exam. Dalla volta dopo il pulsante rilegge quella cartella.", scanUnsupported: "Questo browser non può ricordare una cartella. Usa \"Importa una cartella…\" per caricare gli esami che contiene.",
+    scanStatus: "Cartella \"{name}\": {n} esami trovati (controllata alle {t}).", scanAllow: "Premi \"Cerca esami\" per consentire l'accesso alla cartella \"{name}\".", scanDenied: "Accesso alla cartella negato. Premi \"Cerca esami\" per riprovare.",
+    scanDone: "{n} esami trovati in \"{name}\".", scanRefreshed: "Elenco aggiornato.", scanNone: "Nessun file .exam in quella cartella.", scanImported: "Cartella importata: {a} aggiunti, {u} aggiornati, {s} già inclusi, {b} non leggibili.",
+    scanBadSummary: "{n} file non utilizzabili.", scanBadShow: "Mostra dettagli", scanBadTitle: "{n} file non utilizzabili", scanBadIntro: "Questi file .exam sono stati saltati:", folderChip: "Cartella",
+    errDiskAccess: "L'esame \"{name}\" proviene dalla tua cartella degli esami. Premi \"Cerca esami\" nella pagina iniziale per consentire di nuovo l'accesso alla cartella.",
     formulaLabel: "Formula", closeBtn: "Chiudi", cancelBtn: "Annulla", openBtn: "Apri", editBtn: "Modifica", renameBtn: "Rinomina", clearBtn: "Cancella", localChip: "Mio esame",
     optionsTitle: "Opzioni", optionsSub: "Profilo: {name}", themeLight: "Chiaro", themeDark: "Scuro",
     optGeneral: "Generale", optLanguage: "Lingua", optTheme: "Tema",
@@ -3057,6 +3078,137 @@ App.quality = (function () {
     return { analyze, structural, MIN_SEEN };
 })();
 
+/* Finding exams on disk.
+   1) Folder access (File System Access API, Chromium browsers): the user picks a folder once, the browser remembers it,
+      and "Check for exams" re-reads the .exam files in it — no build step. Cards come straight from the files.
+   2) Folder import (any browser): pick a folder, every .exam in it is copied into the local library.
+   Both share the same reader, which validates each file and reports the ones it cannot use. */
+App.folder = (function () {
+    const state = { name: null, access: 'none', count: 0, bad: [], at: 0 };   // access: none | granted | prompt | denied
+    let handle = null, entries = [], cache = new Map();
+
+    const supported = () => typeof window !== 'undefined' && typeof window.showDirectoryPicker === 'function';
+    const baseName = n => String(n).replace(/\.exam$/i, '');
+
+    // ---- remembered folder handle (IndexedDB, separate tiny database) ----
+    function db() {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open('examsim-fs', 1);
+            req.onupgradeneeded = () => { if (!req.result.objectStoreNames.contains('h')) req.result.createObjectStore('h'); };
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+        });
+    }
+    async function load() { try { const d = await db(); return await new Promise(r => { const q = d.transaction('h').objectStore('h').get('dir'); q.onsuccess = () => r(q.result || null); q.onerror = () => r(null); }); } catch (e) { return null; } }
+    async function store(h) {
+        try { const d = await db(); await new Promise((res, rej) => { const t = d.transaction('h', 'readwrite'); if (h) t.objectStore('h').put(h, 'dir'); else t.objectStore('h').delete('dir'); t.oncomplete = res; t.onerror = t.onabort = rej; }); return true; }
+        catch (e) { return false; }      // not clonable (tests) or storage blocked: the folder is then remembered for this visit only
+    }
+
+    // ---- reading ----
+    // files: [{name, text}] -> {ok: [{name, key, data, exam}], bad: [{name, message}]}
+    function readFiles(files) {
+        const ok = [], bad = [];
+        files.forEach(f => {
+            const key = baseName(f.name);
+            try {
+                const data = App.loader.parseText(f.text);
+                if (!data) throw new App.loader.LoadError('parse', { detail: 'not an ExamSim file' });
+                const { exam, report } = App.schema.prepare(data, key);
+                if (!exam) { bad.push({ name: f.name, message: report.errors.slice(0, 3).map(e => e.path + ': ' + e.message).join(' · ') }); return; }
+                ok.push({ name: f.name, key, data, exam });
+            } catch (e) {
+                bad.push({ name: f.name, message: e instanceof App.loader.LoadError ? App.loader.describe(Object.assign(e, { name: f.name })).join(' ') : String(e && e.message || e) });
+            }
+        });
+        return { ok, bad };
+    }
+
+    const entryOf = x => ({
+        id: x.exam.id, file: 'disk:' + x.key, title: x.exam.title, description: x.exam.description, code: x.exam.code, version: x.exam.version,
+        questionCount: x.exam.questions.length, topicCount: x.exam.topicList.length, disk: true
+    });
+
+    async function scan() {
+        const files = [], unreadable = [];
+        for await (const [name, h] of handle.entries()) {
+            if (h.kind !== 'file' || !/\.exam$/i.test(name)) continue;
+            try { files.push({ name, text: await (await h.getFile()).text() }); } catch (e) { unreadable.push({ name, message: String(e && e.message || e) }); }
+        }
+        files.sort((a, b) => a.name.localeCompare(b.name));
+        const r = readFiles(files);
+        entries = r.ok.map(entryOf);
+        cache = new Map(r.ok.map(x => [x.key, x.data]));
+        state.count = entries.length; state.bad = r.bad.concat(unreadable); state.at = Date.now(); state.name = handle.name;
+        App.events.emit('catalogChange', { source: 'folder' });
+        return { found: entries.length, bad: state.bad };
+    }
+
+    async function permission(ask) {
+        if (!handle.queryPermission) return 'granted';
+        const o = { mode: 'read' };
+        let p = await handle.queryPermission(o);
+        if (p !== 'granted' && ask && handle.requestPermission) p = await handle.requestPermission(o);
+        return p;
+    }
+
+    const api = {
+        supported, state,
+        entries: () => entries,
+        get: key => cache.get(key) || null,
+        hasFolder: () => !!handle,
+        readFiles,
+
+        // At start-up: use the remembered folder when the browser still allows it without asking.
+        async restore() {
+            if (!supported()) return false;
+            handle = await load();
+            if (!handle) return false;
+            state.name = handle.name;
+            state.access = await permission(false).catch(() => 'prompt');
+            if (state.access === 'granted') { try { await scan(); } catch (e) { state.access = 'prompt'; } }
+            return state.access === 'granted';
+        },
+        // Uses a directory handle (also what the tests pass in). Remembers it when possible.
+        async useHandle(h) {
+            handle = h; state.name = h.name; state.access = 'granted';
+            await store(h);
+            return scan();
+        },
+        async choose() {
+            const h = await window.showDirectoryPicker({ id: 'examsim', mode: 'read' });
+            return api.useHandle(h);
+        },
+        // The "Check for exams" button: ask permission again if needed, then re-read the folder.
+        async rescan() {
+            if (!handle) return api.choose();
+            state.access = await permission(true);
+            if (state.access !== 'granted') { state.access = 'denied'; throw new Error('denied'); }
+            return scan();
+        },
+        async forget() { handle = null; entries = []; cache = new Map(); state.name = null; state.access = 'none'; state.count = 0; state.bad = []; await store(null); App.events.emit('catalogChange', { source: 'folder' }); },
+
+        // Fallback for every browser: copies the exams found in `files` into the local library.
+        // Exams already bundled with the app (same id) are skipped; exams already in the library are updated.
+        importFiles(files) {
+            const r = readFiles(files);
+            const bundled = new Set((App.loader.baseCatalog() || []).map(c => c.id || c.file));
+            const out = { added: 0, updated: 0, bundled: 0, bad: r.bad.slice() };
+            r.ok.forEach(x => {
+                const id = x.exam.id;
+                if (bundled.has(id)) { out.bundled++; return; }
+                const existed = App.library.has(id);
+                const raw = Object.assign({}, x.data.format === undefined ? App.schema.fromLegacy(x.data, x.key) : x.data, { id });
+                const res = App.library.save(raw);
+                if (res.ok) { if (existed) out.updated++; else out.added++; }
+                else out.bad.push({ name: x.name, message: res.report.errors.slice(0, 2).map(e => e.path + ': ' + e.message).join(' · ') });
+            });
+            return out;
+        }
+    };
+    return api;
+})();
+
 /* Study modes and spaced repetition (Leitner boxes). Pure logic, no DOM. */
 (function () {
     const { shuffle } = App.util;
@@ -3431,6 +3583,14 @@ App.loader = (function () {
     const isHttp = () => typeof location !== 'undefined' && /^https?:$/.test(location.protocol);
 
     async function loadByName(name) {
+        if (name.startsWith('disk:')) {
+            const key = name.slice(5);
+            const data = App.folder && App.folder.get(key);
+            if (!data) throw new LoadError('diskAccess', { name: key + '.exam' });
+            const exam = finalize(data, key, key + '.exam');
+            exam.sourceFile = name; exam.disk = true;
+            return exam;
+        }
         if (name.startsWith('local:')) {
             const id = name.slice(6);
             const raw = App.library && App.library.get(id);
@@ -3468,13 +3628,19 @@ App.loader = (function () {
     }
 
     // Exam list: exams.js (generated, optional) overrides the list embedded in exam.html at build time.
-    function catalog() {
+    function baseCatalog() {
         if (typeof window === 'undefined') return [];
-        let base = [];
-        if (Array.isArray(window.ExamCatalog) && window.ExamCatalog.length) base = window.ExamCatalog;
-        else if (Array.isArray(window.ExamCatalogDefault)) base = window.ExamCatalogDefault;
-        const local = App.library ? App.library.list() : [];
-        return local.length ? base.concat(local) : base;
+        if (Array.isArray(window.ExamCatalog) && window.ExamCatalog.length) return window.ExamCatalog;
+        return Array.isArray(window.ExamCatalogDefault) ? window.ExamCatalogDefault : [];
+    }
+    // Bundled list + the user's own exams + exams found in the chosen folder. Same id: the fresher source wins (folder > mine > bundled).
+    function catalog() {
+        const out = [];
+        const put = item => { const id = item.id || item.file; const i = out.findIndex(x => (x.id || x.file) === id); if (i >= 0) out[i] = item; else out.push(item); };
+        baseCatalog().forEach(put);
+        (App.library ? App.library.list() : []).forEach(put);
+        (App.folder ? App.folder.entries() : []).forEach(put);
+        return out;
     }
 
     // Human-readable message for a load error.
@@ -3486,6 +3652,7 @@ App.loader = (function () {
             case 'network': return [T('errNetwork', { name })];
             case 'parse': return [T('errParse', { name: name || '', detail: err.detail || '' })];
             case 'noRegister': return [T('errNoRegister', { name })];
+            case 'diskAccess': return [T('errDiskAccess', { name })];
             case 'invalid': {
                 const lines = (err.report && err.report.errors || []).slice(0, 6).map(e => '• ' + e.path + ': ' + e.message);
                 return [T('errInvalid', { name, n: err.report ? err.report.errors.length : '?' })].concat(lines);
@@ -3494,7 +3661,7 @@ App.loader = (function () {
         }
     }
 
-    return { register, parseText, finalize, loadByName, loadByUrl, catalog, describe, LoadError };
+    return { register, parseText, finalize, loadByName, loadByUrl, catalog, baseCatalog, describe, LoadError };
 })();
 
 if (typeof window !== 'undefined') window.ExamSim = { register: d => App.loader.register(d), version: App.version, App };
@@ -3749,6 +3916,7 @@ App.ui = {};
         }
         const banner = App.ui.backupBanner();
         if (banner) v.appendChild(banner);
+        v.appendChild(App.ui.discoverBar());
         const cat = App.loader.catalog();
         if (!cat.length) v.appendChild(el('p', { class: 'hint', style: 'text-align:center', text: App.t('noCatalog') }));
         const grid = el('div', { class: 'exam-grid', id: 'exam-list' });
@@ -3764,7 +3932,8 @@ App.ui = {};
             if (attempts.length) meta.appendChild(el('span', { class: 'chip primary', text: attempts.length === 1 ? App.t('attemptOne') : App.t('attemptsChip', { n: attempts.length }) }));
             if (sessions) meta.appendChild(el('span', { class: 'chip warn', text: App.t('inProgressChip') }));
             if (item.local) meta.appendChild(el('span', { class: 'chip', text: App.t('localChip') }));
-            grid.appendChild(el('a', { href: '?content=' + encodeURIComponent(item.file), class: 'exam-card' }, top,
+            if (item.disk) meta.appendChild(el('span', { class: 'chip', text: App.t('folderChip') }));
+            grid.appendChild(el('a', { href: '?content=' + encodeURIComponent(item.file), class: 'exam-card', onclick: item.disk ? (e => { e.preventDefault(); App.ui.gotoExam(item.file); }) : undefined }, top,
                 el('div', { class: 'exam-card-title', text: App.loc(item.title) || item.file }),
                 el('div', { class: 'exam-card-desc', text: App.loc(item.description) }), meta));
         });
@@ -3776,13 +3945,20 @@ App.ui = {};
     };
 
     // ------------------------------------------------------------- dashboard
-    function examChips() {
-        const chips = el('div', { class: 'exam-chips' });
-        App.loader.catalog().forEach(item => {
-            const cur = item.file === App.state.exam.sourceFile;
-            chips.appendChild(el('a', { href: '?content=' + encodeURIComponent(item.file), class: 'exam-chip' + (cur ? ' current' : ''), text: App.loc(item.title) || item.file, aria: cur ? { current: 'page' } : {} }));
+    // Exam menu: a drop-down scales to any number of exams.
+    function examSelect() {
+        const exam = App.state.exam;
+        const sel = el('select', { id: 'exam-switch', 'aria-label': App.t('switchExam') });
+        const cat = App.loader.catalog();
+        let found = false;
+        cat.forEach(item => {
+            const cur = item.file === exam.sourceFile; if (cur) found = true;
+            sel.appendChild(el('option', { value: item.file, text: (App.loc(item.title) || item.file) + (item.disk ? ' · ' + App.t('folderChip') : (item.local ? ' · ' + App.t('localChip') : '')) }));
+            if (cur) sel.value = item.file;
         });
-        return chips;
+        if (!found) { sel.appendChild(el('option', { value: exam.sourceFile || '', text: App.loc(exam.title) })); sel.value = exam.sourceFile || ''; }
+        sel.addEventListener('change', () => { if (sel.value && sel.value !== exam.sourceFile) App.ui.gotoExam(sel.value); });
+        return sel;
     }
 
     function modeLabel(m) {
@@ -3822,7 +3998,7 @@ App.ui = {};
         const bn = App.ui.backupBanner(); if (bn) v.appendChild(bn);
         const cl = App.ui.changelogNotice(exam); if (cl) v.appendChild(cl);
         if (exam.preview) v.appendChild(el('div', { class: 'banner info', id: 'preview-banner' }, icon('play', 18), el('span', { class: 'banner-text', text: App.t('edPreviewBanner') }), App.ui.btn(App.t('edBackToEditor'), 'back', 'btn-sm', () => { App.state.exam = null; App.ui.renderLibrary(); App.ui.show('library'); }, { id: 'preview-back' })));
-        v.appendChild(el('div', { class: 'exam-switcher' }, el('span', { class: 'exam-switcher-label', text: App.t('switchExam') }), examChips()));
+        v.appendChild(el('div', { class: 'exam-switcher' }, el('label', { class: 'exam-switcher-label', for: 'exam-switch', text: App.t('switchExam') }), examSelect()));
         const tb = App.ui.toolbarButtons({ stats: true, examIds: [exam.id] });
         tb.insertBefore(App.ui.btn(App.t('searchBtn'), 'search', 'btn-ghost btn-sm', () => App.ui.openSearch(), { id: 'dash-search' }), tb.children[1] || null);
         tb.appendChild(App.ui.btn(App.t('exportExam'), 'download', 'btn-ghost btn-sm', () => App.ui.exportExamDialog(exam.local ? (App.library.get(exam.id) || exam) : exam, { raw: !!exam.local }), { id: 'dash-export-exam' }));
@@ -5478,7 +5654,7 @@ App.ui = {};
         const add = (label, hint, iconName, run) => out.push({ label, hint, iconName, run });
         const exam = App.state.exam;
         add(App.t('cmdHome'), '', 'home', () => { location.href = location.pathname; });
-        App.loader.catalog().forEach(c => { if (!exam || c.file !== exam.sourceFile) add(App.t('cmdOpenExam', { name: App.loc(c.title) || c.file }), '', 'book', () => { location.href = '?content=' + encodeURIComponent(c.file); }); });
+        App.loader.catalog().forEach(c => { if (!exam || c.file !== exam.sourceFile) add(App.t('cmdOpenExam', { name: App.loc(c.title) || c.file }), '', 'book', () => App.ui.gotoExam(c.file)); });
         if (exam) {
             add(App.t('cmdSearch'), '/', 'grid', () => App.ui.openSearch());
             add(App.t('statsBtn'), '', 'chart', () => App.ui.openStats());
@@ -5491,6 +5667,7 @@ App.ui = {};
             });
             add(App.t('cmdExportExam'), '', 'download', () => App.ui.exportExamDialog(exam.local ? App.library.get(exam.id) || exam : exam, { raw: !!exam.local }));
         }
+        add(App.t('scanBtn'), '', 'refresh', () => App.ui.checkExams());
         add(App.t('optionsTitle'), '', 'menu', () => App.ui.openOptions());
         add(App.t('themeTitle'), '', App.ui.theme() === 'dark' ? 'sun' : 'moon', () => App.ui.setTheme(App.ui.theme() === 'dark' ? 'light' : 'dark'));
         add(App.t('langTitle'), '', 'globe', () => App.ui.setLang(App.lang === 'en' ? 'it' : 'en'));
@@ -5627,6 +5804,94 @@ App.ui = {};
     };
 })();
 
+/* UI: finding exams on disk — the "Check for exams" bar on the start screen, folder import, in-page opening of folder exams. */
+(function () {
+    const { el, icon } = App.util;
+    const $ = App.ui.$;
+
+    // Opens an exam from the catalog. Exams read from the folder live in memory, so they open without a page reload.
+    App.ui.gotoExam = async function (file) {
+        if (!String(file).startsWith('disk:')) { location.href = '?content=' + encodeURIComponent(file); return; }
+        try {
+            const exam = await App.loader.loadByName(file);
+            try { history.pushState(null, '', '?content=' + encodeURIComponent(file)); } catch (e) { /* file:// may refuse; harmless */ }
+            App.ui.openExam(exam);
+        } catch (e) { App.ui.toast(e instanceof App.loader.LoadError ? App.loader.describe(e).join(' ') : String(e.message || e), 6000); }
+    };
+
+    // Over http(s) the bundled list can be refreshed from exams.js without rebuilding anything on this side.
+    async function refreshBundled() {
+        if (!/^https?:$/.test(location.protocol)) return;
+        try {
+            const resp = await fetch('exams.js', { cache: 'no-cache' });
+            if (!resp.ok) return;
+            const m = (await resp.text()).match(/window\.ExamCatalog\s*=\s*(\[[\s\S]*\])\s*;?/);
+            if (m) window.ExamCatalog = JSON.parse(m[1]);
+        } catch (e) { /* offline: keep the list we have */ }
+    }
+
+    function showBad(bad) {
+        const body = el('div', {}, el('p', { class: 'hint', text: App.t('scanBadIntro') }));
+        bad.forEach(b => body.appendChild(el('p', { class: 'scan-bad-line' }, el('b', { text: b.name + ': ' }), el('span', { text: b.message }))));
+        return App.ui.modal({ title: App.t('scanBadTitle', { n: bad.length }), body, actions: [{ label: App.t('closeBtn'), cls: 'btn-ghost' }] });
+    }
+
+    function pickFolderFiles() {
+        let input = $('folder-input');
+        if (!input) {
+            input = el('input', { type: 'file', id: 'folder-input', class: 'hidden', multiple: true, 'aria-label': App.t('scanImportFolder') });
+            input.setAttribute('webkitdirectory', ''); input.setAttribute('directory', '');
+            input.addEventListener('change', async () => {
+                const list = Array.from(input.files || []).filter(f => /\.exam$/i.test(f.name));
+                input.value = '';
+                if (!list.length) { App.ui.toast(App.t('scanNone'), 5000); return; }
+                const files = [];
+                for (const f of list) files.push({ name: f.name, text: await f.text() });
+                const r = App.folder.importFiles(files);
+                App.ui.toast(App.t('scanImported', { a: r.added, u: r.updated, s: r.bundled, b: r.bad.length }), 6000);
+                App.ui.rerender();
+                if (r.bad.length) showBad(r.bad);
+            });
+            document.body.appendChild(input);
+        }
+        input.click();
+    }
+
+    // The main button: re-read the remembered folder (asking for permission again if the browser wants it).
+    App.ui.checkExams = async function () {
+        await refreshBundled();
+        if (!App.folder.supported()) { App.ui.rerender(); App.ui.toast(App.t('scanRefreshed')); return; }
+        try {
+            const r = await App.folder.rescan();
+            App.ui.toast(App.t('scanDone', { n: r.found, name: App.folder.state.name }), 4000);
+        } catch (e) {
+            if (e && e.name === 'AbortError') return;                 // picker closed
+            App.ui.toast(e && e.message === 'denied' ? App.t('scanDenied') : String(e && e.message || e), 6000);
+        }
+        App.ui.rerender();
+    };
+
+    App.ui.discoverBar = function () {
+        const st = App.folder.state, sup = App.folder.supported();
+        const bar = el('div', { class: 'discover', id: 'discover' });
+        const row = el('div', { class: 'toolbar' },
+            App.ui.btn(App.t('scanBtn'), 'refresh', 'btn-sm', () => App.ui.checkExams(), { id: 'scan-btn' }),
+            sup ? App.ui.btn(App.t('scanImportFolder'), 'upload', 'btn-ghost btn-sm', () => pickFolderFiles(), { id: 'folder-import-btn', title: App.t('scanImportHint') }) : null,
+            sup && App.folder.hasFolder() ? App.ui.btn(App.t('scanForget'), 'x', 'btn-ghost btn-sm', async () => { await App.folder.forget(); App.ui.rerender(); }, { id: 'folder-forget' }) : null);
+        bar.appendChild(row);
+        let msg;
+        if (!sup) msg = App.t('scanUnsupported');
+        else if (!App.folder.hasFolder()) msg = App.t('scanFirstTime');
+        else if (st.access === 'granted') msg = App.t('scanStatus', { name: st.name, n: st.count, t: new Date(st.at).toLocaleTimeString() });
+        else if (st.access === 'denied') msg = App.t('scanDenied');
+        else msg = App.t('scanAllow', { name: st.name });
+        bar.appendChild(el('p', { class: 'hint', id: 'scan-status', role: 'status', text: msg }));
+        if (st.bad.length) bar.appendChild(el('p', { class: 'hint scan-bad', id: 'scan-bad' }, el('span', { text: App.t('scanBadSummary', { n: st.bad.length }) + ' ' }),
+            el('button', { type: 'button', class: 'link-btn', onclick: () => showBad(st.bad), text: App.t('scanBadShow') })));
+        return bar;
+    };
+})();
+
 /* Boot: preferences, header controls, routing (?content=NAME or ?url=ADDRESS). */
 (function () {
     const $ = App.ui.$;
@@ -5659,7 +5924,7 @@ App.ui = {};
         const name = params.get('content');
         const url = params.get('url');
         try {
-            if (name && /^(local:)?[\w.\-]+$/.test(name)) {
+            if (name && (/^(local:)?[\w.\-]+$/.test(name) || /^disk:.+$/.test(name))) {
                 showLoading();
                 openExam(await App.loader.loadByName(name));
             } else if (url) {
@@ -5691,6 +5956,7 @@ App.ui = {};
         const pal = $('palette-btn'); pal.appendChild(App.util.icon('search', 18)); pal.title = pal.ariaLabel = App.t('cmdTitle'); pal.addEventListener('click', () => App.ui.openPalette());
         const opt = $('options-btn'); opt.appendChild(App.util.icon('settings', 18)); opt.title = App.t('optionsTitle'); opt.setAttribute('aria-label', App.t('optionsTitle')); opt.addEventListener('click', () => (App.state.screen === 'options' ? App.ui.closeOptions() : App.ui.openOptions()));
         $('import-file').addEventListener('change', e => { if (e.target.files[0]) App.ui.handleImportFile(e.target.files[0]); e.target.value = ''; });
+        try { await App.folder.restore(); } catch (e) { /* folder access is optional */ }
         await route();
         if (location.hash === '#options') App.ui.openOptions();
         App.events.on('sessionEnd', () => { App.backup.writeAuto(); });

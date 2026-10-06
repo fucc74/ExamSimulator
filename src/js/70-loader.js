@@ -50,6 +50,14 @@ App.loader = (function () {
     const isHttp = () => typeof location !== 'undefined' && /^https?:$/.test(location.protocol);
 
     async function loadByName(name) {
+        if (name.startsWith('disk:')) {
+            const key = name.slice(5);
+            const data = App.folder && App.folder.get(key);
+            if (!data) throw new LoadError('diskAccess', { name: key + '.exam' });
+            const exam = finalize(data, key, key + '.exam');
+            exam.sourceFile = name; exam.disk = true;
+            return exam;
+        }
         if (name.startsWith('local:')) {
             const id = name.slice(6);
             const raw = App.library && App.library.get(id);
@@ -87,13 +95,19 @@ App.loader = (function () {
     }
 
     // Exam list: exams.js (generated, optional) overrides the list embedded in exam.html at build time.
-    function catalog() {
+    function baseCatalog() {
         if (typeof window === 'undefined') return [];
-        let base = [];
-        if (Array.isArray(window.ExamCatalog) && window.ExamCatalog.length) base = window.ExamCatalog;
-        else if (Array.isArray(window.ExamCatalogDefault)) base = window.ExamCatalogDefault;
-        const local = App.library ? App.library.list() : [];
-        return local.length ? base.concat(local) : base;
+        if (Array.isArray(window.ExamCatalog) && window.ExamCatalog.length) return window.ExamCatalog;
+        return Array.isArray(window.ExamCatalogDefault) ? window.ExamCatalogDefault : [];
+    }
+    // Bundled list + the user's own exams + exams found in the chosen folder. Same id: the fresher source wins (folder > mine > bundled).
+    function catalog() {
+        const out = [];
+        const put = item => { const id = item.id || item.file; const i = out.findIndex(x => (x.id || x.file) === id); if (i >= 0) out[i] = item; else out.push(item); };
+        baseCatalog().forEach(put);
+        (App.library ? App.library.list() : []).forEach(put);
+        (App.folder ? App.folder.entries() : []).forEach(put);
+        return out;
     }
 
     // Human-readable message for a load error.
@@ -105,6 +119,7 @@ App.loader = (function () {
             case 'network': return [T('errNetwork', { name })];
             case 'parse': return [T('errParse', { name: name || '', detail: err.detail || '' })];
             case 'noRegister': return [T('errNoRegister', { name })];
+            case 'diskAccess': return [T('errDiskAccess', { name })];
             case 'invalid': {
                 const lines = (err.report && err.report.errors || []).slice(0, 6).map(e => '• ' + e.path + ': ' + e.message);
                 return [T('errInvalid', { name, n: err.report ? err.report.errors.length : '?' })].concat(lines);
@@ -113,7 +128,7 @@ App.loader = (function () {
         }
     }
 
-    return { register, parseText, finalize, loadByName, loadByUrl, catalog, describe, LoadError };
+    return { register, parseText, finalize, loadByName, loadByUrl, catalog, baseCatalog, describe, LoadError };
 })();
 
 if (typeof window !== 'undefined') window.ExamSim = { register: d => App.loader.register(d), version: App.version, App };
