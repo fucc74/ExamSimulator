@@ -50,6 +50,21 @@ ExamSim.register({
           "weight": 2
         }
       ]
+    },
+    {
+      "id": "strict",
+      "name": {
+        "en": "Strict mini exam (1 pause, clock keeps running)",
+        "it": "Mini esame rigoroso (1 pausa, il tempo scorre)"
+      },
+      "selection": "random",
+      "exam": true,
+      "count": 6,
+      "timeSec": 120,
+      "passThreshold": 60,
+      "pauses": 1,
+      "strictTime": true,
+      "scoring": { "partialCredit": true, "wrongPenalty": 0.25 }
     }
   ],
   "questions": [
@@ -95,7 +110,8 @@ ExamSim.register({
       "explanation": {
         "en": "RAG needs embeddings and a vector index to retrieve context.",
         "it": "RAG richiede embedding e un indice vettoriale per recuperare il contesto."
-      }
+      },
+      "mandatory": true
     },
     {
       "id": 3,
@@ -292,6 +308,49 @@ ExamSim.register({
       ],
       "answer": [0, 1, 2],
       "explanation": "Image in a private registry, profiles in local S3, isAirGapped=true."
+    },
+    {
+      "id": 13,
+      "topic": "basics",
+      "type": "single",
+      "difficulty": 2,
+      "tags": ["rich"],
+      "text": {
+        "en": "Look at the diagram.\n\n![RAG flow](data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgOTAiPjxyZWN0IHg9IjQiIHk9IjIwIiB3aWR0aD0iODAiIGhlaWdodD0iNTAiIHJ4PSI4IiBmaWxsPSIjZTNmN2YxIiBzdHJva2U9IiMwMGE2N2UiIHN0cm9rZS13aWR0aD0iMyIvPjx0ZXh0IHg9IjQ0IiB5PSI1MSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMGYxNzJhIj5RdWVyeTwvdGV4dD48cGF0aCBkPSJNODQgNDVoNDAiIHN0cm9rZT0iIzAwYTY3ZSIgc3Ryb2tlLXdpZHRoPSIzIi8+PHJlY3QgeD0iMTI0IiB5PSIyMCIgd2lkdGg9IjgwIiBoZWlnaHQ9IjUwIiByeD0iOCIgZmlsbD0iI2UzZjdmMSIgc3Ryb2tlPSIjMDBhNjdlIiBzdHJva2Utd2lkdGg9IjMiLz48dGV4dCB4PSIxNjQiIHk9IjUxIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMwZjE3MmEiPlJldHJpZXZlPC90ZXh0PjxwYXRoIGQ9Ik0yMDQgNDVoNDAiIHN0cm9rZT0iIzAwYTY3ZSIgc3Ryb2tlLXdpZHRoPSIzIi8+PHJlY3QgeD0iMjQ0IiB5PSIyMCIgd2lkdGg9IjcyIiBoZWlnaHQ9IjUwIiByeD0iOCIgZmlsbD0iI2UzZjdmMSIgc3Ryb2tlPSIjMDBhNjdlIiBzdHJva2Utd2lkdGg9IjMiLz48dGV4dCB4PSIyODAiIHk9IjUxIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMwZjE3MmEiPkxMTTwvdGV4dD48L3N2Zz4=)\n\nWhich component is missing between the retriever and the user's answer?",
+        "it": "Osserva lo schema.\n\n![Flusso RAG](data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgOTAiPjxyZWN0IHg9IjQiIHk9IjIwIiB3aWR0aD0iODAiIGhlaWdodD0iNTAiIHJ4PSI4IiBmaWxsPSIjZTNmN2YxIiBzdHJva2U9IiMwMGE2N2UiIHN0cm9rZS13aWR0aD0iMyIvPjx0ZXh0IHg9IjQ0IiB5PSI1MSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMGYxNzJhIj5RdWVyeTwvdGV4dD48cGF0aCBkPSJNODQgNDVoNDAiIHN0cm9rZT0iIzAwYTY3ZSIgc3Ryb2tlLXdpZHRoPSIzIi8+PHJlY3QgeD0iMTI0IiB5PSIyMCIgd2lkdGg9IjgwIiBoZWlnaHQ9IjUwIiByeD0iOCIgZmlsbD0iI2UzZjdmMSIgc3Ryb2tlPSIjMDBhNjdlIiBzdHJva2Utd2lkdGg9IjMiLz48dGV4dCB4PSIxNjQiIHk9IjUxIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMwZjE3MmEiPlJldHJpZXZlPC90ZXh0PjxwYXRoIGQ9Ik0yMDQgNDVoNDAiIHN0cm9rZT0iIzAwYTY3ZSIgc3Ryb2tlLXdpZHRoPSIzIi8+PHJlY3QgeD0iMjQ0IiB5PSIyMCIgd2lkdGg9IjcyIiBoZWlnaHQ9IjUwIiByeD0iOCIgZmlsbD0iI2UzZjdmMSIgc3Ryb2tlPSIjMDBhNjdlIiBzdHJva2Utd2lkdGg9IjMiLz48dGV4dCB4PSIyODAiIHk9IjUxIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMwZjE3MmEiPkxMTTwvdGV4dD48L3N2Zz4=)\n\nQuale componente manca tra il recupero e la risposta all'utente?"
+      },
+      "options": [
+        "Embedding of the **answer**",
+        "The **LLM** that generates the answer",
+        "`DROP TABLE` statement",
+        "Tape drive"
+      ],
+      "answer": [1],
+      "explanation": {
+        "en": "The **LLM** generates the final answer from the retrieved context.\n\n```python\ncontext = retrieve(query)\nanswer = llm(query, context)\n```",
+        "it": "L'**LLM** genera la risposta finale dal contesto recuperato."
+      }
+    },
+    {
+      "id": 14,
+      "topic": "network",
+      "type": "numeric",
+      "difficulty": 2,
+      "tags": ["rich", "math"],
+      "text": "A model has $P = 70 \\times 10^{9}$ parameters stored in 16-bit (2 bytes) format. How many GB of memory do the weights alone need?\n\n$$\\text{GB} = \\frac{P \\times 2}{10^{9}}$$",
+      "answer": { "value": 140, "tolerance": 1, "unit": "GB" },
+      "explanation": "70e9 × 2 bytes = 140 GB."
+    },
+    {
+      "id": 15,
+      "topic": "basics",
+      "type": "single",
+      "difficulty": 1,
+      "tags": ["rich"],
+      "text": "Which row of the table is correct?\n\n| Config | GPUs |\n|---|---|\n| Developer | 2 |\n| Medium | 8 |\n| Large | 16 |\n\nPick the largest configuration:",
+      "options": ["Developer", "Medium", "Large", "Small"],
+      "answer": [2],
+      "explanation": "Large has 16 GPUs in this made-up table."
     }
   ]
 });

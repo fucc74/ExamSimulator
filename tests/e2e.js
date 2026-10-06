@@ -75,7 +75,9 @@ async function main() {
     p.on('dialog', d => d.accept());
 
     const suites = require('./e2e-suites.js');
+    const only = (process.env.E2E_ONLY || '').split(',').map(x => x.trim().toLowerCase()).filter(Boolean);
     for (const [name, fn] of Object.entries(suites)) {
+        if (only.length && !only.some(o => name.toLowerCase().includes(o))) continue;
         console.log(name);
         try { await fn({ p, ctx, check, answerCurrent, runAll, URL_BASE, HTTP_BASE, ROOT, errors, browser }); }
         catch (e) { failures++; console.log('  ✗ suite crashed: ' + e.message); }

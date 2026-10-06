@@ -406,11 +406,11 @@ select { appearance: none; -webkit-appearance: none; padding-right: 38px; backgr
 .review-item-card { border: 1px solid var(--border); border-left: 5px solid var(--border-strong); border-radius: var(--r-md); padding: 16px 18px; margin-bottom: 12px; background: var(--surface); }
 .review-item-card.is-correct { border-left-color: var(--success); }
 .review-item-card.is-incorrect { border-left-color: var(--error); }
-.review-item-card.is-unanswered { border-left-color: var(--warning); }
+.review-item-card.is-unanswered, .review-item-card.is-partial { border-left-color: var(--warning); }
 .review-status-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 10px; border-radius: var(--r-pill); margin-bottom: 8px; }
 .is-correct .review-status-badge { background: var(--success-soft); color: var(--success); }
 .is-incorrect .review-status-badge { background: var(--error-soft); color: var(--error); }
-.is-unanswered .review-status-badge { background: var(--warning-soft); color: var(--warning); }
+.is-unanswered .review-status-badge, .is-partial .review-status-badge { background: var(--warning-soft); color: var(--warning); }
 .review-item-card .meta { font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; }
 .review-item-card h3 { font-size: 1.02rem; margin-bottom: 10px; white-space: pre-line; overflow-wrap: anywhere; }
 .review-option { margin: 5px 0; padding: 6px 10px; border-radius: 8px; font-size: 0.93rem; overflow-wrap: anywhere; }
@@ -470,6 +470,65 @@ select { appearance: none; -webkit-appearance: none; padding-right: 38px; backgr
     .mode-grid { grid-template-columns: 1fr; }
 }
 
+/* ===== Rich text ===== */
+.question-text { white-space: normal; }
+.rich > *:first-child { margin-top: 0; }
+.rich > *:last-child { margin-bottom: 0; }
+.rich p { margin: 0 0 0.6em; }
+.rich ul, .rich ol { margin: 0.4em 0 0.7em 1.3em; }
+.rich li { margin: 0.2em 0; }
+.rich blockquote { margin: 0.6em 0; padding: 6px 14px; border-left: 4px solid var(--border-strong); color: var(--text-2); background: var(--surface-2); border-radius: 0 8px 8px 0; font-weight: 500; }
+.rich hr { border: 0; border-top: 1px solid var(--border); margin: 0.9em 0; }
+.rich-code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.88em; background: var(--surface-3); padding: 1px 6px; border-radius: 6px; font-weight: 600; }
+.rich-pre { margin: 0.6em 0; padding: 12px 14px; overflow-x: auto; background: #0f172a; color: #e2e8f0; border-radius: 10px; font-size: 0.85rem; line-height: 1.5; }
+.rich-pre code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; }
+.rich-img { display: block; max-width: 100%; max-height: 360px; margin: 0.6em 0; border-radius: 10px; border: 1px solid var(--border); background: #fff; cursor: zoom-in; }
+.rich-inline .rich-img { display: inline-block; max-height: 140px; margin: 4px 0; vertical-align: middle; }
+.rich-table-wrap { overflow-x: auto; margin: 0.6em 0; }
+.rich-table { border-collapse: collapse; font-size: 0.9rem; min-width: 60%; }
+.rich-table th, .rich-table td { border: 1px solid var(--border-strong); padding: 6px 12px; text-align: left; }
+.rich-table th { background: var(--surface-3); }
+.rich-math { overflow-x: auto; margin: 0.4em 0; }
+math { font-size: 1.1em; }
+.review-q { font-size: 1.02rem; font-weight: 700; margin-bottom: 10px; overflow-wrap: anywhere; }
+.review-q strong { display: inline; margin-right: 4px; }
+.review-q .rich { display: inline; }
+.review-q .rich p { display: inline; }
+.lightbox { position: fixed; inset: 0; z-index: 80; background: rgba(0,0,0,0.82); display: grid; place-items: center; padding: 20px; cursor: zoom-out; }
+.lightbox img { max-width: 100%; max-height: 100%; border-radius: 10px; background: #fff; }
+.lightbox-close { position: absolute; top: 16px; right: 16px; width: 42px; height: 42px; border-radius: 50%; border: 0; background: rgba(255,255,255,0.9); font-size: 1.1rem; }
+
+/* ===== Pause overlay, pace ===== */
+.pause-overlay { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 20px; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+.pause-card { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; max-width: 360px; color: var(--primary); }
+.pause-card h2 { color: var(--text); }
+.pace-chip { font-variant-numeric: tabular-nums; }
+.flag-btn:disabled { opacity: 0.5; cursor: default; }
+
+/* ===== Print / save as PDF ===== */
+.print-only { display: none; }
+@media print {
+    :root, :root[data-theme="dark"] {
+        --bg: #fff; --surface: #fff; --surface-2: #f6f6f6; --surface-3: #eee; --border: #ccc; --border-strong: #bbb;
+        --text: #111; --text-2: #222; --muted: #555; --primary: #007a5c; --primary-soft: #e6f4ef; --primary-ink: #fff;
+        --success: #0d7a3a; --success-soft: #e6f4ea; --error: #b3262b; --error-soft: #fbeaea; --warning: #9a6200; --warning-soft: #fff4de;
+        --shadow-sm: none; --shadow-md: none; --shadow-lg: none;
+    }
+    html, body { background: #fff !important; color: #111; font-size: 12px; }
+    body { padding: 0; min-height: 0; }
+    .app-header, .toolbar, .filter-chips, #toast, .skip-link, .actionbar, .run-side, .kbd-help { display: none !important; }
+    .print-only { display: block; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid #111; }
+    .print-head h2 { font-size: 1.3rem; }
+    .main-wrapper { max-width: none; padding: 0; }
+    .card { border: 0; box-shadow: none; padding: 0; }
+    .view { animation: none; }
+    .score-ring { width: 110px; }
+    .review-item-card { break-inside: avoid; border: 1px solid #bbb; margin-bottom: 8px; padding: 10px 12px; }
+    .review-item-card.hidden { display: block !important; }
+    .rich-img { max-height: 180px; }
+    .rich-pre { background: #f3f3f3; color: #111; border: 1px solid #ccc; white-space: pre-wrap; }
+}
+
     </style>
     <script>
     // Apply the saved theme before first paint (avoids a flash)
@@ -516,7 +575,7 @@ select { appearance: none; -webkit-appearance: none; padding-right: 38px; backgr
 <input type="file" id="import-file" accept=".json,application/json" class="hidden">
 
 <script>
-window.ExamCatalogDefault = [{"file":"demo","id":"demo","title":{"en":"Engine Demo — all question types","it":"Demo del motore — tutti i tipi di domanda"},"description":{"en":"A tiny exam that shows every question type, localized content, difficulty levels and custom modes.","it":"Un piccolo esame che mostra ogni tipo di domanda, contenuti localizzati, livelli di difficoltà e modalità personalizzate."},"code":"DEMO","version":"1.0","questionCount":12,"topicCount":3},{"file":"managedServices","id":"managedServices","title":"HPE Managed Services Expertise Exam Simulator","description":"Comprehensive validation bank for HPE Managed Services knowledge across ITSM, delivery, tooling, security, and partner programs.","code":"MS-EXPERTISE","version":"v1.0","questionCount":120,"topicCount":5},{"file":"v31","id":"v31","title":"V31 Practice Test","description":"Practice test, scenario-based and advanced questions on AI fundamentals, HPE Private Cloud AI architecture and sizing, deployment and administration, NVIDIA and AI Essentials, operations, edge AI and HPC.","code":"V31","version":"v1.0","questionCount":200,"topicCount":19},{"file":"v31advanced","id":"v31advanced","title":"V31 Advanced Practice Test","description":"Expert-level scenario questions on HPE Private Cloud AI sizing, AI Essentials resource governance, MLIS/NIM model serving, air-gapped deployments, edge inferencing and HPC/AI.","code":"V31-ADV","version":"v1.0","questionCount":100,"topicCount":7}];
+window.ExamCatalogDefault = [{"file":"demo","id":"demo","title":{"en":"Engine Demo — all question types","it":"Demo del motore — tutti i tipi di domanda"},"description":{"en":"A tiny exam that shows every question type, localized content, difficulty levels and custom modes.","it":"Un piccolo esame che mostra ogni tipo di domanda, contenuti localizzati, livelli di difficoltà e modalità personalizzate."},"code":"DEMO","version":"1.0","questionCount":15,"topicCount":3},{"file":"managedServices","id":"managedServices","title":"HPE Managed Services Expertise Exam Simulator","description":"Comprehensive validation bank for HPE Managed Services knowledge across ITSM, delivery, tooling, security, and partner programs.","code":"MS-EXPERTISE","version":"v1.0","questionCount":120,"topicCount":5},{"file":"v31","id":"v31","title":"V31 Practice Test","description":"Practice test, scenario-based and advanced questions on AI fundamentals, HPE Private Cloud AI architecture and sizing, deployment and administration, NVIDIA and AI Essentials, operations, edge AI and HPC.","code":"V31","version":"v1.0","questionCount":200,"topicCount":19},{"file":"v31advanced","id":"v31advanced","title":"V31 Advanced Practice Test","description":"Expert-level scenario questions on HPE Private Cloud AI sizing, AI Essentials resource governance, MLIS/NIM model serving, air-gapped deployments, edge inferencing and HPC/AI.","code":"V31-ADV","version":"v1.0","questionCount":100,"topicCount":7}];
 </script>
 <script>
 (function () {
@@ -645,6 +704,8 @@ App.I18N = {
         attemptsChip: '{n} attempts', attemptOne: '1 attempt', inProgressChip: 'In progress', correctKpi: 'Correct', wrongKpi: 'Incorrect', unansweredKpi: 'Unanswered', timeKpi: 'Time',
         filterAll: 'All', filterWrong: 'Incorrect', filterUnanswered: 'Unanswered', filterFlagged: 'Flagged', answeredOf: '{a}/{n}',
         topicBreakdown: 'Results by topic', scoreWord: 'score',
+        partialKpi: 'Partial', partialBadge: 'Partial · {p}%', pointsLine: 'Score: {s} / {m} points', mandatoryFailedMsg: 'Mandatory question(s) not answered correctly: {n}', mandatoryChip: 'Mandatory',
+        pauseBtn: 'Pause', pauseLeft: 'Pause ({n} left)', pauseNone: 'No pauses left', pausedTitle: 'Exam paused', pausedText: 'The timer is stopped and the question is hidden.', resumeExam: 'Resume', paceAhead: '+{n} ahead', paceBehind: '{n} behind', paceOn: 'On pace', strictExpired: 'Time ran out while you were away: the exam was submitted.', printBtn: 'Print / save PDF', printedOn: 'Printed on {d}',
         simulator: 'SIMULATOR', timeRemaining: 'Time remaining:',
         noExamTitle: 'Choose an exam', noExamText: 'Select one of the available exams below to start practicing.',
         availableExams: 'Available exams', switchExam: 'Exams:', noCatalog: 'No exams are listed. Add .exam files and rebuild the catalog (npm run build).',
@@ -713,6 +774,8 @@ App.I18N = {
         attemptsChip: '{n} tentativi', attemptOne: '1 tentativo', inProgressChip: 'In corso', correctKpi: 'Corrette', wrongKpi: 'Errate', unansweredKpi: 'Senza risposta', timeKpi: 'Tempo',
         filterAll: 'Tutte', filterWrong: 'Errate', filterUnanswered: 'Senza risposta', filterFlagged: 'Segnate', answeredOf: '{a}/{n}',
         topicBreakdown: 'Risultati per argomento', scoreWord: 'punteggio',
+        partialKpi: 'Parziali', partialBadge: 'Parziale · {p}%', pointsLine: 'Punteggio: {s} / {m} punti', mandatoryFailedMsg: 'Domande obbligatorie non corrette: {n}', mandatoryChip: 'Obbligatoria',
+        pauseBtn: 'Pausa', pauseLeft: 'Pausa ({n} rimaste)', pauseNone: 'Pause esaurite', pausedTitle: 'Esame in pausa', pausedText: 'Il timer è fermo e la domanda è nascosta.', resumeExam: 'Riprendi', paceAhead: '+{n} in anticipo', paceBehind: '{n} in ritardo', paceOn: 'Ritmo regolare', strictExpired: 'Il tempo è scaduto mentre eri assente: l\'esame è stato consegnato.', printBtn: 'Stampa / salva PDF', printedOn: 'Stampato il {d}',
         simulator: 'SIMULATORE', timeRemaining: 'Tempo rimanente:',
         noExamTitle: 'Scegli un esame', noExamText: 'Seleziona uno degli esami disponibili qui sotto per iniziare.',
         availableExams: 'Esami disponibili', switchExam: 'Esami:', noCatalog: 'Nessun esame elencato. Aggiungi file .exam e rigenera il catalogo (npm run build).',
@@ -794,6 +857,267 @@ App.loc = function (v) {
     return v[App.lang] || v.en || Object.values(v)[0] || '';
 };
 
+/* Rich text for exam content: a small, SAFE markdown subset rendered with DOM APIs (never innerHTML).
+   Supported: paragraphs/line breaks, **bold**, *italic*, `code`, ```fenced code```, lists, > quotes, tables,
+   ![images](data: / https: / relative), [links](https://…), and $math$ (LaTeX subset → MathML).
+   parse() builds a plain AST (testable without a DOM); toDom() turns it into nodes. */
+(function () {
+    const SAFE_IMG = /^(data:image\/(png|jpe?g|gif|webp|svg\+xml);base64,[A-Za-z0-9+\/=]+|https?:\/\/[^\s)]+|[\w.\-\/]+\.(png|jpe?g|gif|webp|svg))$/i;
+    const SAFE_LINK = /^https?:\/\/[^\s]+$/i;
+    const MATH_HINT = /[\\^_{}]/;
+
+    // ------------------------------------------------------------------ math (LaTeX subset)
+    const GREEK = { alpha: 'α', beta: 'β', gamma: 'γ', delta: 'δ', epsilon: 'ε', theta: 'θ', lambda: 'λ', mu: 'μ', pi: 'π', rho: 'ρ', sigma: 'σ', tau: 'τ', phi: 'φ', omega: 'ω', Delta: 'Δ', Sigma: 'Σ', Omega: 'Ω', Pi: 'Π' };
+    const SYMS = { times: '×', cdot: '·', div: '÷', pm: '±', le: '≤', leq: '≤', ge: '≥', geq: '≥', ne: '≠', neq: '≠', approx: '≈', infty: '∞', sum: '∑', prod: '∏', int: '∫', to: '→', rightarrow: '→', leftarrow: '←', Rightarrow: '⇒', in: '∈', ldots: '…', cdots: '⋯', degree: '°' };
+
+    function parseMath(src) {
+        let i = 0;
+        const peek = () => src[i];
+        function skipWs() { while (i < src.length && /\s/.test(src[i])) i++; }
+        function group() {                      // {...} or a single token
+            skipWs();
+            if (peek() === '{') { i++; const r = seq('}'); i++; return r; }
+            const a = atom();
+            return a || { t: 'mrow', c: [] };
+        }
+        function atom() {
+            skipWs();
+            if (i >= src.length) return null;
+            const ch = src[i];
+            if (ch === '\\') {
+                i++;
+                let name = '';
+                while (i < src.length && /[A-Za-z]/.test(src[i])) name += src[i++];
+                if (!name && i < src.length) { const s = src[i++]; return { t: 'mo', v: s === '%' ? '%' : s }; }
+                if (name === 'frac') { const a = group(), b = group(); return { t: 'mfrac', a, b }; }
+                if (name === 'sqrt') { return { t: 'msqrt', a: group() }; }
+                if (name === 'text' || name === 'mathrm') { skipWs(); let txt = ''; if (peek() === '{') { i++; while (i < src.length && src[i] !== '}') txt += src[i++]; i++; } return { t: 'mtext', v: txt }; }
+                if (GREEK[name]) return { t: 'mi', v: GREEK[name] };
+                if (SYMS[name]) return { t: 'mo', v: SYMS[name] };
+                return { t: 'mi', v: name };
+            }
+            if (ch === '{') { i++; const r = seq('}'); i++; return r; }
+            if (/[0-9.]/.test(ch)) { let n = ''; while (i < src.length && /[0-9.,]/.test(src[i]) && !(src[i] === ',' && !/[0-9]/.test(src[i + 1] || ''))) n += src[i++]; return { t: 'mn', v: n }; }
+            if (/[A-Za-z]/.test(ch)) { i++; return { t: 'mi', v: ch }; }
+            i++;
+            return { t: 'mo', v: ch };
+        }
+        function scripts(base) {
+            for (;;) {
+                skipWs();
+                if (peek() === '^') { i++; const s = group(); skipWs(); if (peek() === '_') { i++; const b = group(); base = { t: 'msubsup', base, sub: b, sup: s }; } else base = { t: 'msup', base, sup: s }; }
+                else if (peek() === '_') { i++; const b = group(); skipWs(); if (peek() === '^') { i++; const s = group(); base = { t: 'msubsup', base, sub: b, sup: s }; } else base = { t: 'msub', base, sub: b }; }
+                else return base;
+            }
+        }
+        function seq(stop) {
+            const items = [];
+            for (;;) {
+                skipWs();
+                if (i >= src.length || (stop && peek() === stop)) break;
+                const a = atom();
+                if (!a) break;
+                items.push(scripts(a));
+            }
+            return { t: 'mrow', c: items };
+        }
+        return seq(null);
+    }
+
+    // ------------------------------------------------------------------ inline
+    function inline(text) {
+        const out = [];
+        let buf = '';
+        const flush = () => { if (buf) { out.push({ t: 'text', v: buf }); buf = ''; } };
+        let i = 0;
+        while (i < text.length) {
+            const rest = text.slice(i);
+            let m;
+            if (text[i] === '\n') { flush(); out.push({ t: 'br' }); i++; continue; }
+            if (text[i] === '\\' && /[*`$\[\]!\\]/.test(text[i + 1] || '')) { buf += text[i + 1]; i += 2; continue; }
+            if ((m = rest.match(/^`([^`\n]+)`/))) { flush(); out.push({ t: 'code', v: m[1] }); i += m[0].length; continue; }
+            if ((m = rest.match(/^!\[([^\]\n]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/))) {
+                flush();
+                if (SAFE_IMG.test(m[2])) out.push({ t: 'img', src: m[2], alt: m[1] }); else out.push({ t: 'text', v: m[1] || '[image]' });
+                i += m[0].length; continue;
+            }
+            if ((m = rest.match(/^\[([^\]\n]+)\]\(([^)\s]+)\)/))) {
+                flush();
+                if (SAFE_LINK.test(m[2])) out.push({ t: 'a', href: m[2], c: inline(m[1]) }); else out.push({ t: 'text', v: m[1] });
+                i += m[0].length; continue;
+            }
+            if ((m = rest.match(/^\*\*([^*\n]+?)\*\*/))) { flush(); out.push({ t: 'b', c: inline(m[1]) }); i += m[0].length; continue; }
+            if ((m = rest.match(/^\*([^*\s][^*\n]*?)\*(?![*\w])/)) && (i === 0 || !/\w/.test(text[i - 1]))) { flush(); out.push({ t: 'i', c: inline(m[1]) }); i += m[0].length; continue; }
+            if ((m = rest.match(/^\$([^$\n]+)\$/)) && MATH_HINT.test(m[1]) && !/^\s|\s$/.test(m[1])) { flush(); out.push({ t: 'math', m: parseMath(m[1]), block: false }); i += m[0].length; continue; }
+            buf += text[i]; i++;
+        }
+        flush();
+        return out;
+    }
+
+    // ------------------------------------------------------------------ blocks
+    const isTableSep = l => /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/.test(l) && l.includes('-');
+    const splitRow = l => l.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim());
+
+    function parse(text) {
+        text = String(text === undefined || text === null ? '' : text).replace(/\r\n?/g, '\n');
+        const lines = text.split('\n');
+        const blocks = [];
+        let para = [];
+        const flushPara = () => { if (para.length) { blocks.push({ t: 'p', c: inline(para.join('\n')) }); para = []; } };
+        for (let i = 0; i < lines.length; i++) {
+            const l = lines[i];
+            let m;
+            if ((m = l.match(/^\s*```(\w*)\s*$/))) {
+                flushPara();
+                const code = [];
+                i++;
+                while (i < lines.length && !/^\s*```\s*$/.test(lines[i])) code.push(lines[i++]);
+                blocks.push({ t: 'codeblock', lang: m[1], v: code.join('\n') });
+                continue;
+            }
+            if ((m = l.match(/^\s*\$\$(.+)\$\$\s*$/)) && MATH_HINT.test(m[1])) { flushPara(); blocks.push({ t: 'math', m: parseMath(m[1]), block: true }); continue; }
+            if (/^\s*([-*_])\1{2,}\s*$/.test(l) && !para.length) { blocks.push({ t: 'hr' }); continue; }
+            if (/^\s*>\s?/.test(l)) {
+                flushPara();
+                const q = [];
+                while (i < lines.length && /^\s*>\s?/.test(lines[i])) q.push(lines[i++].replace(/^\s*>\s?/, ''));
+                i--;
+                blocks.push({ t: 'quote', c: inline(q.join('\n')) });
+                continue;
+            }
+            if (l.includes('|') && i + 1 < lines.length && isTableSep(lines[i + 1])) {
+                flushPara();
+                const head = splitRow(l);
+                i += 2;
+                const rows = [];
+                while (i < lines.length && lines[i].includes('|') && lines[i].trim()) rows.push(splitRow(lines[i++]));
+                i--;
+                blocks.push({ t: 'table', head: head.map(inline), rows: rows.map(r => r.map(inline)) });
+                continue;
+            }
+            if (/^\s*[-*•]\s+\S/.test(l) || /^\s*\d{1,2}[.)]\s+\S/.test(l)) {
+                const ordered = /^\s*\d/.test(l);
+                const re = ordered ? /^\s*\d{1,2}[.)]\s+(.*)$/ : /^\s*[-*•]\s+(.*)$/;
+                // a list needs 2+ consecutive items, otherwise it is just text that starts with "1." or "-"
+                let j = i, items = [];
+                while (j < lines.length && re.test(lines[j])) { items.push(lines[j].match(re)[1]); j++; }
+                if (items.length >= 2 || (items.length === 1 && !para.length && !ordered)) {
+                    flushPara();
+                    blocks.push({ t: ordered ? 'ol' : 'ul', items: items.map(inline) });
+                    i = j - 1;
+                    continue;
+                }
+            }
+            if (!l.trim()) { flushPara(); continue; }
+            para.push(l);
+        }
+        flushPara();
+        return blocks;
+    }
+
+    // ------------------------------------------------------------------ plain text (search, labels)
+    function plain(text) {
+        return String(text === undefined || text === null ? '' : text)
+            .replace(/```\w*\n?([\s\S]*?)```/g, '$1')
+            .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
+            .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+            .replace(/\$\$?([^$]+)\$\$?/g, (all, m) => MATH_HINT.test(m) ? m : all)
+            .replace(/\*\*([^*]+)\*\*/g, '$1').replace(/`([^`]+)`/g, '$1').replace(/\\([*`$\[\]!\\])/g, '$1');
+    }
+    // true when the text has no markup at all (fast path: a plain text node)
+    const isPlain = t => !/[`*$\[\]\n|>\-•]|\d[.)]\s|!\[/.test(String(t));
+
+    // ------------------------------------------------------------------ DOM
+    const MATHNS = 'http://www.w3.org/1998/Math/MathML';
+    function mathDom(n) {
+        const mk = (tag, txt) => { const e = document.createElementNS(MATHNS, tag); if (txt !== undefined) e.textContent = txt; return e; };
+        const wrap = (tag, ...kids) => { const e = mk(tag); kids.forEach(k => e.appendChild(mathDom(k))); return e; };
+        switch (n.t) {
+            case 'mrow': { const e = mk('mrow'); n.c.forEach(c => e.appendChild(mathDom(c))); return e; }
+            case 'mi': case 'mn': case 'mo': case 'mtext': return mk(n.t, n.v);
+            case 'msup': return wrap('msup', n.base, n.sup);
+            case 'msub': return wrap('msub', n.base, n.sub);
+            case 'msubsup': return wrap('msubsup', n.base, n.sub, n.sup);
+            case 'mfrac': return wrap('mfrac', n.a, n.b);
+            case 'msqrt': return wrap('msqrt', n.a);
+            default: return mk('mrow');
+        }
+    }
+    function inlineDom(nodes, parent) {
+        const { el } = App.util;
+        nodes.forEach(n => {
+            switch (n.t) {
+                case 'text': parent.appendChild(document.createTextNode(n.v)); break;
+                case 'br': parent.appendChild(document.createElement('br')); break;
+                case 'code': parent.appendChild(el('code', { class: 'rich-code', text: n.v })); break;
+                case 'b': { const e = document.createElement('strong'); inlineDom(n.c, e); parent.appendChild(e); break; }
+                case 'i': { const e = document.createElement('em'); inlineDom(n.c, e); parent.appendChild(e); break; }
+                case 'a': { const e = el('a', { href: n.href, target: '_blank', rel: 'noopener noreferrer' }); inlineDom(n.c, e); parent.appendChild(e); break; }
+                case 'img': {
+                    const img = el('img', { class: 'rich-img', src: n.src, alt: n.alt || '', loading: 'lazy', tabIndex: 0, role: 'button' });
+                    img.addEventListener('click', () => App.rich.zoom(n.src, n.alt));
+                    img.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); App.rich.zoom(n.src, n.alt); } });
+                    parent.appendChild(img); break;
+                }
+                case 'math': { const m = document.createElementNS(MATHNS, 'math'); if (n.block) m.setAttribute('display', 'block'); m.appendChild(mathDom(n.m)); parent.appendChild(m); break; }
+            }
+        });
+        return parent;
+    }
+    function blocksDom(blocks, parent) {
+        const { el } = App.util;
+        blocks.forEach(b => {
+            switch (b.t) {
+                case 'p': parent.appendChild(inlineDom(b.c, el('p'))); break;
+                case 'codeblock': parent.appendChild(el('pre', { class: 'rich-pre' }, el('code', { text: b.v, class: b.lang ? 'lang-' + b.lang : '' }))); break;
+                case 'ul': case 'ol': { const l = el(b.t); b.items.forEach(it => l.appendChild(inlineDom(it, el('li')))); parent.appendChild(l); break; }
+                case 'quote': parent.appendChild(inlineDom(b.c, el('blockquote'))); break;
+                case 'hr': parent.appendChild(el('hr')); break;
+                case 'math': { const m = document.createElementNS(MATHNS, 'math'); m.setAttribute('display', 'block'); m.appendChild(mathDom(b.m)); parent.appendChild(el('div', { class: 'rich-math' }, m)); break; }
+                case 'table': {
+                    const t = el('table', { class: 'rich-table' });
+                    const th = el('tr'); b.head.forEach(h => th.appendChild(inlineDom(h, el('th')))); t.appendChild(el('thead', {}, th));
+                    const tb = el('tbody'); b.rows.forEach(r => { const tr = el('tr'); r.forEach(c => tr.appendChild(inlineDom(c, el('td')))); tb.appendChild(tr); }); t.appendChild(tb);
+                    parent.appendChild(el('div', { class: 'rich-table-wrap' }, t)); break;
+                }
+            }
+        });
+        return parent;
+    }
+
+    App.rich = {
+        parse, parseMath, plain, isPlain, SAFE_IMG,
+        // Block rendering (question text, explanations): returns a <div class="rich">
+        node(text) {
+            const { el } = App.util;
+            const t = String(text === undefined || text === null ? '' : text);
+            const box = el('div', { class: 'rich' });
+            if (isPlain(t)) { if (t) box.appendChild(el('p', { text: t })); return box; }
+            return blocksDom(parse(t), box);
+        },
+        // Inline rendering (options, list items, table cells): returns a <span class="rich-inline">
+        inline(text) {
+            const { el } = App.util;
+            const t = String(text === undefined || text === null ? '' : text);
+            const box = el('span', { class: 'rich-inline' });
+            if (isPlain(t)) { box.textContent = t; return box; }
+            return inlineDom(inline(t), box);
+        },
+        // Click-to-zoom for images
+        zoom(src, alt) {
+            const { el } = App.util;
+            const close = () => { dlg.remove(); document.removeEventListener('keydown', onKey); };
+            const onKey = e => { if (e.key === 'Escape') close(); };
+            const dlg = el('div', { class: 'lightbox', role: 'dialog', aria: { modal: 'true', label: alt || 'Image' }, onclick: close },
+                el('img', { src, alt: alt || '' }), el('button', { type: 'button', class: 'lightbox-close', text: '✕', aria: { label: 'Close' }, onclick: close }));
+            document.body.appendChild(dlg);
+            document.addEventListener('keydown', onKey);
+            dlg.querySelector('button').focus();
+        }
+    };
+})();
+
 /* Question types. Each handler implements:
      prepare(def, ctx)            -> runtime item (shuffles, normalizes the answer)
      hasAnswer(item, value)       -> bool
@@ -826,7 +1150,8 @@ App.loc = function (v) {
         return {
             uid: def.uid !== undefined ? String(def.uid) : String(def.id),
             id: def.id, topic: def.topic, text: textOf(def), explanation: def.explanation,
-            difficulty: def.difficulty, tags: def.tags, source: def.source, estimatedSec: def.estimatedSec
+            difficulty: def.difficulty, tags: def.tags, source: def.source, estimatedSec: def.estimatedSec,
+            points: def.points, mandatory: !!def.mandatory, rev: def.rev
         };
     }
 
@@ -839,6 +1164,13 @@ App.loc = function (v) {
         return item;
     }
     App.prepareQuestion = prepareAny;
+    // Fraction of credit (0..1) for an answer; handlers without fraction() are all-or-nothing.
+    App.fractionOf = function (item, value, cfg) {
+        const h = App.types[item.kind];
+        if (!h.hasAnswer(item, value)) return 0;
+        if (h.fraction) return h.fraction(item, value, cfg || {});
+        return h.isCorrect(item, value) ? 1 : 0;
+    };
     App.typeHandler = item => App.types[item.kind];
 
     // ---- single / multiple / truefalse ---------------------------------------------------
@@ -885,7 +1217,7 @@ App.loc = function (v) {
                 const lab = el('label', { class: 'option-card', dataset: { index: i } },
                     input,
                     el('span', { class: 'option-marker', text: LETTERS[i] }),
-                    el('span', { class: 'option-text', text: App.loc(opt) }));
+                    el('span', { class: 'option-text' }, App.rich.inline(App.loc(opt))));
                 labels.push(lab);
                 group.appendChild(lab);
             });
@@ -901,7 +1233,7 @@ App.loc = function (v) {
             let cls = 'review-option';
             if (item.answer.includes(k)) cls += ' review-correct';
             else if (chosen.includes(k)) cls += ' review-wrong';
-            box.appendChild(el('p', { class: cls }, el('strong', { text: LETTERS[k] + ': ' }), App.loc(opt)));
+            box.appendChild(el('p', { class: cls }, el('strong', { text: LETTERS[k] + ': ' }), App.rich.inline(App.loc(opt))));
         });
         return box;
     }
@@ -935,6 +1267,13 @@ App.loc = function (v) {
         prepare: (d, c) => choicePrepare(d, c, true),
         hasAnswer: (it, v) => Array.isArray(v) && v.length > 0,
         isCorrect: (it, v) => Array.isArray(v) && sameSet(v, it.answer),
+        fraction(it, v, cfg) {
+            if (!Array.isArray(v) || !v.length) return 0;
+            if (sameSet(v, it.answer)) return 1;
+            if (!cfg || !cfg.partialCredit) return 0;
+            const good = v.filter(x => it.answer.includes(x)).length, bad = v.length - good;
+            return Math.max(0, (good - bad) / it.answer.length);
+        },
         render: choiceRender(true), renderReview: choiceReview, validateDef: choiceValidate(true)
     });
     App.registerType('truefalse', {
@@ -968,6 +1307,12 @@ App.loc = function (v) {
         },
         hasAnswer: (it, v) => Array.isArray(v),
         isCorrect: (it, v) => Array.isArray(v) && v.length === it.items.length && v.every((x, i) => x === i),
+        fraction(it, v, cfg) {
+            if (!Array.isArray(v)) return 0;
+            const ok = v.filter((x, i) => x === i).length;
+            if (ok === it.items.length) return 1;
+            return cfg && cfg.partialCredit ? ok / it.items.length : 0;
+        },
         render(ctx) {
             const { item, onChange, locked, reveal } = ctx;
             let order = Array.isArray(ctx.value) ? [...ctx.value] : [...item.shownOrder];
@@ -995,7 +1340,7 @@ App.loc = function (v) {
                     down.addEventListener('click', () => move(p + 1));
                     list.appendChild(el('li', { class: cls },
                         el('span', { class: 'order-pos', text: String(p + 1) }),
-                        el('span', { class: 'order-text', text: App.loc(item.items[idx]) }),
+                        el('span', { class: 'order-text' }, App.rich.inline(App.loc(item.items[idx]))),
                         el('span', { class: 'order-btns' }, up, down)));
                 });
                 if (focusPos !== null) {
@@ -1010,7 +1355,7 @@ App.loc = function (v) {
             if (reveal) {
                 wrap.appendChild(el('p', { class: 'type-hint', text: App.t('correctAnswer') + ':' }));
                 wrap.appendChild(el('ol', { class: 'ordering-list correct-order' }, ...item.items.map((t, i) =>
-                    el('li', { class: 'ordering-row row-ok' }, el('span', { class: 'order-pos', text: String(i + 1) }), el('span', { class: 'order-text', text: App.loc(t) })))));
+                    el('li', { class: 'ordering-row row-ok' }, el('span', { class: 'order-pos', text: String(i + 1) }), el('span', { class: 'order-text' }, App.rich.inline(App.loc(t)))))));
             }
             return wrap;
         },
@@ -1019,9 +1364,9 @@ App.loc = function (v) {
             const box = el('div', { class: 'review-options' });
             box.appendChild(el('p', { class: 'type-hint', text: App.t('yourAnswer') + ':' }));
             if (!order) box.appendChild(el('p', { class: 'review-option review-wrong', text: '—' }));
-            else order.forEach((idx, p) => box.appendChild(el('p', { class: 'review-option ' + (idx === p ? 'review-correct' : 'review-wrong') }, el('strong', { text: (p + 1) + '. ' }), App.loc(item.items[idx]))));
+            else order.forEach((idx, p) => box.appendChild(el('p', { class: 'review-option ' + (idx === p ? 'review-correct' : 'review-wrong') }, el('strong', { text: (p + 1) + '. ' }), App.rich.inline(App.loc(item.items[idx])))));
             box.appendChild(el('p', { class: 'type-hint', text: App.t('correctAnswer') + ':' }));
-            item.items.forEach((t, i) => box.appendChild(el('p', { class: 'review-option review-correct' }, el('strong', { text: (i + 1) + '. ' }), App.loc(t))));
+            item.items.forEach((t, i) => box.appendChild(el('p', { class: 'review-option review-correct' }, el('strong', { text: (i + 1) + '. ' }), App.rich.inline(App.loc(t)))));
             return box;
         },
         validateDef(def, path, rep) {
@@ -1041,20 +1386,26 @@ App.loc = function (v) {
         },
         hasAnswer: (it, v) => Array.isArray(v) && v.some(x => x >= 0),
         isCorrect: (it, v) => Array.isArray(v) && v.length === it.lefts.length && v.every((x, i) => x === i),
+        fraction(it, v, cfg) {
+            if (!Array.isArray(v)) return 0;
+            const ok = v.filter((x, i) => x === i).length;
+            if (ok === it.lefts.length) return 1;
+            return cfg && cfg.partialCredit ? ok / it.lefts.length : 0;
+        },
         render(ctx) {
             const { item, onChange, locked, reveal } = ctx;
             const val = Array.isArray(ctx.value) ? [...ctx.value] : item.lefts.map(() => -1);
             const wrap = el('div', { class: 'matching' }, el('p', { class: 'type-hint', text: App.t('hintMatching') }));
             item.lefts.forEach((left, i) => {
-                const sel = el('select', { class: 'match-select', disabled: !!locked, aria: { label: App.loc(left) } });
+                const sel = el('select', { class: 'match-select', disabled: !!locked, aria: { label: App.rich.plain(App.loc(left)) } });
                 sel.appendChild(el('option', { value: '-1', text: App.t('chooseOne') }));
-                item.rightOrder.forEach(r => sel.appendChild(el('option', { value: String(r), text: App.loc(item.rights[r]) })));
+                item.rightOrder.forEach(r => sel.appendChild(el('option', { value: String(r), text: App.rich.plain(App.loc(item.rights[r])) })));
                 sel.value = String(val[i]);
                 sel.addEventListener('change', () => { val[i] = parseInt(sel.value, 10); onChange([...val], { silent: true }); });
                 let cls = 'match-row';
                 if (reveal) cls += val[i] === i ? ' row-ok' : ' row-bad';
-                const row = el('div', { class: cls }, el('span', { class: 'match-left', text: App.loc(left) }), sel);
-                if (reveal && val[i] !== i) row.appendChild(el('span', { class: 'match-correct', text: '→ ' + App.loc(item.rights[i]) }));
+                const row = el('div', { class: cls }, el('span', { class: 'match-left' }, App.rich.inline(App.loc(left))), sel);
+                if (reveal && val[i] !== i) row.appendChild(el('span', { class: 'match-correct', text: '→ ' + App.rich.plain(App.loc(item.rights[i])) }));
                 wrap.appendChild(row);
             });
             return wrap;
@@ -1064,9 +1415,9 @@ App.loc = function (v) {
             const box = el('div', { class: 'review-options' });
             item.lefts.forEach((left, i) => {
                 const ok = v[i] === i;
-                const chosen = v[i] >= 0 && v[i] !== undefined ? App.loc(item.rights[v[i]]) : '—';
+                const chosen = v[i] >= 0 && v[i] !== undefined ? App.rich.plain(App.loc(item.rights[v[i]])) : '—';
                 box.appendChild(el('p', { class: 'review-option ' + (ok ? 'review-correct' : 'review-wrong') },
-                    el('strong', { text: App.loc(left) + ' → ' }), ok ? chosen : chosen + '  (' + App.t('correctAnswer') + ': ' + App.loc(item.rights[i]) + ')'));
+                    el('strong', {}, App.rich.inline(App.loc(left)), ' → '), ok ? chosen : chosen + '  (' + App.t('correctAnswer') + ': ' + App.rich.plain(App.loc(item.rights[i])) + ')'));
             });
             return box;
         },
@@ -1130,20 +1481,27 @@ App.loc = function (v) {
         },
         hasAnswer: (it, v) => Array.isArray(v) && it.parts.some((p, i) => App.types[p.kind].hasAnswer(p, v[i])),
         isCorrect: (it, v) => Array.isArray(v) && it.parts.every((p, i) => App.types[p.kind].isCorrect(p, v[i])),
+        fraction(it, v, cfg) {
+            if (!Array.isArray(v)) return 0;
+            if (it.parts.every((p, i) => App.types[p.kind].isCorrect(p, v[i]))) return 1;
+            if (!cfg || !cfg.partialCredit) return 0;
+            const sum = it.parts.reduce((a, p, i) => a + App.fractionOf(p, v[i], cfg), 0);
+            return sum / it.parts.length;
+        },
         render(ctx) {
             const { item, onChange, locked, reveal, uid } = ctx;
             const val = Array.isArray(ctx.value) ? [...ctx.value] : item.parts.map(() => undefined);
             const wrap = el('div', { class: 'scenario' });
-            if (item.context) wrap.appendChild(el('div', { class: 'scenario-context', text: App.loc(item.context) }));
+            if (item.context) wrap.appendChild(el('div', { class: 'scenario-context' }, App.rich.node(App.loc(item.context))));
             item.parts.forEach((part, i) => {
                 const h = App.types[part.kind];
                 const box = el('div', { class: 'scenario-part' },
-                    el('h4', { class: 'scenario-part-title', text: App.t('sub', { n: i + 1 }) + ' — ' + App.loc(part.text) }),
+                    el('h4', { class: 'scenario-part-title' }, App.t('sub', { n: i + 1 }) + ' — ', App.rich.inline(App.loc(part.text))),
                     h.render({
                         item: part, value: val[i], locked, reveal, uid: uid + '-p' + i,
                         onChange: (v, o) => { val[i] = v; onChange([...val], { silent: true }); }
                     }));
-                if (reveal && part.explanation) box.appendChild(el('p', { class: 'part-expl', text: App.loc(part.explanation) }));
+                if (reveal && part.explanation) box.appendChild(el('div', { class: 'part-expl' }, App.rich.node(App.loc(part.explanation))));
                 wrap.appendChild(box);
             });
             return wrap;
@@ -1151,9 +1509,9 @@ App.loc = function (v) {
         renderReview(item, value) {
             const v = Array.isArray(value) ? value : [];
             const wrap = el('div', { class: 'scenario' });
-            if (item.context) wrap.appendChild(el('div', { class: 'scenario-context', text: App.loc(item.context) }));
+            if (item.context) wrap.appendChild(el('div', { class: 'scenario-context' }, App.rich.node(App.loc(item.context))));
             item.parts.forEach((part, i) => {
-                wrap.appendChild(el('h4', { class: 'scenario-part-title', text: App.t('sub', { n: i + 1 }) + ' — ' + App.loc(part.text) }));
+                wrap.appendChild(el('h4', { class: 'scenario-part-title' }, App.t('sub', { n: i + 1 }) + ' — ', App.rich.inline(App.loc(part.text))));
                 wrap.appendChild(App.types[part.kind].renderReview(part, v[i]));
             });
             return wrap;
@@ -1219,6 +1577,31 @@ App.loc = function (v) {
         };
     }
 
+    // Warns about images that will not be shown (unsafe source) or that make the file very large.
+    function eachString(v, fn, path) {
+        if (typeof v === 'string') fn(v, path);
+        else if (Array.isArray(v)) v.forEach((x, i) => eachString(x, fn, path + '[' + i + ']'));
+        else if (isObj(v)) Object.keys(v).forEach(k => eachString(v[k], fn, path + '.' + k));
+    }
+    function richCheck(q, label, rep) {
+        const fields = { text: q.text !== undefined ? q.text : q.question, options: q.options, explanation: q.explanation, context: q.context, items: q.items, pairs: q.pairs, parts: q.parts };
+        eachString(fields, (str, path) => {
+            const re = /!\[[^\]\n]*\]\(([^)\s]+)/g;
+            let m;
+            while ((m = re.exec(str))) {
+                if (!App.rich.SAFE_IMG.test(m[1])) rep.warn(label + '.' + path, 'image source is not allowed and will not be shown (use data:image/…;base64, https:// or a relative .png/.jpg/.webp/.gif/.svg path)');
+                else if (m[1].length > 400000) rep.warn(label + '.' + path, 'embedded image is very large (' + Math.round(m[1].length / 1024) + ' KB) — consider shrinking it');
+            }
+        }, 'fields');
+    }
+
+    function checkScoring(sc, path, rep) {
+        if (sc === undefined) return;
+        if (!isObj(sc)) { rep.error(path, 'must be an object'); return; }
+        if (sc.partialCredit !== undefined && typeof sc.partialCredit !== 'boolean') rep.error(path + '.partialCredit', 'must be true or false');
+        ['wrongPenalty', 'unansweredPenalty'].forEach(k => { if (sc[k] !== undefined && !(typeof sc[k] === 'number' && sc[k] >= 0 && sc[k] <= 1)) rep.error(path + '.' + k, 'must be a number between 0 and 1 (fraction of the question points)'); });
+    }
+
     function validate(exam) {
         const rep = newReport();
         if (!isObj(exam)) { rep.error('exam', 'must be an object'); return rep; }
@@ -1233,6 +1616,7 @@ App.loc = function (v) {
             else {
                 if (s.passThreshold !== undefined && !(s.passThreshold >= 0 && s.passThreshold <= 100)) rep.error('settings.passThreshold', 'must be between 0 and 100');
                 if (s.timePerQuestionSec !== undefined && !(s.timePerQuestionSec > 0)) rep.error('settings.timePerQuestionSec', 'must be a positive number');
+                checkScoring(s.scoring, 'settings.scoring', rep);
             }
         }
 
@@ -1255,11 +1639,16 @@ App.loc = function (v) {
             if (q.difficulty !== undefined && ![1, 2, 3].includes(q.difficulty)) rep.error(label + '.difficulty', 'must be 1, 2 or 3');
             if (q.tags !== undefined && !(Array.isArray(q.tags) && q.tags.every(t => typeof t === 'string'))) rep.error(label + '.tags', 'must be a list of strings');
             if (q.estimatedSec !== undefined && !(q.estimatedSec > 0)) rep.error(label + '.estimatedSec', 'must be a positive number');
+            if (q.points !== undefined && !(typeof q.points === 'number' && q.points > 0)) rep.error(label + '.points', 'must be a positive number');
+            if (q.mandatory !== undefined && typeof q.mandatory !== 'boolean') rep.error(label + '.mandatory', 'must be true or false');
+            if (q.rev !== undefined && !(Number.isInteger(q.rev) && q.rev >= 1)) rep.error(label + '.rev', 'must be a positive integer');
+            if (q.retired !== undefined && typeof q.retired !== 'boolean') rep.error(label + '.retired', 'must be true or false');
             const type = App.questionType(q);
             const h = App.types[type];
             if (!h) rep.error(label + '.type', 'unknown question type "' + type + '"');
             else if (h.validateDef) h.validateDef(q, label, rep);
-            const key = App.loc(textOf(q)).trim().toLowerCase();
+            richCheck(q, label, rep);
+            const key = App.rich.plain(App.loc(textOf(q))).trim().toLowerCase();
             if (key) { if (texts.has(key)) rep.warn(label, 'same text as question ' + texts.get(key)); else texts.set(key, q.id); }
         });
 
@@ -1284,6 +1673,9 @@ App.loc = function (v) {
                     if (m.count > qs.length) rep.warn(p + '.count', 'is larger than the number of questions (' + qs.length + ')');
                     if (m.timeSec !== undefined && !(m.timeSec >= 0)) rep.error(p + '.timeSec', 'must be >= 0');
                     if (m.passThreshold !== undefined && !(m.passThreshold >= 0 && m.passThreshold <= 100)) rep.error(p + '.passThreshold', 'must be between 0 and 100');
+                    checkScoring(m.scoring, p + '.scoring', rep);
+                    if (m.pauses !== undefined && !(Number.isInteger(m.pauses) && m.pauses >= 0)) rep.error(p + '.pauses', 'must be a non-negative integer');
+                    if (m.strictTime !== undefined && typeof m.strictTime !== 'boolean') rep.error(p + '.strictTime', 'must be true or false');
                     if (m.selection === 'weighted') {
                         if (!Array.isArray(m.groups) || !m.groups.length) rep.error(p + '.groups', 'weighted selection needs "groups": [{topics, weight}]');
                         else {
@@ -1358,6 +1750,71 @@ App.loc = function (v) {
 
     App.schema = { validate, fromLegacy, normalize, prepare, lint, newReport };
 })();
+
+/* Scoring rules: partial credit, negative marking, mandatory questions.
+   Rules can be set per exam (settings.scoring), per mode (modes[].scoring) and, for practice modes, in the options page. */
+App.scoring = (function () {
+    const DEFAULTS = { partialCredit: false, wrongPenalty: 0, unansweredPenalty: 0 };
+
+    function clean(c) {
+        const out = {};
+        if (!c) return out;
+        if (typeof c.partialCredit === 'boolean') out.partialCredit = c.partialCredit;
+        if (typeof c.wrongPenalty === 'number' && c.wrongPenalty >= 0) out.wrongPenalty = c.wrongPenalty;
+        if (typeof c.unansweredPenalty === 'number' && c.unansweredPenalty >= 0) out.unansweredPenalty = c.unansweredPenalty;
+        return out;
+    }
+
+    // Effective rules: built-in defaults < user preference (practice modes only) < exam settings < mode.
+    function resolve(exam, modeDef, userPref) {
+        const examLevel = clean(exam && exam.settings && exam.settings.scoring);
+        const modeLevel = clean(modeDef && modeDef.scoring);
+        const explicit = Object.keys(examLevel).length || Object.keys(modeLevel).length;
+        const useUser = !(modeDef && modeDef.exam) && !explicit;      // exam-defined exam modes keep the exam's own rules
+        return Object.assign({}, DEFAULTS, useUser ? clean(userPref) : {}, examLevel, modeLevel);
+    }
+
+    // Scores a list of {item, value} pairs.
+    function score(items, values, cfg) {
+        cfg = Object.assign({}, DEFAULTS, cfg || {});
+        let got = 0, max = 0, fully = 0, partial = 0, wrong = 0, unanswered = 0;
+        const mandatoryFailed = [];
+        const details = items.map((item, i) => {
+            const pts = typeof item.points === 'number' && item.points > 0 ? item.points : 1;
+            max += pts;
+            const answered = App.types[item.kind].hasAnswer(item, values[i]);
+            const frac = answered ? App.fractionOf(item, values[i], cfg) : 0;
+            let delta = pts * frac;
+            if (!answered) { unanswered++; delta -= cfg.unansweredPenalty * pts; }
+            else if (frac >= 1) fully++;
+            else if (frac > 0) partial++;
+            else { wrong++; delta -= cfg.wrongPenalty * pts; }
+            got += delta;
+            if (item.mandatory && frac < 1) mandatoryFailed.push(i);
+            return { frac, points: pts, delta, answered };
+        });
+        const total = Math.max(0, got);
+        return {
+            score: Math.round(total * 100) / 100, max, pct: max ? Math.round(100 * total / max) : 0,
+            fully, partial, wrong, unanswered, mandatoryFailed, details, cfg,
+            custom: cfg.partialCredit || cfg.wrongPenalty > 0 || cfg.unansweredPenalty > 0 || items.some(it => typeof it.points === 'number' && it.points !== 1)
+        };
+    }
+
+    return { DEFAULTS, clean, resolve, score };
+})();
+
+/* Exam-taking rules: how many pauses are allowed and whether the clock keeps running while you are away.
+   Free navigation between questions is never restricted. */
+App.examRules = {
+    resolve(exam, modeDef, userPref) {
+        const isExam = !!(modeDef && modeDef.exam);
+        if (!isExam) return { pauses: null, strictTime: false };
+        const pick = (k, dflt) => modeDef[k] !== undefined ? modeDef[k] : (exam.settings && exam.settings[k] !== undefined ? exam.settings[k] : (userPref && userPref[k] !== undefined ? userPref[k] : dflt));
+        const pauses = pick('pauses', null);
+        return { pauses: (pauses === null || pauses === undefined || pauses === '') ? null : Number(pauses), strictTime: !!pick('strictTime', false) };
+    }
+};
 
 /* Versioned local storage: preferences, in-progress sessions, attempt history, per-question stats.
    Everything lives under one key ("examsim:v2") so it can be exported/imported as a single file. */
@@ -1701,9 +2158,10 @@ App.Session = (function () {
             return new Session({
                 id: App.util.uid(), examId: options.examId, modeId: options.modeId, modeLabel: options.modeLabel || options.modeId,
                 createdAt: Date.now(), updatedAt: Date.now(), studyMode: !!options.studyMode, threshold: options.threshold,
-                items, index: 0, values: {}, validated: {}, applied: {}, times: {},
+                scoring: App.scoring.clean(options.scoring), items, index: 0, values: {}, validated: {}, applied: {}, times: {},
                 timerMode, totalSec: options.totalSec || 0, secondsLeft: options.totalSec || 0,
-                perQuestionSec: options.perQuestionSec || 0, qLeft: options.perQuestionSec || 0
+                perQuestionSec: options.perQuestionSec || 0, qLeft: options.perQuestionSec || 0,
+                pausesAllowed: options.pauses === undefined ? null : options.pauses, pausesUsed: 0, paused: false, strictTime: !!options.strictTime
             });
         }
 
@@ -1744,8 +2202,30 @@ App.Session = (function () {
             App.recordAnswer(this.examId, this.item(i).uid, ok, this.times[i] || 0, storage);
         }
 
+        canPause() { return this.timerMode !== 'none' && !this.paused && (this.pausesAllowed === null || this.pausesUsed < this.pausesAllowed); }
+        pausesLeft() { return this.pausesAllowed === null ? null : Math.max(0, this.pausesAllowed - this.pausesUsed); }
+        pause() { if (!this.canPause()) return false; this.paused = true; this.pausesUsed++; return true; }
+        unpause() { this.paused = false; }
+
+        // Strict time: the clock kept running while the session was closed.
+        applyAway(now) {
+            if (!this.strictTime || this.paused || this.timerMode !== 'total') return 0;
+            const away = Math.max(0, Math.round(((now || Date.now()) - this.updatedAt) / 1000));
+            this.secondsLeft = Math.max(0, this.secondsLeft - away);
+            return away;
+        }
+
+        // Pace for a total timer: positive = ahead of schedule (answers vs. time used).
+        pace() {
+            if (this.timerMode !== 'total' || !this.totalSec) return null;
+            const used = this.totalSec - this.secondsLeft;
+            const expected = this.length * used / this.totalSec;
+            return Math.round((this.answeredCount() - expected) * 10) / 10;
+        }
+
         // Called once per second by the UI. Returns 'total' | 'question' when a timer runs out.
         tick() {
+            if (this.paused) return null;
             this.times[this.index] = (this.times[this.index] || 0) + 1;
             if (this.timerMode === 'total') {
                 this.secondsLeft = Math.max(0, this.secondsLeft - 1);
@@ -1757,24 +2237,27 @@ App.Session = (function () {
             return null;
         }
 
+        scoreNow() { return App.scoring.score(this.items, this.values, this.scoring); }
+        fraction(i) { return App.fractionOf(this.item(i), this.values[i], this.scoring); }
+
         // Scores the session. Returns the attempt record (also emitted as 'sessionEnd').
         submit(storage, now) {
             now = now || Date.now();
-            let correct = 0;
+            const r = this.scoreNow();
             const answers = [];
             for (let i = 0; i < this.length; i++) {
-                const answered = this.hasAnswer(i);
+                const answered = r.details[i].answered;
                 const ok = answered && this.isCorrect(i);
-                if (ok) correct++;
                 if (answered && !this.applied[i]) this._record(i, ok, storage);
-                answers.push([this.item(i).uid, ok ? 1 : 0, this.times[i] || 0, answered ? 1 : 0]);
+                answers.push([this.item(i).uid, ok ? 1 : 0, this.times[i] || 0, answered ? 1 : 0, Math.round(r.details[i].frac * 100) / 100]);
             }
             const total = this.length;
-            const pct = total ? Math.round(100 * correct / total) : 0;
+            const passed = r.pct >= this.threshold && !r.mandatoryFailed.length;
             const attempt = {
                 id: App.util.uid(), ts: now, started: this.createdAt, mode: this.modeId, modeLabel: this.modeLabel,
                 studyMode: this.studyMode, durationSec: Object.values(this.times).reduce((a, b) => a + b, 0),
-                total, correct, pct, threshold: this.threshold, passed: pct >= this.threshold, answers
+                total, correct: r.fully, partial: r.partial, pct: r.pct, score: r.score, maxScore: r.max, threshold: this.threshold,
+                passed, mandatoryFailed: r.mandatoryFailed.length, scoring: r.custom ? r.cfg : undefined, answers
             };
             App.events.emit('sessionEnd', { session: this, attempt });
             return attempt;
@@ -2269,10 +2752,13 @@ App.ui = {};
         const n = picked.questions.length;
         const timerMode = timerChoice === 'none' ? 'none' : (timerChoice === 'perQuestion' ? 'perQuestion' : 'total');
         const totalSec = (defined && defined.timeSec) ? defined.timeSec : n * exam.settings.timePerQuestionSec;
+        const rules = App.examRules.resolve(exam, defined, App.storage.getPref('examRules'));
         const session = App.Session.create(picked.questions, {
             examId: exam.id, modeId: mode.id, modeLabel: modeTitle(mode), studyMode,
             timerMode, totalSec: timerMode === 'total' ? totalSec : 0, perQuestionSec: exam.settings.timePerQuestionSec,
             threshold: (defined && defined.passThreshold !== undefined) ? defined.passThreshold : exam.settings.passThreshold,
+            scoring: App.scoring.resolve(exam, defined, App.storage.getPref('scoring')),
+            pauses: rules.pauses, strictTime: rules.strictTime,
             shuffleOptions: exam.settings.shuffleOptions
         });
         App.ui.beginSession(session);
@@ -2296,7 +2782,16 @@ App.ui = {};
         App.state.persistTimer = setTimeout(App.ui.persist, 400);
     }
 
-    App.ui.resumeSession = function (session) { App.ui.beginSession(session, true); };
+    App.ui.resumeSession = function (session) {
+        const away = session.applyAway();
+        if (away > 0 && session.secondsLeft <= 0) {      // strict clock: time ran out while away
+            App.state.session = session;
+            App.ui.toast(App.t('strictExpired'), 5000);
+            App.state.exam && App.ui.submit(true);
+            return;
+        }
+        App.ui.beginSession(session, true);
+    };
 
     App.ui.beginSession = function (session, resumed) {
         App.state.session = session;
@@ -2316,6 +2811,8 @@ App.ui = {};
         refs.bar = el('i');
         refs.topic = el('span', { class: 'tag-topic' });
         refs.pos = el('span', { class: 'q-number', aria: { live: 'polite' } });
+        refs.pace = el('span', { class: 'chip pace-chip hidden', id: 'pace-chip' });
+        refs.pause = el('button', { type: 'button', class: 'flag-btn', id: 'pause-btn', onclick: () => doPause() });
         refs.flag = el('button', { type: 'button', class: 'flag-btn', onclick: () => toggleFlag() });
         refs.text = el('div', { class: 'question-text', id: 'q-text' });
         refs.body = el('div', { id: 'q-body' });
@@ -2340,7 +2837,7 @@ App.ui = {};
 
         const main = el('div', { class: 'card q-card' },
             el('div', { class: 'q-bar' }, refs.bar),
-            el('div', { class: 'q-top' }, refs.topic, el('div', { class: 'q-meta' }, refs.pos, refs.flag)),
+            el('div', { class: 'q-top' }, refs.topic, el('div', { class: 'q-meta' }, refs.pace, refs.pos, refs.pause, refs.flag)),
             refs.text, refs.body, refs.expl, refs.note,
             el('div', { class: 'actionbar' }, refs.prev, refs.check, el('span', { class: 'spacer' }), refs.next),
             refs.help);
@@ -2349,7 +2846,51 @@ App.ui = {};
             refs.legend, refs.grid);
         if (window.matchMedia && window.matchMedia('(min-width: 961px)').matches) panel.open = true;
         const side = el('aside', { class: 'run-side' }, panel, refs.finish);
+        refs.overlay = el('div', { class: 'pause-overlay hidden', id: 'pause-overlay', role: 'dialog', aria: { modal: 'true' } });
         v.appendChild(el('div', { class: 'run-layout' }, main, side));
+        v.appendChild(refs.overlay);
+    }
+
+    function doPause() {
+        const s = S();
+        if (!s.pause()) return;
+        App.ui.persist();
+        App.events.emit('pause', { session: s });
+        renderPause();
+    }
+    function doUnpause() {
+        const s = S();
+        s.unpause();
+        App.ui.persist();
+        renderPause();
+        App.events.emit('unpause', { session: s });
+    }
+    function renderPause() {
+        const s = S();
+        refs.overlay.classList.toggle('hidden', !s.paused);
+        refs.overlay.textContent = '';
+        if (s.paused) {
+            refs.overlay.appendChild(el('div', { class: 'pause-card' },
+                icon('clock', 34), el('h2', { text: App.t('pausedTitle') }), el('p', { class: 'muted', text: App.t('pausedText') }),
+                App.ui.btn(App.t('resumeExam'), 'play', 'btn-lg', () => doUnpause(), { id: 'unpause-btn' })));
+            const b = refs.overlay.querySelector('button'); if (b) b.focus();
+        }
+        const left = s.pausesLeft();
+        refs.pause.classList.toggle('hidden', s.timerMode === 'none');
+        refs.pause.disabled = !s.canPause();
+        refs.pause.textContent = '';
+        refs.pause.appendChild(icon('clock', 14));
+        refs.pause.appendChild(el('span', { text: left === null ? App.t('pauseBtn') : (left > 0 ? App.t('pauseLeft', { n: left }) : App.t('pauseNone')) }));
+    }
+    function renderPace() {
+        const s = S();
+        const d = s.pace();
+        if (d === null || s.studyMode) { refs.pace.classList.add('hidden'); return; }
+        refs.pace.classList.remove('hidden', 'ok', 'warn', 'bad');
+        const txt = d >= 1 ? App.t('paceAhead', { n: Math.floor(d) }) : (d <= -2 ? App.t('paceBehind', { n: Math.ceil(-d) }) : App.t('paceOn'));
+        refs.pace.textContent = txt;
+        refs.pace.classList.add(d >= 1 ? 'ok' : (d <= -2 ? 'bad' : 'warn'));
+        refs.pace.classList.toggle('warn', d > -2 && d < 1);
     }
 
     function topicName(t) {
@@ -2376,6 +2917,8 @@ App.ui = {};
         renderQuestion();
         renderGrid();
         updateClock();
+        renderPause();
+        renderPace();
     };
 
     function renderQuestion() {
@@ -2386,7 +2929,8 @@ App.ui = {};
         const checked = s.studyMode && s.isChecked(i);
         refs.topic.textContent = topicName(item.topic);
         refs.pos.textContent = App.t('questionOf', { i: i + 1, n: s.length });
-        refs.text.textContent = App.loc(item.text);
+        refs.text.textContent = '';
+        refs.text.appendChild(App.rich.node(App.loc(item.text)));
         refs.body.textContent = '';
         refs.body.appendChild(h.render({
             item, value: s.value(i), locked: checked, reveal: checked, uid: 'q' + i,
@@ -2402,7 +2946,7 @@ App.ui = {};
         if (checked) {
             refs.expl.appendChild(el('div', { class: 'dynamic-explanation-box' }, el('div', {},
                 el('h3', { text: App.t('explanation') }),
-                el('p', { text: App.loc(item.explanation) || App.t('noExplanation') }))));
+                item.explanation ? App.rich.node(App.loc(item.explanation)) : el('p', { text: App.t('noExplanation') }))));
         }
         refs.check.disabled = !!checked;
         const last = i === s.length - 1;
@@ -2483,9 +3027,10 @@ App.ui = {};
             const s = S();
             const screen = App.state.screen;
             // the total timer keeps running on the review screen; per-question timers pause there
-            if (!s || !(screen === 'runtime' || (screen === 'review' && s.timerMode === 'total'))) return;
+            if (!s || s.paused || !(screen === 'runtime' || (screen === 'review' && s.timerMode === 'total'))) return;
             const ev = s.tick();
             updateClock();
+            if (screen === 'runtime') renderPace();
             if (ev === 'total') { App.ui.submit(true); return; }
             if (ev === 'question' && screen === 'runtime') { if (s.index < s.length - 1) go(s.index + 1); else App.ui.openReview(); return; }
             if (s.times[s.index] % 10 === 0) App.ui.persist();
@@ -2501,6 +3046,7 @@ App.ui = {};
     // ---- keyboard ----
     document.addEventListener('keydown', e => {
         if (App.state.screen !== 'runtime' || e.ctrlKey || e.metaKey || e.altKey) return;
+        if (S() && S().paused && e.key.toLowerCase() !== 'p') return;
         const t = e.target;
         const typing = t && (t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || (t.tagName === 'INPUT' && t.type === 'text') || (e.key.startsWith('Arrow') && t.classList && t.classList.contains('option-input')));
         if (typing) return;
@@ -2515,6 +3061,7 @@ App.ui = {};
         else if (key === 'arrowright') { if (s.index < s.length - 1) go(s.index + 1); e.preventDefault(); }
         else if (key === 'arrowleft') { go(s.index - 1); e.preventDefault(); }
         else if (key === 'm') { toggleFlag(); e.preventDefault(); }
+        else if (key === 'p') { if (s.paused) doUnpause(); else doPause(); e.preventDefault(); }
         else if (key === 'enter' && t.tagName !== 'BUTTON' && t.tagName !== 'A' && t.tagName !== 'SUMMARY') {
             if (s.studyMode && !s.isChecked(s.index) && s.hasAnswer(s.index)) checkAnswer(); else nextQuestion();
             e.preventDefault();
@@ -2622,6 +3169,9 @@ App.ui = {};
         v.textContent = '';
         const color = attempt.passed ? 'var(--success)' : 'var(--error)';
         const card = el('div', { class: 'card' });
+        card.appendChild(el('div', { class: 'print-only print-head' },
+            el('h2', { text: App.loc(exam.title) }),
+            el('p', { text: [s.modeLabel, App.t('printedOn', { d: new Date().toLocaleString(App.lang === 'it' ? 'it-IT' : 'en-GB') }), App.t('scoreLine', { c: attempt.correct, n: attempt.total }) + ' (' + attempt.pct + '%)'].join(' · ') })));
         card.appendChild(el('h1', { text: App.t('resultsTitle') }));
         card.appendChild(el('p', { class: 'subtitle', text: App.t('resultsSubtitle') }));
 
@@ -2629,15 +3179,19 @@ App.ui = {};
         ring.appendChild(App.ui.ring(attempt.pct, color, 168, 10));
         ring.appendChild(el('div', { class: 'score-num' }, el('span', { id: 'metric-percentage', text: attempt.pct + '%' }), el('small', { text: App.t('scoreWord') })));
         const unanswered = attempt.answers.filter(a => !a[3]).length;
-        const wrongN = attempt.total - attempt.correct - unanswered;
+        const partialN = attempt.partial || 0;
+        const wrongN = attempt.total - attempt.correct - partialN - unanswered;
         card.appendChild(el('div', { class: 'score-hero', style: 'margin-top:20px' }, ring,
             el('div', { style: 'flex:1 1 260px;min-width:0' },
                 el('div', { class: 'verdict ' + (attempt.passed ? 'pass' : 'fail'), id: 'exam-result-badge' }, icon(attempt.passed ? 'trophy' : 'x', 18), el('span', { text: App.t(attempt.passed ? 'pass' : 'fail', { t: attempt.threshold }).replace(/^[^\w]*\s*/, '') })),
                 el('p', { id: 'metric-raw-string', style: 'font-weight:600;font-size:1.05rem', text: App.t('scoreLine', { c: attempt.correct, n: attempt.total }) }),
+                attempt.scoring ? el('p', { class: 'hint', id: 'points-line', text: App.t('pointsLine', { s: attempt.score, m: attempt.maxScore }) }) : null,
+                attempt.mandatoryFailed ? el('p', { class: 'hint', style: 'color:var(--error);font-weight:700', text: App.t('mandatoryFailedMsg', { n: attempt.mandatoryFailed }) }) : null,
                 el('p', { class: 'hint', text: s.modeLabel }))));
 
         card.appendChild(el('div', { class: 'kpis' },
             kpi(attempt.correct, App.t('correctKpi'), 'ok'),
+            partialN ? kpi(partialN, App.t('partialKpi'), 'warn') : null,
             kpi(wrongN, App.t('wrongKpi'), wrongN ? 'bad' : ''),
             kpi(unanswered, App.t('unansweredKpi'), unanswered ? 'warn' : ''),
             kpi(App.ui.fmtTime(attempt.durationSec), App.t('timeKpi'))));
@@ -2651,6 +3205,7 @@ App.ui = {};
             App.ui.btn(App.t('backToMenu'), 'home', '', () => { App.ui.renderDashboard(); App.ui.show('dashboard'); }, { id: 'return-btn' }));
         if (wrong.length) bar.appendChild(App.ui.btn(App.t('retryWrong') + ' (' + wrong.length + ')', 'refresh', 'btn-ghost', () => App.ui.retry(wrong)));
         bar.appendChild(App.ui.btn(App.t('statsBtn'), 'chart', 'btn-ghost', () => App.ui.openStats()));
+        bar.appendChild(App.ui.btn(App.t('printBtn'), 'download', 'btn-ghost', () => window.print(), { id: 'print-btn' }));
         card.appendChild(bar);
 
         // filter chips + review cards
@@ -2663,15 +3218,17 @@ App.ui = {};
             const item = s.item(i);
             const answered = s.hasAnswer(i), ok = s.isCorrect(i);
             const st = stats[item.uid];
-            const cls = ok ? 'is-correct' : (answered ? 'is-incorrect' : 'is-unanswered');
-            const badge = ok ? App.t('correct') : (answered ? App.t('incorrect') : App.t('unansweredBadge'));
-            const meta = [item.topic, item.difficulty ? '★'.repeat(item.difficulty) : '', (s.times[i] || 0) + 's'].filter(Boolean).join(' · ');
+            const frac = s.fraction(i);
+            const part = answered && !ok && frac > 0;
+            const cls = ok ? 'is-correct' : (part ? 'is-partial' : (answered ? 'is-incorrect' : 'is-unanswered'));
+            const badge = ok ? App.t('correct') : (part ? App.t('partialBadge', { p: Math.round(frac * 100) }) : (answered ? App.t('incorrect') : App.t('unansweredBadge')));
+            const meta = [item.topic, item.difficulty ? '★'.repeat(item.difficulty) : '', item.mandatory ? App.t('mandatoryChip') : '', (s.times[i] || 0) + 's'].filter(Boolean).join(' · ');
             const c = el('div', { class: 'review-item-card ' + cls },
                 el('span', { class: 'review-status-badge' }, icon(ok ? 'check' : (answered ? 'x' : 'clock'), 12), el('span', { text: badge })),
                 el('div', { class: 'meta', text: meta }),
-                el('h3', { text: App.t('questionN', { n: i + 1, q: App.loc(item.text) }) }),
+                el('div', { class: 'review-q', role: 'heading', aria: { level: '3' } }, el('strong', { text: App.t('questionN', { n: i + 1, q: '' }) }), App.rich.node(App.loc(item.text))),
                 App.types[item.kind].renderReview(item, s.value(i)),
-                item.explanation ? el('div', { class: 'explanation-box' }, el('h4', { text: App.t('explanation') }), el('p', { text: App.loc(item.explanation) })) : null);
+                item.explanation ? el('div', { class: 'explanation-box' }, el('h4', { text: App.t('explanation') }), App.rich.node(App.loc(item.explanation))) : null);
             cards.push({ node: c, ok, answered, flagged: !!(st && st.flag) });
             box.appendChild(c);
         }
@@ -2698,7 +3255,7 @@ App.ui = {};
         if (!qs.length) return;
         const session = App.Session.create(qs, {
             examId: exam.id, modeId: 'retry', modeLabel: App.t('retryWrong'), studyMode: true,
-            timerMode: 'none', threshold: exam.settings.passThreshold, shuffleOptions: exam.settings.shuffleOptions
+            timerMode: 'none', threshold: exam.settings.passThreshold, scoring: App.scoring.resolve(exam, null, App.storage.getPref('scoring')), shuffleOptions: exam.settings.shuffleOptions
         });
         App.ui.beginSession(session);
     };
@@ -2777,7 +3334,7 @@ App.ui = {};
         const hard = el('div', { class: 'stat-section' }, el('h2', { text: App.t('statsHardest') }));
         if (!st.hardest.length) hard.appendChild(el('p', { class: 'hint', text: App.t('statsNoHard') }));
         st.hardest.forEach(h => hard.appendChild(el('div', { class: 'hard-row' },
-            el('div', { text: App.loc(h.text).slice(0, 220) }),
+            el('div', { text: App.rich.plain(App.loc(h.text)).slice(0, 220) }),
             el('div', { class: 'hard-meta', text: h.topic + ' · ' + App.t('statsErrRate', { p: Math.round(h.rate * 100), w: h.wrong, n: h.seen }) }))));
         card.appendChild(hard);
     };

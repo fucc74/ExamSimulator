@@ -3,15 +3,9 @@
 // Usage: node tools/convert-legacy.js [file ...]   (default: every *.exam in the project folder)
 const fs = require('fs');
 const path = require('path');
-const vm = require('vm');
 const { ROOT, readExamFile, examFiles, writeExamFile } = require('./exam-files.js');
 
-function loadAppForTools() {
-    const files = ['00-core', '10-i18n', '20-types', '30-schema'].map(f => fs.readFileSync(path.join(ROOT, 'src/js', f + '.js'), 'utf8'));
-    const sandbox = { document: {}, window: {} };
-    vm.createContext(sandbox);
-    return vm.runInContext(files.join('\n') + '\n;App;', sandbox);
-}
+const { loadApp: loadAppForTools } = require('./load-app.js');
 
 if (require.main === module) {
     const App = loadAppForTools();

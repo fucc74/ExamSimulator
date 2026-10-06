@@ -12,9 +12,10 @@ App.Session = (function () {
             return new Session({
                 id: App.util.uid(), examId: options.examId, modeId: options.modeId, modeLabel: options.modeLabel || options.modeId,
                 createdAt: Date.now(), updatedAt: Date.now(), studyMode: !!options.studyMode, threshold: options.threshold,
-                items, index: 0, values: {}, validated: {}, applied: {}, times: {},
+                scoring: App.scoring.clean(options.scoring), items, index: 0, values: {}, validated: {}, applied: {}, times: {},
                 timerMode, totalSec: options.totalSec || 0, secondsLeft: options.totalSec || 0,
-                perQuestionSec: options.perQuestionSec || 0, qLeft: options.perQuestionSec || 0
+                perQuestionSec: options.perQuestionSec || 0, qLeft: options.perQuestionSec || 0,
+                pausesAllowed: options.pauses === undefined ? null : options.pauses, pausesUsed: 0, paused: false, strictTime: !!options.strictTime
             });
         }
 
@@ -55,8 +56,30 @@ App.Session = (function () {
             App.recordAnswer(this.examId, this.item(i).uid, ok, this.times[i] || 0, storage);
         }
 
+        canPause() { return this.timerMode !== 'none' && !this.paused && (this.pausesAllowed === null || this.pausesUsed < this.pausesAllowed); }
+        pausesLeft() { return this.pausesAllowed === null ? null : Math.max(0, this.pausesAllowed - this.pausesUsed); }
+        pause() { if (!this.canPause()) return false; this.paused = true; this.pausesUsed++; return true; }
+        unpause() { this.paused = false; }
+
+        // Strict time: the clock kept running while the session was closed.
+        applyAway(now) {
+            if (!this.strictTime || this.paused || this.timerMode !== 'total') return 0;
+            const away = Math.max(0, Math.round(((now || Date.now()) - this.updatedAt) / 1000));
+            this.secondsLeft = Math.max(0, this.secondsLeft - away);
+            return away;
+        }
+
+        // Pace for a total timer: positive = ahead of schedule (answers vs. time used).
+        pace() {
+            if (this.timerMode !== 'total' || !this.totalSec) return null;
+            const used = this.totalSec - this.secondsLeft;
+            const expected = this.length * used / this.totalSec;
+            return Math.round((this.answeredCount() - expected) * 10) / 10;
+        }
+
         // Called once per second by the UI. Returns 'total' | 'question' when a timer runs out.
         tick() {
+            if (this.paused) return null;
             this.times[this.index] = (this.times[this.index] || 0) + 1;
             if (this.timerMode === 'total') {
                 this.secondsLeft = Math.max(0, this.secondsLeft - 1);
@@ -68,24 +91,27 @@ App.Session = (function () {
             return null;
         }
 
+        scoreNow() { return App.scoring.score(this.items, this.values, this.scoring); }
+        fraction(i) { return App.fractionOf(this.item(i), this.values[i], this.scoring); }
+
         // Scores the session. Returns the attempt record (also emitted as 'sessionEnd').
         submit(storage, now) {
             now = now || Date.now();
-            let correct = 0;
+            const r = this.scoreNow();
             const answers = [];
             for (let i = 0; i < this.length; i++) {
-                const answered = this.hasAnswer(i);
+                const answered = r.details[i].answered;
                 const ok = answered && this.isCorrect(i);
-                if (ok) correct++;
                 if (answered && !this.applied[i]) this._record(i, ok, storage);
-                answers.push([this.item(i).uid, ok ? 1 : 0, this.times[i] || 0, answered ? 1 : 0]);
+                answers.push([this.item(i).uid, ok ? 1 : 0, this.times[i] || 0, answered ? 1 : 0, Math.round(r.details[i].frac * 100) / 100]);
             }
             const total = this.length;
-            const pct = total ? Math.round(100 * correct / total) : 0;
+            const passed = r.pct >= this.threshold && !r.mandatoryFailed.length;
             const attempt = {
                 id: App.util.uid(), ts: now, started: this.createdAt, mode: this.modeId, modeLabel: this.modeLabel,
                 studyMode: this.studyMode, durationSec: Object.values(this.times).reduce((a, b) => a + b, 0),
-                total, correct, pct, threshold: this.threshold, passed: pct >= this.threshold, answers
+                total, correct: r.fully, partial: r.partial, pct: r.pct, score: r.score, maxScore: r.max, threshold: this.threshold,
+                passed, mandatoryFailed: r.mandatoryFailed.length, scoring: r.custom ? r.cfg : undefined, answers
             };
             App.events.emit('sessionEnd', { session: this, attempt });
             return attempt;

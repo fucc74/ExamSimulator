@@ -232,10 +232,13 @@
         const n = picked.questions.length;
         const timerMode = timerChoice === 'none' ? 'none' : (timerChoice === 'perQuestion' ? 'perQuestion' : 'total');
         const totalSec = (defined && defined.timeSec) ? defined.timeSec : n * exam.settings.timePerQuestionSec;
+        const rules = App.examRules.resolve(exam, defined, App.storage.getPref('examRules'));
         const session = App.Session.create(picked.questions, {
             examId: exam.id, modeId: mode.id, modeLabel: modeTitle(mode), studyMode,
             timerMode, totalSec: timerMode === 'total' ? totalSec : 0, perQuestionSec: exam.settings.timePerQuestionSec,
             threshold: (defined && defined.passThreshold !== undefined) ? defined.passThreshold : exam.settings.passThreshold,
+            scoring: App.scoring.resolve(exam, defined, App.storage.getPref('scoring')),
+            pauses: rules.pauses, strictTime: rules.strictTime,
             shuffleOptions: exam.settings.shuffleOptions
         });
         App.ui.beginSession(session);

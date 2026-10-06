@@ -13,7 +13,7 @@ window.ExamCatalog = [
     },
     "code": "DEMO",
     "version": "1.0",
-    "questionCount": 12,
+    "questionCount": 15,
     "topicCount": 3
   },
   {

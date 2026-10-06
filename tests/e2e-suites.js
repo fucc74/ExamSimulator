@@ -11,6 +11,67 @@ const fresh = async (p, base, content) => {
 };
 
 module.exports = {
+    'rich text renders images, code, math and tables safely': async ({ p, check, URL_BASE }) => {
+        await fresh(p, URL_BASE, 'demo');
+        await p.selectOption('#cfg-mode', 'all');
+        await p.click('#start-btn');
+        await p.evaluate(() => { ExamSim.App.state.session.goTo(12); ExamSim.App.ui.refreshRuntime(); });
+        check('image rendered', (await p.locator('#q-text img.rich-img').count()) === 1);
+        check('inline code and bold in options', (await p.locator('#q-body code.rich-code').count()) === 1 && (await p.locator('#q-body strong').count()) >= 1);
+        await p.evaluate(() => { ExamSim.App.state.session.goTo(13); ExamSim.App.ui.refreshRuntime(); });
+        check('formula rendered as MathML', (await p.locator('#q-text math').count()) === 2);
+        await p.evaluate(() => { ExamSim.App.state.session.goTo(14); ExamSim.App.ui.refreshRuntime(); });
+        check('table rendered', (await p.locator('#q-text table.rich-table tbody tr').count()) === 3);
+        await p.evaluate(() => { const s = ExamSim.App.state.session; s.items[0].text = '<img src=x onerror="window.__xss=1"> **ok**'; s.goTo(0); ExamSim.App.ui.refreshRuntime(); });
+        check('HTML in content is shown as text, never executed', (await p.locator('#q-text img').count()) === 0 && (await p.evaluate(() => window.__xss)) === undefined);
+    },
+
+    'pause policy, strict clock, pace and custom scoring': async ({ p, check, answerCurrent, URL_BASE }) => {
+        await fresh(p, URL_BASE, 'demo');
+        await p.selectOption('#cfg-mode', 'strict');
+        check('exam mode default for strict mode', !(await p.locator('#cfg-study').isChecked()));
+        await p.click('#start-btn');
+        check('pause button shows pauses left', /1 left/.test(await p.locator('#pause-btn').innerText()));
+        const before = await p.evaluate(() => ExamSim.App.state.session.secondsLeft);
+        await p.click('#pause-btn');
+        check('pause overlay hides the question', await p.locator('#pause-overlay').isVisible());
+        await p.waitForTimeout(2300);
+        const during = await p.evaluate(() => ExamSim.App.state.session.secondsLeft);
+        check('clock stopped while paused', during === before, [before, during]);
+        await p.click('#unpause-btn');
+        check('no pauses left afterwards', await p.locator('#pause-btn').isDisabled());
+        check('free navigation still works in strict mode', await (async () => { await p.click('#session-action-trigger'); return (await S(p)).index === 1; })());
+        // strict clock: time passes while the session is closed
+        await p.evaluate(() => { const A = ExamSim.App; const s = A.state.session; A.ui.persist(); A.storage.raw().exams.demo.sessions[s.id].updatedAt -= 60000; A.storage.setPref('touch', 1); });
+        await p.reload();
+        await p.waitForSelector('.sessions-box');
+        await p.click('.sessions-box >> text=Resume');
+        const left = await p.evaluate(() => ExamSim.App.state.session.secondsLeft);
+        check('strict time deducts the time spent away', left <= before - 55, [before, left]);
+        check('pace chip shown for total timers', await p.locator('#pace-chip').isVisible());
+        // answer everything correctly → custom scoring shows points
+        const n = await p.evaluate(() => ExamSim.App.state.session.length);
+        await p.evaluate(() => { ExamSim.App.state.session.goTo(0); ExamSim.App.ui.refreshRuntime(); });
+        for (let i = 0; i < n; i++) {
+            await answerCurrent(p);
+            if (i < n - 1) await p.click('#session-action-trigger');
+        }
+        await p.click('#session-action-trigger');
+        await p.click('#submit-btn');
+        check('100% with all answers right', (await p.locator('#metric-percentage').innerText()) === '100%');
+        check('points line shown for custom scoring', /6 \/ 6 points/.test(await p.locator('#points-line').innerText()), await p.locator('#points-line').innerText().catch(() => 'none'));
+    },
+
+    'print layout': async ({ p, check, runAll, URL_BASE }) => {
+        await fresh(p, URL_BASE, 'demo');
+        await runAll(p, 'all');
+        check('print button available', await p.locator('#print-btn').isVisible());
+        await p.emulateMedia({ media: 'print' });
+        check('header and toolbar hidden when printing', !(await p.locator('.app-header').isVisible()) && !(await p.locator('#view-summary .toolbar').isVisible()));
+        check('print heading shown', await p.locator('.print-head').isVisible());
+        await p.emulateMedia({ media: 'screen' });
+    },
+
     'picker and exam loading': async ({ p, check, URL_BASE }) => {
         await p.goto(URL_BASE);
         check('exam cards listed', (await p.locator('.exam-card').count()) >= 4);

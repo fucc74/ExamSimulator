@@ -2,16 +2,9 @@
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
-const { jsFiles } = require('../tools/build.js');
 
-function loadApp(opts) {
-    opts = opts || {};
-    const files = jsFiles().filter(f => !/^(8|9)\d-/.test(path.basename(f)));
-    const code = files.map(f => fs.readFileSync(f, 'utf8')).join('\n') + '\n;App;';
-    const sandbox = { console, setTimeout, clearTimeout, Date, Math, JSON };
-    sandbox.window = sandbox;
-    vm.createContext(sandbox);
-    const App = vm.runInContext(code, sandbox);
+function loadApp() {
+    const App = require('../tools/load-app.js').loadApp();
     App.storage = App.createStorage(App.memoryBackend());
     return App;
 }

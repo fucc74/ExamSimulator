@@ -44,6 +44,31 @@
         };
     }
 
+    // Warns about images that will not be shown (unsafe source) or that make the file very large.
+    function eachString(v, fn, path) {
+        if (typeof v === 'string') fn(v, path);
+        else if (Array.isArray(v)) v.forEach((x, i) => eachString(x, fn, path + '[' + i + ']'));
+        else if (isObj(v)) Object.keys(v).forEach(k => eachString(v[k], fn, path + '.' + k));
+    }
+    function richCheck(q, label, rep) {
+        const fields = { text: q.text !== undefined ? q.text : q.question, options: q.options, explanation: q.explanation, context: q.context, items: q.items, pairs: q.pairs, parts: q.parts };
+        eachString(fields, (str, path) => {
+            const re = /!\[[^\]\n]*\]\(([^)\s]+)/g;
+            let m;
+            while ((m = re.exec(str))) {
+                if (!App.rich.SAFE_IMG.test(m[1])) rep.warn(label + '.' + path, 'image source is not allowed and will not be shown (use data:image/…;base64, https:// or a relative .png/.jpg/.webp/.gif/.svg path)');
+                else if (m[1].length > 400000) rep.warn(label + '.' + path, 'embedded image is very large (' + Math.round(m[1].length / 1024) + ' KB) — consider shrinking it');
+            }
+        }, 'fields');
+    }
+
+    function checkScoring(sc, path, rep) {
+        if (sc === undefined) return;
+        if (!isObj(sc)) { rep.error(path, 'must be an object'); return; }
+        if (sc.partialCredit !== undefined && typeof sc.partialCredit !== 'boolean') rep.error(path + '.partialCredit', 'must be true or false');
+        ['wrongPenalty', 'unansweredPenalty'].forEach(k => { if (sc[k] !== undefined && !(typeof sc[k] === 'number' && sc[k] >= 0 && sc[k] <= 1)) rep.error(path + '.' + k, 'must be a number between 0 and 1 (fraction of the question points)'); });
+    }
+
     function validate(exam) {
         const rep = newReport();
         if (!isObj(exam)) { rep.error('exam', 'must be an object'); return rep; }
@@ -58,6 +83,7 @@
             else {
                 if (s.passThreshold !== undefined && !(s.passThreshold >= 0 && s.passThreshold <= 100)) rep.error('settings.passThreshold', 'must be between 0 and 100');
                 if (s.timePerQuestionSec !== undefined && !(s.timePerQuestionSec > 0)) rep.error('settings.timePerQuestionSec', 'must be a positive number');
+                checkScoring(s.scoring, 'settings.scoring', rep);
             }
         }
 
@@ -80,11 +106,16 @@
             if (q.difficulty !== undefined && ![1, 2, 3].includes(q.difficulty)) rep.error(label + '.difficulty', 'must be 1, 2 or 3');
             if (q.tags !== undefined && !(Array.isArray(q.tags) && q.tags.every(t => typeof t === 'string'))) rep.error(label + '.tags', 'must be a list of strings');
             if (q.estimatedSec !== undefined && !(q.estimatedSec > 0)) rep.error(label + '.estimatedSec', 'must be a positive number');
+            if (q.points !== undefined && !(typeof q.points === 'number' && q.points > 0)) rep.error(label + '.points', 'must be a positive number');
+            if (q.mandatory !== undefined && typeof q.mandatory !== 'boolean') rep.error(label + '.mandatory', 'must be true or false');
+            if (q.rev !== undefined && !(Number.isInteger(q.rev) && q.rev >= 1)) rep.error(label + '.rev', 'must be a positive integer');
+            if (q.retired !== undefined && typeof q.retired !== 'boolean') rep.error(label + '.retired', 'must be true or false');
             const type = App.questionType(q);
             const h = App.types[type];
             if (!h) rep.error(label + '.type', 'unknown question type "' + type + '"');
             else if (h.validateDef) h.validateDef(q, label, rep);
-            const key = App.loc(textOf(q)).trim().toLowerCase();
+            richCheck(q, label, rep);
+            const key = App.rich.plain(App.loc(textOf(q))).trim().toLowerCase();
             if (key) { if (texts.has(key)) rep.warn(label, 'same text as question ' + texts.get(key)); else texts.set(key, q.id); }
         });
 
@@ -109,6 +140,9 @@
                     if (m.count > qs.length) rep.warn(p + '.count', 'is larger than the number of questions (' + qs.length + ')');
                     if (m.timeSec !== undefined && !(m.timeSec >= 0)) rep.error(p + '.timeSec', 'must be >= 0');
                     if (m.passThreshold !== undefined && !(m.passThreshold >= 0 && m.passThreshold <= 100)) rep.error(p + '.passThreshold', 'must be between 0 and 100');
+                    checkScoring(m.scoring, p + '.scoring', rep);
+                    if (m.pauses !== undefined && !(Number.isInteger(m.pauses) && m.pauses >= 0)) rep.error(p + '.pauses', 'must be a non-negative integer');
+                    if (m.strictTime !== undefined && typeof m.strictTime !== 'boolean') rep.error(p + '.strictTime', 'must be true or false');
                     if (m.selection === 'weighted') {
                         if (!Array.isArray(m.groups) || !m.groups.length) rep.error(p + '.groups', 'weighted selection needs "groups": [{topics, weight}]');
                         else {

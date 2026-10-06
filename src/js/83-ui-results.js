@@ -98,6 +98,9 @@
         v.textContent = '';
         const color = attempt.passed ? 'var(--success)' : 'var(--error)';
         const card = el('div', { class: 'card' });
+        card.appendChild(el('div', { class: 'print-only print-head' },
+            el('h2', { text: App.loc(exam.title) }),
+            el('p', { text: [s.modeLabel, App.t('printedOn', { d: new Date().toLocaleString(App.lang === 'it' ? 'it-IT' : 'en-GB') }), App.t('scoreLine', { c: attempt.correct, n: attempt.total }) + ' (' + attempt.pct + '%)'].join(' · ') })));
         card.appendChild(el('h1', { text: App.t('resultsTitle') }));
         card.appendChild(el('p', { class: 'subtitle', text: App.t('resultsSubtitle') }));
 
@@ -105,15 +108,19 @@
         ring.appendChild(App.ui.ring(attempt.pct, color, 168, 10));
         ring.appendChild(el('div', { class: 'score-num' }, el('span', { id: 'metric-percentage', text: attempt.pct + '%' }), el('small', { text: App.t('scoreWord') })));
         const unanswered = attempt.answers.filter(a => !a[3]).length;
-        const wrongN = attempt.total - attempt.correct - unanswered;
+        const partialN = attempt.partial || 0;
+        const wrongN = attempt.total - attempt.correct - partialN - unanswered;
         card.appendChild(el('div', { class: 'score-hero', style: 'margin-top:20px' }, ring,
             el('div', { style: 'flex:1 1 260px;min-width:0' },
                 el('div', { class: 'verdict ' + (attempt.passed ? 'pass' : 'fail'), id: 'exam-result-badge' }, icon(attempt.passed ? 'trophy' : 'x', 18), el('span', { text: App.t(attempt.passed ? 'pass' : 'fail', { t: attempt.threshold }).replace(/^[^\w]*\s*/, '') })),
                 el('p', { id: 'metric-raw-string', style: 'font-weight:600;font-size:1.05rem', text: App.t('scoreLine', { c: attempt.correct, n: attempt.total }) }),
+                attempt.scoring ? el('p', { class: 'hint', id: 'points-line', text: App.t('pointsLine', { s: attempt.score, m: attempt.maxScore }) }) : null,
+                attempt.mandatoryFailed ? el('p', { class: 'hint', style: 'color:var(--error);font-weight:700', text: App.t('mandatoryFailedMsg', { n: attempt.mandatoryFailed }) }) : null,
                 el('p', { class: 'hint', text: s.modeLabel }))));
 
         card.appendChild(el('div', { class: 'kpis' },
             kpi(attempt.correct, App.t('correctKpi'), 'ok'),
+            partialN ? kpi(partialN, App.t('partialKpi'), 'warn') : null,
             kpi(wrongN, App.t('wrongKpi'), wrongN ? 'bad' : ''),
             kpi(unanswered, App.t('unansweredKpi'), unanswered ? 'warn' : ''),
             kpi(App.ui.fmtTime(attempt.durationSec), App.t('timeKpi'))));
@@ -127,6 +134,7 @@
             App.ui.btn(App.t('backToMenu'), 'home', '', () => { App.ui.renderDashboard(); App.ui.show('dashboard'); }, { id: 'return-btn' }));
         if (wrong.length) bar.appendChild(App.ui.btn(App.t('retryWrong') + ' (' + wrong.length + ')', 'refresh', 'btn-ghost', () => App.ui.retry(wrong)));
         bar.appendChild(App.ui.btn(App.t('statsBtn'), 'chart', 'btn-ghost', () => App.ui.openStats()));
+        bar.appendChild(App.ui.btn(App.t('printBtn'), 'download', 'btn-ghost', () => window.print(), { id: 'print-btn' }));
         card.appendChild(bar);
 
         // filter chips + review cards
@@ -139,15 +147,17 @@
             const item = s.item(i);
             const answered = s.hasAnswer(i), ok = s.isCorrect(i);
             const st = stats[item.uid];
-            const cls = ok ? 'is-correct' : (answered ? 'is-incorrect' : 'is-unanswered');
-            const badge = ok ? App.t('correct') : (answered ? App.t('incorrect') : App.t('unansweredBadge'));
-            const meta = [item.topic, item.difficulty ? '★'.repeat(item.difficulty) : '', (s.times[i] || 0) + 's'].filter(Boolean).join(' · ');
+            const frac = s.fraction(i);
+            const part = answered && !ok && frac > 0;
+            const cls = ok ? 'is-correct' : (part ? 'is-partial' : (answered ? 'is-incorrect' : 'is-unanswered'));
+            const badge = ok ? App.t('correct') : (part ? App.t('partialBadge', { p: Math.round(frac * 100) }) : (answered ? App.t('incorrect') : App.t('unansweredBadge')));
+            const meta = [item.topic, item.difficulty ? '★'.repeat(item.difficulty) : '', item.mandatory ? App.t('mandatoryChip') : '', (s.times[i] || 0) + 's'].filter(Boolean).join(' · ');
             const c = el('div', { class: 'review-item-card ' + cls },
                 el('span', { class: 'review-status-badge' }, icon(ok ? 'check' : (answered ? 'x' : 'clock'), 12), el('span', { text: badge })),
                 el('div', { class: 'meta', text: meta }),
-                el('h3', { text: App.t('questionN', { n: i + 1, q: App.loc(item.text) }) }),
+                el('div', { class: 'review-q', role: 'heading', aria: { level: '3' } }, el('strong', { text: App.t('questionN', { n: i + 1, q: '' }) }), App.rich.node(App.loc(item.text))),
                 App.types[item.kind].renderReview(item, s.value(i)),
-                item.explanation ? el('div', { class: 'explanation-box' }, el('h4', { text: App.t('explanation') }), el('p', { text: App.loc(item.explanation) })) : null);
+                item.explanation ? el('div', { class: 'explanation-box' }, el('h4', { text: App.t('explanation') }), App.rich.node(App.loc(item.explanation))) : null);
             cards.push({ node: c, ok, answered, flagged: !!(st && st.flag) });
             box.appendChild(c);
         }
@@ -174,7 +184,7 @@
         if (!qs.length) return;
         const session = App.Session.create(qs, {
             examId: exam.id, modeId: 'retry', modeLabel: App.t('retryWrong'), studyMode: true,
-            timerMode: 'none', threshold: exam.settings.passThreshold, shuffleOptions: exam.settings.shuffleOptions
+            timerMode: 'none', threshold: exam.settings.passThreshold, scoring: App.scoring.resolve(exam, null, App.storage.getPref('scoring')), shuffleOptions: exam.settings.shuffleOptions
         });
         App.ui.beginSession(session);
     };

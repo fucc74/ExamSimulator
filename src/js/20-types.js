@@ -30,7 +30,8 @@
         return {
             uid: def.uid !== undefined ? String(def.uid) : String(def.id),
             id: def.id, topic: def.topic, text: textOf(def), explanation: def.explanation,
-            difficulty: def.difficulty, tags: def.tags, source: def.source, estimatedSec: def.estimatedSec
+            difficulty: def.difficulty, tags: def.tags, source: def.source, estimatedSec: def.estimatedSec,
+            points: def.points, mandatory: !!def.mandatory, rev: def.rev
         };
     }
 
@@ -43,6 +44,13 @@
         return item;
     }
     App.prepareQuestion = prepareAny;
+    // Fraction of credit (0..1) for an answer; handlers without fraction() are all-or-nothing.
+    App.fractionOf = function (item, value, cfg) {
+        const h = App.types[item.kind];
+        if (!h.hasAnswer(item, value)) return 0;
+        if (h.fraction) return h.fraction(item, value, cfg || {});
+        return h.isCorrect(item, value) ? 1 : 0;
+    };
     App.typeHandler = item => App.types[item.kind];
 
     // ---- single / multiple / truefalse ---------------------------------------------------
@@ -89,7 +97,7 @@
                 const lab = el('label', { class: 'option-card', dataset: { index: i } },
                     input,
                     el('span', { class: 'option-marker', text: LETTERS[i] }),
-                    el('span', { class: 'option-text', text: App.loc(opt) }));
+                    el('span', { class: 'option-text' }, App.rich.inline(App.loc(opt))));
                 labels.push(lab);
                 group.appendChild(lab);
             });
@@ -105,7 +113,7 @@
             let cls = 'review-option';
             if (item.answer.includes(k)) cls += ' review-correct';
             else if (chosen.includes(k)) cls += ' review-wrong';
-            box.appendChild(el('p', { class: cls }, el('strong', { text: LETTERS[k] + ': ' }), App.loc(opt)));
+            box.appendChild(el('p', { class: cls }, el('strong', { text: LETTERS[k] + ': ' }), App.rich.inline(App.loc(opt))));
         });
         return box;
     }
@@ -139,6 +147,13 @@
         prepare: (d, c) => choicePrepare(d, c, true),
         hasAnswer: (it, v) => Array.isArray(v) && v.length > 0,
         isCorrect: (it, v) => Array.isArray(v) && sameSet(v, it.answer),
+        fraction(it, v, cfg) {
+            if (!Array.isArray(v) || !v.length) return 0;
+            if (sameSet(v, it.answer)) return 1;
+            if (!cfg || !cfg.partialCredit) return 0;
+            const good = v.filter(x => it.answer.includes(x)).length, bad = v.length - good;
+            return Math.max(0, (good - bad) / it.answer.length);
+        },
         render: choiceRender(true), renderReview: choiceReview, validateDef: choiceValidate(true)
     });
     App.registerType('truefalse', {
@@ -172,6 +187,12 @@
         },
         hasAnswer: (it, v) => Array.isArray(v),
         isCorrect: (it, v) => Array.isArray(v) && v.length === it.items.length && v.every((x, i) => x === i),
+        fraction(it, v, cfg) {
+            if (!Array.isArray(v)) return 0;
+            const ok = v.filter((x, i) => x === i).length;
+            if (ok === it.items.length) return 1;
+            return cfg && cfg.partialCredit ? ok / it.items.length : 0;
+        },
         render(ctx) {
             const { item, onChange, locked, reveal } = ctx;
             let order = Array.isArray(ctx.value) ? [...ctx.value] : [...item.shownOrder];
@@ -199,7 +220,7 @@
                     down.addEventListener('click', () => move(p + 1));
                     list.appendChild(el('li', { class: cls },
                         el('span', { class: 'order-pos', text: String(p + 1) }),
-                        el('span', { class: 'order-text', text: App.loc(item.items[idx]) }),
+                        el('span', { class: 'order-text' }, App.rich.inline(App.loc(item.items[idx]))),
                         el('span', { class: 'order-btns' }, up, down)));
                 });
                 if (focusPos !== null) {
@@ -214,7 +235,7 @@
             if (reveal) {
                 wrap.appendChild(el('p', { class: 'type-hint', text: App.t('correctAnswer') + ':' }));
                 wrap.appendChild(el('ol', { class: 'ordering-list correct-order' }, ...item.items.map((t, i) =>
-                    el('li', { class: 'ordering-row row-ok' }, el('span', { class: 'order-pos', text: String(i + 1) }), el('span', { class: 'order-text', text: App.loc(t) })))));
+                    el('li', { class: 'ordering-row row-ok' }, el('span', { class: 'order-pos', text: String(i + 1) }), el('span', { class: 'order-text' }, App.rich.inline(App.loc(t)))))));
             }
             return wrap;
         },
@@ -223,9 +244,9 @@
             const box = el('div', { class: 'review-options' });
             box.appendChild(el('p', { class: 'type-hint', text: App.t('yourAnswer') + ':' }));
             if (!order) box.appendChild(el('p', { class: 'review-option review-wrong', text: '—' }));
-            else order.forEach((idx, p) => box.appendChild(el('p', { class: 'review-option ' + (idx === p ? 'review-correct' : 'review-wrong') }, el('strong', { text: (p + 1) + '. ' }), App.loc(item.items[idx]))));
+            else order.forEach((idx, p) => box.appendChild(el('p', { class: 'review-option ' + (idx === p ? 'review-correct' : 'review-wrong') }, el('strong', { text: (p + 1) + '. ' }), App.rich.inline(App.loc(item.items[idx])))));
             box.appendChild(el('p', { class: 'type-hint', text: App.t('correctAnswer') + ':' }));
-            item.items.forEach((t, i) => box.appendChild(el('p', { class: 'review-option review-correct' }, el('strong', { text: (i + 1) + '. ' }), App.loc(t))));
+            item.items.forEach((t, i) => box.appendChild(el('p', { class: 'review-option review-correct' }, el('strong', { text: (i + 1) + '. ' }), App.rich.inline(App.loc(t)))));
             return box;
         },
         validateDef(def, path, rep) {
@@ -245,20 +266,26 @@
         },
         hasAnswer: (it, v) => Array.isArray(v) && v.some(x => x >= 0),
         isCorrect: (it, v) => Array.isArray(v) && v.length === it.lefts.length && v.every((x, i) => x === i),
+        fraction(it, v, cfg) {
+            if (!Array.isArray(v)) return 0;
+            const ok = v.filter((x, i) => x === i).length;
+            if (ok === it.lefts.length) return 1;
+            return cfg && cfg.partialCredit ? ok / it.lefts.length : 0;
+        },
         render(ctx) {
             const { item, onChange, locked, reveal } = ctx;
             const val = Array.isArray(ctx.value) ? [...ctx.value] : item.lefts.map(() => -1);
             const wrap = el('div', { class: 'matching' }, el('p', { class: 'type-hint', text: App.t('hintMatching') }));
             item.lefts.forEach((left, i) => {
-                const sel = el('select', { class: 'match-select', disabled: !!locked, aria: { label: App.loc(left) } });
+                const sel = el('select', { class: 'match-select', disabled: !!locked, aria: { label: App.rich.plain(App.loc(left)) } });
                 sel.appendChild(el('option', { value: '-1', text: App.t('chooseOne') }));
-                item.rightOrder.forEach(r => sel.appendChild(el('option', { value: String(r), text: App.loc(item.rights[r]) })));
+                item.rightOrder.forEach(r => sel.appendChild(el('option', { value: String(r), text: App.rich.plain(App.loc(item.rights[r])) })));
                 sel.value = String(val[i]);
                 sel.addEventListener('change', () => { val[i] = parseInt(sel.value, 10); onChange([...val], { silent: true }); });
                 let cls = 'match-row';
                 if (reveal) cls += val[i] === i ? ' row-ok' : ' row-bad';
-                const row = el('div', { class: cls }, el('span', { class: 'match-left', text: App.loc(left) }), sel);
-                if (reveal && val[i] !== i) row.appendChild(el('span', { class: 'match-correct', text: '→ ' + App.loc(item.rights[i]) }));
+                const row = el('div', { class: cls }, el('span', { class: 'match-left' }, App.rich.inline(App.loc(left))), sel);
+                if (reveal && val[i] !== i) row.appendChild(el('span', { class: 'match-correct', text: '→ ' + App.rich.plain(App.loc(item.rights[i])) }));
                 wrap.appendChild(row);
             });
             return wrap;
@@ -268,9 +295,9 @@
             const box = el('div', { class: 'review-options' });
             item.lefts.forEach((left, i) => {
                 const ok = v[i] === i;
-                const chosen = v[i] >= 0 && v[i] !== undefined ? App.loc(item.rights[v[i]]) : '—';
+                const chosen = v[i] >= 0 && v[i] !== undefined ? App.rich.plain(App.loc(item.rights[v[i]])) : '—';
                 box.appendChild(el('p', { class: 'review-option ' + (ok ? 'review-correct' : 'review-wrong') },
-                    el('strong', { text: App.loc(left) + ' → ' }), ok ? chosen : chosen + '  (' + App.t('correctAnswer') + ': ' + App.loc(item.rights[i]) + ')'));
+                    el('strong', {}, App.rich.inline(App.loc(left)), ' → '), ok ? chosen : chosen + '  (' + App.t('correctAnswer') + ': ' + App.rich.plain(App.loc(item.rights[i])) + ')'));
             });
             return box;
         },
@@ -334,20 +361,27 @@
         },
         hasAnswer: (it, v) => Array.isArray(v) && it.parts.some((p, i) => App.types[p.kind].hasAnswer(p, v[i])),
         isCorrect: (it, v) => Array.isArray(v) && it.parts.every((p, i) => App.types[p.kind].isCorrect(p, v[i])),
+        fraction(it, v, cfg) {
+            if (!Array.isArray(v)) return 0;
+            if (it.parts.every((p, i) => App.types[p.kind].isCorrect(p, v[i]))) return 1;
+            if (!cfg || !cfg.partialCredit) return 0;
+            const sum = it.parts.reduce((a, p, i) => a + App.fractionOf(p, v[i], cfg), 0);
+            return sum / it.parts.length;
+        },
         render(ctx) {
             const { item, onChange, locked, reveal, uid } = ctx;
             const val = Array.isArray(ctx.value) ? [...ctx.value] : item.parts.map(() => undefined);
             const wrap = el('div', { class: 'scenario' });
-            if (item.context) wrap.appendChild(el('div', { class: 'scenario-context', text: App.loc(item.context) }));
+            if (item.context) wrap.appendChild(el('div', { class: 'scenario-context' }, App.rich.node(App.loc(item.context))));
             item.parts.forEach((part, i) => {
                 const h = App.types[part.kind];
                 const box = el('div', { class: 'scenario-part' },
-                    el('h4', { class: 'scenario-part-title', text: App.t('sub', { n: i + 1 }) + ' — ' + App.loc(part.text) }),
+                    el('h4', { class: 'scenario-part-title' }, App.t('sub', { n: i + 1 }) + ' — ', App.rich.inline(App.loc(part.text))),
                     h.render({
                         item: part, value: val[i], locked, reveal, uid: uid + '-p' + i,
                         onChange: (v, o) => { val[i] = v; onChange([...val], { silent: true }); }
                     }));
-                if (reveal && part.explanation) box.appendChild(el('p', { class: 'part-expl', text: App.loc(part.explanation) }));
+                if (reveal && part.explanation) box.appendChild(el('div', { class: 'part-expl' }, App.rich.node(App.loc(part.explanation))));
                 wrap.appendChild(box);
             });
             return wrap;
@@ -355,9 +389,9 @@
         renderReview(item, value) {
             const v = Array.isArray(value) ? value : [];
             const wrap = el('div', { class: 'scenario' });
-            if (item.context) wrap.appendChild(el('div', { class: 'scenario-context', text: App.loc(item.context) }));
+            if (item.context) wrap.appendChild(el('div', { class: 'scenario-context' }, App.rich.node(App.loc(item.context))));
             item.parts.forEach((part, i) => {
-                wrap.appendChild(el('h4', { class: 'scenario-part-title', text: App.t('sub', { n: i + 1 }) + ' — ' + App.loc(part.text) }));
+                wrap.appendChild(el('h4', { class: 'scenario-part-title' }, App.t('sub', { n: i + 1 }) + ' — ', App.rich.inline(App.loc(part.text))));
                 wrap.appendChild(App.types[part.kind].renderReview(part, v[i]));
             });
             return wrap;

@@ -15,7 +15,16 @@
         App.state.persistTimer = setTimeout(App.ui.persist, 400);
     }
 
-    App.ui.resumeSession = function (session) { App.ui.beginSession(session, true); };
+    App.ui.resumeSession = function (session) {
+        const away = session.applyAway();
+        if (away > 0 && session.secondsLeft <= 0) {      // strict clock: time ran out while away
+            App.state.session = session;
+            App.ui.toast(App.t('strictExpired'), 5000);
+            App.state.exam && App.ui.submit(true);
+            return;
+        }
+        App.ui.beginSession(session, true);
+    };
 
     App.ui.beginSession = function (session, resumed) {
         App.state.session = session;
@@ -35,6 +44,8 @@
         refs.bar = el('i');
         refs.topic = el('span', { class: 'tag-topic' });
         refs.pos = el('span', { class: 'q-number', aria: { live: 'polite' } });
+        refs.pace = el('span', { class: 'chip pace-chip hidden', id: 'pace-chip' });
+        refs.pause = el('button', { type: 'button', class: 'flag-btn', id: 'pause-btn', onclick: () => doPause() });
         refs.flag = el('button', { type: 'button', class: 'flag-btn', onclick: () => toggleFlag() });
         refs.text = el('div', { class: 'question-text', id: 'q-text' });
         refs.body = el('div', { id: 'q-body' });
@@ -59,7 +70,7 @@
 
         const main = el('div', { class: 'card q-card' },
             el('div', { class: 'q-bar' }, refs.bar),
-            el('div', { class: 'q-top' }, refs.topic, el('div', { class: 'q-meta' }, refs.pos, refs.flag)),
+            el('div', { class: 'q-top' }, refs.topic, el('div', { class: 'q-meta' }, refs.pace, refs.pos, refs.pause, refs.flag)),
             refs.text, refs.body, refs.expl, refs.note,
             el('div', { class: 'actionbar' }, refs.prev, refs.check, el('span', { class: 'spacer' }), refs.next),
             refs.help);
@@ -68,7 +79,51 @@
             refs.legend, refs.grid);
         if (window.matchMedia && window.matchMedia('(min-width: 961px)').matches) panel.open = true;
         const side = el('aside', { class: 'run-side' }, panel, refs.finish);
+        refs.overlay = el('div', { class: 'pause-overlay hidden', id: 'pause-overlay', role: 'dialog', aria: { modal: 'true' } });
         v.appendChild(el('div', { class: 'run-layout' }, main, side));
+        v.appendChild(refs.overlay);
+    }
+
+    function doPause() {
+        const s = S();
+        if (!s.pause()) return;
+        App.ui.persist();
+        App.events.emit('pause', { session: s });
+        renderPause();
+    }
+    function doUnpause() {
+        const s = S();
+        s.unpause();
+        App.ui.persist();
+        renderPause();
+        App.events.emit('unpause', { session: s });
+    }
+    function renderPause() {
+        const s = S();
+        refs.overlay.classList.toggle('hidden', !s.paused);
+        refs.overlay.textContent = '';
+        if (s.paused) {
+            refs.overlay.appendChild(el('div', { class: 'pause-card' },
+                icon('clock', 34), el('h2', { text: App.t('pausedTitle') }), el('p', { class: 'muted', text: App.t('pausedText') }),
+                App.ui.btn(App.t('resumeExam'), 'play', 'btn-lg', () => doUnpause(), { id: 'unpause-btn' })));
+            const b = refs.overlay.querySelector('button'); if (b) b.focus();
+        }
+        const left = s.pausesLeft();
+        refs.pause.classList.toggle('hidden', s.timerMode === 'none');
+        refs.pause.disabled = !s.canPause();
+        refs.pause.textContent = '';
+        refs.pause.appendChild(icon('clock', 14));
+        refs.pause.appendChild(el('span', { text: left === null ? App.t('pauseBtn') : (left > 0 ? App.t('pauseLeft', { n: left }) : App.t('pauseNone')) }));
+    }
+    function renderPace() {
+        const s = S();
+        const d = s.pace();
+        if (d === null || s.studyMode) { refs.pace.classList.add('hidden'); return; }
+        refs.pace.classList.remove('hidden', 'ok', 'warn', 'bad');
+        const txt = d >= 1 ? App.t('paceAhead', { n: Math.floor(d) }) : (d <= -2 ? App.t('paceBehind', { n: Math.ceil(-d) }) : App.t('paceOn'));
+        refs.pace.textContent = txt;
+        refs.pace.classList.add(d >= 1 ? 'ok' : (d <= -2 ? 'bad' : 'warn'));
+        refs.pace.classList.toggle('warn', d > -2 && d < 1);
     }
 
     function topicName(t) {
@@ -95,6 +150,8 @@
         renderQuestion();
         renderGrid();
         updateClock();
+        renderPause();
+        renderPace();
     };
 
     function renderQuestion() {
@@ -105,7 +162,8 @@
         const checked = s.studyMode && s.isChecked(i);
         refs.topic.textContent = topicName(item.topic);
         refs.pos.textContent = App.t('questionOf', { i: i + 1, n: s.length });
-        refs.text.textContent = App.loc(item.text);
+        refs.text.textContent = '';
+        refs.text.appendChild(App.rich.node(App.loc(item.text)));
         refs.body.textContent = '';
         refs.body.appendChild(h.render({
             item, value: s.value(i), locked: checked, reveal: checked, uid: 'q' + i,
@@ -121,7 +179,7 @@
         if (checked) {
             refs.expl.appendChild(el('div', { class: 'dynamic-explanation-box' }, el('div', {},
                 el('h3', { text: App.t('explanation') }),
-                el('p', { text: App.loc(item.explanation) || App.t('noExplanation') }))));
+                item.explanation ? App.rich.node(App.loc(item.explanation)) : el('p', { text: App.t('noExplanation') }))));
         }
         refs.check.disabled = !!checked;
         const last = i === s.length - 1;
@@ -202,9 +260,10 @@
             const s = S();
             const screen = App.state.screen;
             // the total timer keeps running on the review screen; per-question timers pause there
-            if (!s || !(screen === 'runtime' || (screen === 'review' && s.timerMode === 'total'))) return;
+            if (!s || s.paused || !(screen === 'runtime' || (screen === 'review' && s.timerMode === 'total'))) return;
             const ev = s.tick();
             updateClock();
+            if (screen === 'runtime') renderPace();
             if (ev === 'total') { App.ui.submit(true); return; }
             if (ev === 'question' && screen === 'runtime') { if (s.index < s.length - 1) go(s.index + 1); else App.ui.openReview(); return; }
             if (s.times[s.index] % 10 === 0) App.ui.persist();
@@ -220,6 +279,7 @@
     // ---- keyboard ----
     document.addEventListener('keydown', e => {
         if (App.state.screen !== 'runtime' || e.ctrlKey || e.metaKey || e.altKey) return;
+        if (S() && S().paused && e.key.toLowerCase() !== 'p') return;
         const t = e.target;
         const typing = t && (t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || (t.tagName === 'INPUT' && t.type === 'text') || (e.key.startsWith('Arrow') && t.classList && t.classList.contains('option-input')));
         if (typing) return;
@@ -234,6 +294,7 @@
         else if (key === 'arrowright') { if (s.index < s.length - 1) go(s.index + 1); e.preventDefault(); }
         else if (key === 'arrowleft') { go(s.index - 1); e.preventDefault(); }
         else if (key === 'm') { toggleFlag(); e.preventDefault(); }
+        else if (key === 'p') { if (s.paused) doUnpause(); else doPause(); e.preventDefault(); }
         else if (key === 'enter' && t.tagName !== 'BUTTON' && t.tagName !== 'A' && t.tagName !== 'SUMMARY') {
             if (s.studyMode && !s.isChecked(s.index) && s.hasAnswer(s.index)) checkAnswer(); else nextQuestion();
             e.preventDefault();

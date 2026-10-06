@@ -244,3 +244,93 @@ test('events: handlers run and errors are isolated', () => {
     off(); App.events.emit('t');
     assert.equal(n, 1);
 });
+
+test('rich text: parsing, safety and plain text', () => {
+    const R = App.rich;
+    const b = R.parse('Hello **bold** `code`\nnext');
+    assert.equal(b[0].t, 'p');
+    assert.ok(b[0].c.some(n => n.t === 'b') && b[0].c.some(n => n.t === 'code') && b[0].c.some(n => n.t === 'br'));
+    assert.equal(R.parse('1. a\n2. b')[0].t, 'ol');
+    assert.equal(R.parse('- a\n- b')[0].t, 'ul');
+    assert.equal(R.parse('```js\nlet x = 1;\n```')[0].t, 'codeblock');
+    assert.equal(R.parse('| a | b |\n|---|---|\n| 1 | 2 |')[0].t, 'table');
+    // safety: no html, no javascript: URLs
+    const evil = R.parse('<script>x</script> ![i](javascript:alert(1)) [l](javascript:alert(1))');
+    const flat = JSON.stringify(evil);
+    assert.ok(!/"t":"img"|"t":"a"/.test(flat));
+    assert.ok(R.parse('![ok](data:image/png;base64,AAAA)')[0].c.some(n => n.t === 'img'));
+    assert.ok(R.parse('![ok](pics/a.png)')[0].c.some(n => n.t === 'img'));
+    assert.ok(R.parse('[ok](https://example.com/x)')[0].c.some(n => n.t === 'a'));
+    // dollar amounts are not math
+    assert.ok(!JSON.stringify(R.parse('about $1,000 USD (of the total $2,000)')).includes('"math"'));
+    assert.ok(JSON.stringify(R.parse('area $x^2 + \\frac{a}{b}$')).includes('"math"'));
+    assert.equal(R.plain('**a** ![alt](x.png) `c` [t](https://e.com)'), 'a alt c t');
+    assert.ok(R.isPlain('Plain question text?') && !R.isPlain('with `code`'));
+});
+
+test('rich text: LaTeX subset', () => {
+    const m = App.rich.parseMath('\\frac{a}{b}^2 + \\sqrt{x_1} \\times \\alpha');
+    const s = JSON.stringify(m);
+    for (const t of ['mfrac', 'msup', 'msqrt', 'msub']) assert.ok(s.includes('"' + t + '"'), t);
+    assert.ok(s.includes('×') && s.includes('α'));
+    assert.ok(JSON.stringify(App.rich.parseMath('x_a^b')).includes('msubsup'));
+});
+
+test('schema: warns about unsafe or huge images', () => {
+    const r = App.schema.validate({ format: 2, id: 'x', title: 'X', questions: [
+        { id: 1, topic: 'T', text: 'See ![x](javascript:alert(1))', options: ['a', 'b'], answer: [0] }] });
+    assert.ok(r.warnings.some(w => /not allowed/.test(w.message)), r.format());
+});
+
+test('scoring: partial credit, penalties and points', () => {
+    const items = [
+        App.prepareQuestion(q({ id: 1, shuffle: false, answer: [0, 2], text: 'Select two' }), {}),
+        App.prepareQuestion(q({ id: 2, shuffle: false, answer: [1] }), {}),
+        App.prepareQuestion(q({ id: 3, shuffle: false, answer: [1], points: 3 }), {}),
+        App.prepareQuestion(q({ id: 4, shuffle: false, answer: [1] }), {})
+    ];
+    // q1 partial (one of two), q2 wrong, q3 right (3 points), q4 unanswered
+    const values = { 0: [0], 1: 0, 2: 1 };
+    const plain = App.scoring.score(items, values, {});
+    assert.equal(plain.score, 3); assert.equal(plain.max, 6); assert.equal(plain.pct, 50);
+    assert.equal(plain.fully, 1); assert.equal(plain.partial, 0); assert.equal(plain.wrong, 2); assert.equal(plain.unanswered, 1);
+    assert.equal(plain.custom, true, 'weighted points make the scoring custom');
+    const partial = App.scoring.score(items, values, { partialCredit: true });
+    assert.equal(partial.score, 3.5); assert.equal(partial.partial, 1);
+    const penal = App.scoring.score(items, values, { partialCredit: true, wrongPenalty: 0.5, unansweredPenalty: 0.25 });
+    assert.equal(penal.score, 3.5 - 0.5 - 0.25);
+    assert.equal(App.scoring.score(items, {}, { wrongPenalty: 1, unansweredPenalty: 1 }).score, 0, 'never below zero');
+});
+
+test('scoring: partial credit per type and mandatory questions', () => {
+    const T = App.types;
+    const multi = App.prepareQuestion(q({ shuffle: false, answer: [0, 1, 2], text: 'Select three' }), {});
+    assert.equal(App.fractionOf(multi, [0, 1], { partialCredit: true }).toFixed(2), '0.67');
+    assert.equal(App.fractionOf(multi, [0, 1, 3], { partialCredit: true }).toFixed(2), '0.33');
+    assert.equal(App.fractionOf(multi, [0, 1], {}), 0);
+    const ord = App.prepareQuestion({ id: 6, topic: 'T', text: 'o', type: 'ordering', items: ['a', 'b', 'c', 'd'] }, {});
+    assert.equal(App.fractionOf(ord, [0, 1, 3, 2], { partialCredit: true }), 0.5);
+    const mat = App.prepareQuestion({ id: 7, topic: 'T', text: 'm', pairs: [{ left: 'a', right: '1' }, { left: 'b', right: '2' }] }, {});
+    assert.equal(App.fractionOf(mat, [0, 0], { partialCredit: true }), 0.5);
+    const sc = App.prepareQuestion({ id: 9, topic: 'T', text: 's', parts: [{ text: 'p1', options: ['x', 'y'], answer: [0], shuffle: false }, { text: 'p2', type: 'numeric', answer: 3 }] }, {});
+    assert.equal(App.fractionOf(sc, [0, '4'], { partialCredit: true }), 0.5);
+    const m1 = App.prepareQuestion(q({ id: 10, shuffle: false, mandatory: true }), {});
+    assert.deepEqual(App.scoring.score([m1], { 0: 0 }, {}).mandatoryFailed, [0]);
+    assert.deepEqual(App.scoring.score([m1], { 0: 1 }, {}).mandatoryFailed, []);
+});
+
+test('scoring: resolution order (defaults < user < exam < mode) and session pass/fail', () => {
+    const exam = { settings: { scoring: { wrongPenalty: 0.25 } } };
+    assert.equal(App.scoring.resolve(exam, null, { partialCredit: true }).partialCredit, false, 'exam rules win over user preferences');
+    assert.equal(App.scoring.resolve({ settings: {} }, null, { partialCredit: true }).partialCredit, true);
+    assert.equal(App.scoring.resolve({ settings: {} }, { exam: true }, { partialCredit: true }).partialCredit, false, 'exam modes ignore user preferences');
+    assert.equal(App.scoring.resolve(exam, { scoring: { wrongPenalty: 0.5 } }, null).wrongPenalty, 0.5);
+
+    const e = mkBig(4);
+    const store = App.createStorage(App.memoryBackend());
+    const qs = e.questions.map((x, i) => i === 0 ? Object.assign({}, x, { mandatory: true }) : x);
+    const s = App.Session.create(qs, { examId: 'big', modeId: 'all', timerMode: 'none', threshold: 50, shuffleOptions: false });
+    s.setValue(1, 1); s.setValue(2, 1); s.setValue(3, 1);      // 3 of 4 right, the mandatory first one unanswered
+    const a = s.submit(store);
+    assert.equal(a.pct, 75); assert.equal(a.mandatoryFailed, 1); assert.equal(a.passed, false);
+});
