@@ -8,3 +8,6 @@ Exam Simulator
 ## Formato del file domande
 `window.ExamData = { config: {...}, questions: [...] }` — vedi `managedServices.js`.
 Ogni domanda: `id`, `topic`, `question`, `options[]`, `answer[]` (indici base 0; più di uno = risposta multipla), `explanation`.
+
+## Elenco esami
+La pagina iniziale mostra gli esami elencati in `exams.js`. Per aggiungerne uno, copia il file `.js` nella cartella e aggiungi una voce in `window.ExamCatalog`.
