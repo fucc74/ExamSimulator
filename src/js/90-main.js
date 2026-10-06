@@ -14,6 +14,7 @@
     }
     App.ui.openExam = openExam;
 
+    App.ui.showPicker = showPicker;
     function showPicker(errorLines) {
         App.state.exam = null;
         App.state.loadError = errorLines || null;
@@ -55,6 +56,7 @@
         const theme = App.ui.getGlobal('theme');
         if (theme === 'dark' || theme === 'light') document.documentElement.setAttribute('data-theme', theme);
         App.ui.applyStatic();
+        $('brand-link').addEventListener('click', e => { if (App.state.exam || App.state.screen !== 'picker') { e.preventDefault(); App.ui.goHome(); } });
         $('lang-btn').addEventListener('click', () => App.ui.setLang(App.lang === 'en' ? 'it' : 'en'));
         $('theme-btn').addEventListener('click', () => App.ui.setTheme(App.ui.theme() === 'dark' ? 'light' : 'dark'));
         const pal = $('palette-btn'); pal.appendChild(App.util.icon('search', 18)); pal.title = pal.ariaLabel = App.t('cmdTitle'); pal.addEventListener('click', () => App.ui.openPalette());

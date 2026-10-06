@@ -29,7 +29,7 @@
         if (banner) v.appendChild(banner);
         v.appendChild(App.ui.discoverBar());
         const cat = App.loader.catalog();
-        if (!cat.length) v.appendChild(el('p', { class: 'hint', style: 'text-align:center', text: App.t('noCatalog') }));
+        if (!cat.length) v.appendChild(el('p', { class: 'hint picker-empty', id: 'picker-empty', style: 'text-align:center', text: App.t('pickerEmpty') }));
         const grid = el('div', { class: 'exam-grid', id: 'exam-list' });
         cat.forEach(item => {
             const id = item.id || item.file;
@@ -44,7 +44,7 @@
             if (sessions) meta.appendChild(el('span', { class: 'chip warn', text: App.t('inProgressChip') }));
             if (item.local) meta.appendChild(el('span', { class: 'chip', text: App.t('localChip') }));
             if (item.disk) meta.appendChild(el('span', { class: 'chip', text: App.t('folderChip') }));
-            grid.appendChild(el('a', { href: '?content=' + encodeURIComponent(item.file), class: 'exam-card', onclick: item.disk ? (e => { e.preventDefault(); App.ui.gotoExam(item.file); }) : undefined }, top,
+            grid.appendChild(el('a', { href: '?content=' + encodeURIComponent(item.file), class: 'exam-card', onclick: e => { if (e.ctrlKey || e.metaKey || e.shiftKey || e.button) return; e.preventDefault(); App.ui.gotoExam(item.file); } }, top,
                 el('div', { class: 'exam-card-title', text: App.loc(item.title) || item.file }),
                 el('div', { class: 'exam-card-desc', text: App.loc(item.description) }), meta));
         });

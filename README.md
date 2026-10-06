@@ -84,8 +84,8 @@ QZ has no server and no tracking. Questions, answers, notes and statistics are s
 - **Backup** — download a full backup, get a reminder every *N* days, or pick a file (Chrome/Edge) that QZ rewrites after every finished session.
 - **Sync between devices** — copy/paste a *transfer code*, or sync through a private GitHub Gist (token kept on your device, never inside backups). Progress is merged, never overwritten.
 
-## Finding exams on disk
-The start page has a **Check for exams** button. In Chrome/Edge it asks for your exam folder once, remembers it and re-reads it on every press; cards are built from the files themselves. In every browser **Import a folder…** copies all `.exam` files of a folder into *My exams*. Unreadable files are listed with the reason. After a browser restart Chrome may ask to allow the folder again — press the button.
+## Finding exams
+The start page is **empty on purpose**: nothing is listed until you press **Check for exams**. On a web address (for example GitHub Pages) the button lists the exams that site offers. From a downloaded `exam.html`, in Chrome/Edge it asks for your exam folder once, remembers it and re-reads it on every press; cards are built from the files themselves. Each new visit starts empty again. In every browser **Import a folder…** copies all `.exam` files of a folder into *My exams*. Unreadable files are listed with the reason. After a browser restart Chrome may ask to allow the folder again — press the button. Files renamed by a phone to `*.exam.txt` are recognised too.
 
 ## Exam versions and quality
 - Exams can carry a **changelog**: learners see "what's new" when the version changes.

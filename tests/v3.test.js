@@ -385,3 +385,19 @@ test('folder import copies exams into the library: new, updated, bundled skipped
 test('support link is a plain https link and can be switched off', () => {
     assert.match(App.config.supportUrl, /^https:\/\/buymeacoffee\.com\/[\w-]+$/);
 });
+
+test('the start page catalog is empty until a check was made', async () => {
+    App.backend = App.memoryBackend();
+    App.discovery.done = false; App.discovery.served = [];
+    App.library.list().forEach(e => App.library.remove(e.id));
+    assert.deepEqual(App.loader.catalog(), [], 'nothing before the check');
+    assert.equal(await App.loader.refreshServed(), -1, 'no web server in a plain file context');
+    // creating/importing an exam is an explicit action: it shows what is in My exams
+    App.library.save(mkExam([q()], { id: 'mine', title: 'Mine' }));
+    assert.equal(App.loader.catalog().length, 1);
+    assert.deepEqual(App.loader.knownIds().includes('mine'), true);
+    // a remembered folder alone does not list anything
+    App.discovery.done = false;
+    assert.deepEqual(App.loader.catalog(), []);
+    App.library.remove('mine');
+});

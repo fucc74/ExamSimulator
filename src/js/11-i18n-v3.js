@@ -1,5 +1,7 @@
 /* UI translations added in engine v3 (options, backup/sync, library, editor, search, reports, quality). */
 Object.assign(App.I18N.en, {
+    pickerEmpty: "No exams are listed. Press \"Check for exams\" to look for them.", scanReady: "The folder \"{name}\" is remembered. Press \"Check for exams\" to read it.", scanListed: "{n} exams listed.",
+    scanServed: "Press \"Check for exams\" to list the exams available on this site.", scanServedFolder: "To read a folder on this device use \"Choose folder…\".", scanChooseFolder: "Choose folder…",
     scanBtn: "Check for exams", scanImportFolder: "Import a folder…", scanImportHint: "Copies every .exam file found in a folder into My exams (works in every browser)", scanForget: "Forget folder",
     scanFirstTime: "Press \"Check for exams\" and choose the folder that holds your .exam files. Next time the button re-reads that folder.", scanUnsupported: "This browser cannot remember a folder. Use \"Import a folder…\" to load the exams in it.",
     scanStatus: "Folder \"{name}\": {n} exams found (checked at {t}).", scanAllow: "Press \"Check for exams\" to allow access to the folder \"{name}\".", scanDenied: "Access to the folder was denied. Press \"Check for exams\" to try again.",
@@ -72,6 +74,8 @@ Object.assign(App.I18N.en, {
 });
 
 Object.assign(App.I18N.it, {
+    pickerEmpty: "Nessun esame in elenco. Premi \"Cerca esami\" per cercarli.", scanReady: "La cartella \"{name}\" è ricordata. Premi \"Cerca esami\" per leggerla.", scanListed: "{n} esami in elenco.",
+    scanServed: "Premi \"Cerca esami\" per elencare gli esami disponibili su questo sito.", scanServedFolder: "Per leggere una cartella di questo dispositivo usa \"Scegli cartella…\".", scanChooseFolder: "Scegli cartella…",
     scanBtn: "Cerca esami", scanImportFolder: "Importa una cartella…", scanImportHint: "Copia in I miei esami ogni file .exam trovato in una cartella (funziona in tutti i browser)", scanForget: "Dimentica la cartella",
     scanFirstTime: "Premi \"Cerca esami\" e scegli la cartella che contiene i tuoi file .exam. Dalla volta dopo il pulsante rilegge quella cartella.", scanUnsupported: "Questo browser non può ricordare una cartella. Usa \"Importa una cartella…\" per caricare gli esami che contiene.",
     scanStatus: "Cartella \"{name}\": {n} esami trovati (controllata alle {t}).", scanAllow: "Premi \"Cerca esami\" per consentire l'accesso alla cartella \"{name}\".", scanDenied: "Accesso alla cartella negato. Premi \"Cerca esami\" per riprovare.",

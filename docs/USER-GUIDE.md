@@ -8,6 +8,7 @@ This guide explains every part of QZ in detail. For a short introduction see the
 - Deep links: `exam.html?content=NAME` opens `NAME.exam`; `exam.html?url=https://…/NAME.exam` loads an exam from a web address.
 
 ## 2. The start page
+- The list is **empty until you press Check for exams** (or import/create an exam in this visit); a new visit starts empty again.
 - **Exam cards** — one per exam, showing title, description, number of questions and topics, your last score, and *In progress* when a session is waiting.
 - **Check for exams** — re-reads your exam folder (see §9). **Import a folder…** copies the `.exam` files of a folder into *My exams*.
 - **Header buttons** — command palette (search icon), **Options** (gear), language (EN/IT), theme (light/dark).
@@ -89,7 +90,7 @@ History chart, accuracy per topic, mastered questions, average time per question
 - **Reminder:** a banner appears when there is progress and no backup for the chosen number of days.
 
 ## 9. Finding and managing exams
-- **Check for exams** — in Chrome/Edge: choose the folder once; the next presses re-read it. Cards are built from the `.exam` files, so a new or edited file shows up straight away. After a browser restart the browser may ask permission again.
+- **Check for exams** — on a web address it lists the exams the site offers; from a downloaded `exam.html` in Chrome/Edge: choose the folder once, the next presses re-read it. Cards are built from the `.exam` files, so a new or edited file shows up straight away. After a browser restart the browser may ask permission again.
 - **Import a folder…** — works everywhere; copies every `.exam` in the folder into *My exams* (new ones are added, existing ones updated, bundled ones skipped).
 - **Import wizard** — *Options → My exams → Import or create from a file*: choose or paste a file (`.exam`, `.json`, `.csv`, `.md`, `.txt`) and QZ opens it in the editor with every problem flagged.
 - **Editor** — metadata, topics, and per question: topic, type (single, multiple, true/false, numeric; other types are edited as JSON), text with formatting and images, options with the correct ones ticked, explanation. A validation panel updates as you type; *Try it* runs the draft without saving.

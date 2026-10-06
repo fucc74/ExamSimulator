@@ -78,10 +78,21 @@ module.exports = {
         await p.emulateMedia({ media: 'screen' });
     },
 
-    'picker and exam loading': async ({ p, check, URL_BASE }) => {
+    'picker and exam loading': async ({ p, check, URL_BASE, HTTP_BASE }) => {
         await p.goto(URL_BASE);
+        await p.waitForSelector('#picker-empty');
+        check('start page is empty until "Check for exams" is pressed (file)', (await p.locator('.exam-card').count()) === 0 && (await p.locator('#scan-btn').isVisible()));
+        await p.goto(HTTP_BASE + '/exam.html');
+        await p.waitForSelector('#picker-empty');
+        check('start page is empty until "Check for exams" is pressed (web address)', (await p.locator('.exam-card').count()) === 0);
+        await p.click('#scan-btn');
         await p.waitForSelector('.exam-card');
-        check('exam cards listed', (await p.locator('.exam-card').count()) >= 4);
+        check('exam cards listed after the check', (await p.locator('.exam-card').count()) >= 4);
+        await p.reload();
+        await p.waitForSelector('#picker-empty');
+        check('a new visit starts empty again', (await p.locator('.exam-card').count()) === 0);
+        await p.click('#scan-btn');
+        await p.waitForSelector('.exam-card');
         await p.click('.exam-card >> text=V31 Practice Test');
         await p.waitForSelector('#start-btn');
         check('dashboard opens', /V31/.test(await p.title()));

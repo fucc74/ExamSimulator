@@ -95,19 +95,47 @@ App.loader = (function () {
     }
 
     // Exam list: exams.js (generated, optional) overrides the list embedded in exam.html at build time.
+    // The catalog list built into the page (exams.js / exam.html): used for bundled ids and as the fallback of a served-site check.
     function baseCatalog() {
         if (typeof window === 'undefined') return [];
         if (Array.isArray(window.ExamCatalog) && window.ExamCatalog.length) return window.ExamCatalog;
         return Array.isArray(window.ExamCatalogDefault) ? window.ExamCatalogDefault : [];
     }
-    // Bundled list + the user's own exams + exams found in the chosen folder. Same id: the fresher source wins (folder > mine > bundled).
+
+    // The start page lists NOTHING until the user presses "Check for exams" (or imports something):
+    // `done` flips to true on those actions, `served` holds the list found on the web server.
+    const discovery = { done: false, served: [] };
+    App.discovery = discovery;
+    if (App.events) App.events.on('libraryChange', () => { discovery.done = true; });
+
+    // Over http(s): read the server's exams.js again. Returns the number of exams listed, or -1 when not applicable.
+    async function refreshServed() {
+        if (!isHttp()) return -1;
+        let list = null;
+        try {
+            const resp = await fetch('exams.js', { cache: 'no-cache' });
+            if (resp.ok) { const m = (await resp.text()).match(/window\.ExamCatalog\s*=\s*(\[[\s\S]*\])\s*;?/); if (m) list = JSON.parse(m[1]); }
+        } catch (e) { /* offline or no exams.js */ }
+        discovery.served = Array.isArray(list) ? list : baseCatalog().slice();
+        discovery.done = true;
+        return discovery.served.length;
+    }
+
+    // What the start page shows. Same id: the fresher source wins (folder > mine > served).
     function catalog() {
+        if (!discovery.done) return [];
         const out = [];
         const put = item => { const id = item.id || item.file; const i = out.findIndex(x => (x.id || x.file) === id); if (i >= 0) out[i] = item; else out.push(item); };
-        baseCatalog().forEach(put);
+        discovery.served.forEach(put);
         (App.library ? App.library.list() : []).forEach(put);
         (App.folder ? App.folder.entries() : []).forEach(put);
         return out;
+    }
+    // Every id that already exists somewhere (to avoid clashes when creating or importing exams).
+    function knownIds() {
+        const ids = new Set(baseCatalog().map(c => c.id || c.file));
+        discovery.served.concat(App.library ? App.library.list() : [], App.folder ? App.folder.entries() : []).forEach(c => ids.add(c.id || c.file));
+        return Array.from(ids);
     }
 
     // Human-readable message for a load error.
@@ -128,7 +156,7 @@ App.loader = (function () {
         }
     }
 
-    return { register, parseText, finalize, loadByName, loadByUrl, catalog, baseCatalog, describe, LoadError };
+    return { register, parseText, finalize, loadByName, loadByUrl, catalog, baseCatalog, knownIds, refreshServed, describe, LoadError };
 })();
 
 if (typeof window !== 'undefined') window.ExamSim = { register: d => App.loader.register(d), version: App.version, App };

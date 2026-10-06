@@ -80,7 +80,7 @@ Other keys: `examsim:profiles`, `examsim:ui` (language/theme, mirrored in `local
 ## 5. Flows
 
 ### Start-up (`90-main`)
-`initStorage()` (IndexedDB → localStorage → memory) → set language/theme → wire header buttons → restore the remembered exam folder (1.5 s timeout) → route (`?content=`, `?url=`, `#options`) → register the service worker.
+`initStorage()` (IndexedDB → localStorage → memory) → set language/theme → wire header buttons → remember (not read) the exam folder handle (1.5 s timeout) → route (`?content=`, `?url=`, `#options`) → register the service worker.
 
 ### Loading an exam (`70-loader`)
 - over http(s): `fetch` the `.exam` text, strip comments, extract the argument of `ExamSim.register(...)` and `JSON.parse` it — **nothing is executed**;
@@ -93,6 +93,9 @@ Question handler `render` → `onChange(value)` → `session.setValue` → autos
 
 ### Updates
 The service worker precaches the shell and exam files (stale-while-revalidate). A new worker waits; the page shows a *new version available* banner and sends `SKIP_WAITING` when you press *Reload*.
+
+### Exam discovery
+`App.discovery.done` is false at every start, so `App.loader.catalog()` returns an empty list and the start page shows nothing. It becomes true only through an explicit action: *Check for exams* (served list from `exams.js` over http(s), folder scan, folder import) or saving/importing an exam in *My exams* (`libraryChange`). Exams open in-page (`App.ui.gotoExam`) so the list survives navigation within the visit; direct links (`?content=NAME`) still work without a check.
 
 ## 6. Security notes
 - Exam text → DOM only through `App.rich` / `textContent`. Images: `data:image/*`, `https:` or relative image paths only. Links: `https:` only.

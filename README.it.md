@@ -84,8 +84,8 @@ QZ non ha server né tracciamento. Domande, risposte, note e statistiche sono sa
 - **Backup** — scarichi un backup completo, ricevi un promemoria ogni *N* giorni, oppure scegli un file (Chrome/Edge) che QZ riscrive dopo ogni sessione conclusa.
 - **Sincronizzazione tra dispositivi** — copia/incolla di un *codice di trasferimento*, oppure Gist GitHub privato (il token resta sul tuo dispositivo e non finisce mai nei backup). I progressi vengono uniti, mai sovrascritti.
 
-## Trovare gli esami sul disco
-La pagina iniziale ha il pulsante **Cerca esami**. In Chrome/Edge chiede la cartella degli esami una volta sola, la ricorda e la rilegge a ogni pressione; le schede sono costruite dai file stessi. In tutti i browser **Importa una cartella…** copia tutti i file `.exam` di una cartella in *I miei esami*. I file non leggibili sono elencati con il motivo. Dopo il riavvio del browser Chrome può chiedere di nuovo il permesso: premi il pulsante.
+## Trovare gli esami
+La pagina iniziale è **vuota di proposito**: non viene elencato nulla finché non premi **Cerca esami**. Su un indirizzo web (per esempio GitHub Pages) il pulsante elenca gli esami offerti da quel sito. Da un `exam.html` scaricato, in Chrome/Edge chiede la cartella degli esami una volta sola, la ricorda e la rilegge a ogni pressione; le schede sono costruite dai file stessi. Ogni nuova visita riparte vuota. In tutti i browser **Importa una cartella…** copia tutti i file `.exam` di una cartella in *I miei esami*. I file non leggibili sono elencati con il motivo. Dopo il riavvio del browser Chrome può chiedere di nuovo il permesso: premi il pulsante.
 
 ## Versioni degli esami e qualità
 - Gli esami possono avere un **registro delle modifiche**: chi studia vede le novità quando la versione cambia.

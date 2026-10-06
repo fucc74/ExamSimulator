@@ -50,6 +50,7 @@ async function perf() {
         await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
         const t0 = Date.now();
         await b.p.goto(b.base);
+        await b.p.click('#scan-btn');
         await b.p.waitForSelector('#exam-list .exam-card');
         const first = Date.now() - t0;
         (first <= BUDGET.firstRenderMs ? ok : fail)('exam list visible after ' + first + ' ms at 4x CPU slowdown (budget ' + BUDGET.firstRenderMs + ')');

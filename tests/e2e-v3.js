@@ -7,7 +7,7 @@ const fresh = async (p, base, content) => {
     await p.waitForFunction(() => window.ExamSim && ExamSim.App.backend);
     await p.evaluate(async () => { await ExamSim.App.wipeAll(); try { localStorage.clear(); } catch (e) {} });
     await p.goto(base + (content ? '?content=' + content : ''));
-    if (content) await p.waitForSelector('#start-btn'); else await p.waitForSelector('#exam-list');
+    if (content) await p.waitForSelector('#start-btn'); else await p.waitForSelector('#scan-btn');
 };
 const openOptions = async p => { await p.click('#options-btn'); await p.waitForSelector('#opt-general'); };
 const finishSession = async (p, runAll, mode) => { await runAll(p, mode); };
@@ -63,7 +63,7 @@ module.exports = {
         check('language remembered', /Opzioni/.test(await p.locator('#view-options h1').innerText()));
         check('partial credit remembered', await p.locator('#opt-partial').isChecked());
         await p.click('#opt-back');
-        check('back to the exam list', await p.locator('#exam-list').isVisible());
+        check('back to the start page (still empty)', await p.locator('#scan-btn').isVisible() && (await p.locator('.exam-card').count()) === 0);
         await p.evaluate(() => ExamSim.App.ui.setLang('en'));
     },
 
@@ -92,7 +92,7 @@ module.exports = {
         check('no reminder right after the first session', (await p.locator('#backup-banner').count()) === 0);
         await p.evaluate(() => { const a = ExamSim.App.storage.raw().exams.demo.attempts; a.forEach(x => { x.ts -= 30 * 86400000; }); ExamSim.App.storage.setPref('x', 1); });
         await p.goto(URL_BASE);
-        await p.waitForSelector('#exam-list');
+        await p.waitForSelector('#scan-btn');
         check('reminder shown after 30 days without backup', (await p.locator('#backup-banner').count()) === 1);
         await p.click('#backup-banner >> text=Remind me later');
         check('reminder snoozed', (await p.locator('#backup-banner').count()) === 0);
@@ -105,7 +105,7 @@ module.exports = {
         // restore into a wiped store
         await p.evaluate(async () => { await ExamSim.App.wipeAll(); });
         await p.goto(URL_BASE);
-        await p.waitForSelector('#exam-list');
+        await p.waitForSelector('#scan-btn');
         check('wiped', (await p.evaluate(() => ExamSim.App.storage.listAttempts('demo').length)) === 0);
         await p.setInputFiles('#import-file', file);
         await p.waitForFunction(() => ExamSim.App.storage.listAttempts('demo').length === 1);
@@ -125,7 +125,7 @@ module.exports = {
         check('transfer code created', /^ES[01]\.[\w-]+$/.test(code), code.slice(0, 20));
         await p.evaluate(async () => { await ExamSim.App.wipeAll(); });
         await p.goto(URL_BASE);
-        await p.waitForSelector('#exam-list');
+        await p.waitForSelector('#scan-btn');
         await openOptions(p);
         await p.fill('#sync-code-in', 'garbage');
         await p.click('#sync-import');
@@ -166,7 +166,7 @@ module.exports = {
         await p.unroute('https://api.github.com/**');
     },
 
-    'wizard and editor: import text, fix problems, save, use, export': async ({ p, check, URL_BASE }) => {
+    'wizard and editor: import text, fix problems, save, use, export': async ({ p, check, URL_BASE, ROOT }) => {
         await fresh(p, URL_BASE);
         await p.click('#picker-wizard');
         await p.fill('#wiz-text', TEXT_EXAM);
@@ -190,8 +190,7 @@ module.exports = {
         check('saved in the library with 4 questions and 2 topics', saved.questionCount === 4 && saved.topicCount === 2, saved);
         await p.click('#ed-back');
         await p.click('#opt-back');
-        const bundled = await p.evaluate(() => ExamSim.App.loader.baseCatalog().length);
-        check('picker lists the new exam', (await p.locator('#exam-list .exam-card').count()) === bundled + 1);
+        check('after creating an exam the start page lists only exams you made', (await p.locator('#exam-list .exam-card').count()) === 1);
         await p.click('.exam-card:has-text("Imported Networking Quiz")');
         await p.waitForSelector('#start-btn');
         check('local exam opens on its dashboard', /Imported Networking Quiz/.test(await p.locator('#view-dashboard h1').innerText()));
@@ -224,6 +223,18 @@ module.exports = {
         await p.waitForSelector('#ed-questions');
         check('CSV re-imported with 4 valid questions', (await p.locator('.ed-q').count()) === 4 && (await p.locator('.ed-q.has-problem').count()) === 0);
         check('re-import is saveable', !(await p.locator('#ed-save').isDisabled()));
+        // a phone renames downloads to *.exam.txt: the content must still be recognised as an exam
+        const txtPath = path.join(require('os').tmpdir(), 'demo.exam.txt');
+        fs.copyFileSync(path.join(ROOT, 'demo.exam'), txtPath);
+        await p.goto(URL_BASE);
+        await p.waitForSelector('#scan-btn');
+        await p.click('#picker-wizard');
+        await p.setInputFiles('#wiz-file', txtPath);
+        await p.waitForFunction(() => document.querySelector('#wiz-text').value.length > 20);
+        await p.click('.modal-actions >> text=Continue');
+        await p.waitForSelector('#ed-questions');
+        const demoN = await p.evaluate(() => ExamSim.App.loader.baseCatalog().find(c => c.id === 'demo').questionCount);
+        check('an exam renamed to .exam.txt is still read as an exam', (await p.locator('.ed-q').count()) === demoN, demoN);
     },
 
     'editor: new exam, live validation, image attach, preview': async ({ p, check, URL_BASE }) => {
@@ -388,6 +399,7 @@ module.exports = {
         });
         await fresh(p, URL_BASE);
         check('the check button is on the start screen from the start', await p.locator('#scan-btn').isVisible());
+        check('nothing is listed before pressing it', (await p.locator('.exam-card').count()) === 0 && (await p.locator('#picker-empty').isVisible()));
         check('first-time hint explains what it does', /choose the folder/.test(await p.locator('#scan-status').innerText()));
         await p.evaluate(([a, b]) => { window.__disk['disk-quiz.exam'] = a; window.__disk['second.exam'] = b; }, [mk('disk-quiz', 'Disk Quiz', 3), mk('second', 'Second Disk Exam', 2)]);
         await p.click('#scan-btn');
@@ -415,9 +427,14 @@ module.exports = {
         await p.selectOption('#exam-switch', 'disk:second');
         await p.waitForFunction(() => /Second Disk Exam/.test(document.querySelector('#view-dashboard h1').innerText));
         check('switching with the menu works for folder exams', true);
-        await p.selectOption('#exam-switch', 'demo');
-        await p.waitForSelector('#view-dashboard h1:has-text("Engine Demo")');
-        check('...and for bundled exams', true);
+        await p.selectOption('#exam-switch', 'disk:disk-quiz');
+        await p.waitForSelector('#view-dashboard h1:has-text("Disk Quiz")');
+        check('...and back again', true);
+        check('the menu lists only what the check found', (await p.locator('#exam-switch option').count()) === 2);
+        // the brand link returns to the start page without losing the list
+        await p.click('#brand-link');
+        await p.waitForSelector('.exam-card');
+        check('brand link goes home in-page and keeps the list', (await p.locator('.exam-card').count()) === 2 && (await p.evaluate(() => window.__marker)) === 'same-page');
 
         // fallback: import a whole folder (works in every browser)
         const dir = path.join(require('os').tmpdir(), 'examsim-folder-' + Date.now());
@@ -427,7 +444,7 @@ module.exports = {
         fs.writeFileSync(path.join(dir, 'garbage.exam'), 'not an exam');
         fs.writeFileSync(path.join(dir, 'readme.txt'), 'ignored');
         await p.goto(URL_BASE);
-        await p.waitForSelector('#exam-list');
+        await p.waitForSelector('#scan-btn');
         const [chooser] = await Promise.all([p.waitForEvent('filechooser'), p.click('#folder-import-btn')]);
         await chooser.setFiles(dir);
         await p.waitForFunction(() => ExamSim.App.library.list().length === 2);

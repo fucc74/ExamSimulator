@@ -41,13 +41,14 @@
     }
 
     // ---------------------------------------------------------------- reading sources
+    // The content wins over the extension: Android and some browsers rename downloads (ai.exam → ai.exam.txt).
     function detectKind(name, text) {
         const n = String(name || '').toLowerCase();
-        if (/\.(exam|json|js)$/.test(n)) return 'exam';
+        const t = String(text || '').replace(/^\uFEFF/, '').trim();
+        if (/^(\s*(\/\/[^\n]*\n|\/\*[\s\S]*?\*\/))*\s*(ExamSim\.register\s*\(|[{[])/.test(t)) return 'exam';
+        if (/\.(exam|json|js)(\.txt)?$/.test(n)) return 'exam';
         if (/\.csv$|\.tsv$/.test(n)) return 'csv';
         if (/\.(md|markdown|txt)$/.test(n)) return 'text';
-        const t = String(text || '').trim();
-        if (/^ExamSim\.register\(|^\s*[{[]/.test(t) || /^\/\*[\s\S]*?\*\/\s*ExamSim\.register\(/.test(t)) return 'exam';
         const first = t.split(/\r?\n/, 1)[0] || '';
         if (/(^|[,;\t])\s*"?(text|question|domanda)"?\s*([,;\t]|$)/i.test(first) && /[,;\t]/.test(first)) return 'csv';
         return 'text';
@@ -56,7 +57,7 @@
     // Returns {draft, issues:{id:[codes]}, notes:[strings]} or throws Error(message)
     function readSource(name, text) {
         const kind = detectKind(name, text);
-        const fileTitle = String(name || '').replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim();
+        const fileTitle = String(name || '').replace(/\.txt$/i, '').replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim();
         if (kind === 'exam') {
             let data;
             try { data = App.loader.parseText(text); } catch (e) { throw new Error(App.t('wizBadExam', { detail: e.detail || e.message })); }
@@ -110,7 +111,7 @@
     };
 
     // ---------------------------------------------------------------- editor
-    const catalogIds = () => (App.loader.catalog() || []).filter(c => !c.local).map(c => c.id || c.file);
+    const catalogIds = () => App.loader.knownIds();
 
     App.ui.openEditor = function (id) {
         if (id) {

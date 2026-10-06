@@ -20,7 +20,7 @@ async function open(opts) {
 
 // Resets storage then walks to a named state of the app.
 const STATES = {
-    async picker(p, base) { await reset(p, base); await p.goto(base); await p.waitForSelector('#exam-list .exam-card'); },
+    async picker(p, base) { await reset(p, base); await p.goto(base); await p.waitForSelector('#picker-empty'); await p.click('#scan-btn'); await p.waitForSelector('#exam-list .exam-card'); },
     async dashboard(p, base) { await reset(p, base); await p.goto(base + '/?content=demo'); await p.waitForSelector('#start-btn'); },
     async runtime(p, base) { await STATES.dashboard(p, base); await p.selectOption('#cfg-mode', 'all'); await p.check('#cfg-study'); await p.click('#start-btn'); await p.waitForSelector('#q-body .option-card'); },
     async checked(p, base) { await STATES.runtime(p, base); await p.locator('#q-body .option-card').first().click(); await p.click('#validate-btn'); await p.waitForSelector('#q-expl .dynamic-explanation-box'); },

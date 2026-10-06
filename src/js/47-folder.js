@@ -8,7 +8,8 @@ App.folder = (function () {
     let handle = null, entries = [], cache = new Map();
 
     const supported = () => typeof window !== 'undefined' && typeof window.showDirectoryPicker === 'function';
-    const baseName = n => String(n).replace(/\.exam$/i, '');
+    const EXAM_FILE = /\.exam(\.txt)?$/i;      // phones often rename downloads to .exam.txt
+    const baseName = n => String(n).replace(EXAM_FILE, '');
 
     // ---- remembered folder handle (IndexedDB, separate tiny database) ----
     function db() {
@@ -52,7 +53,7 @@ App.folder = (function () {
     async function scan() {
         const files = [], unreadable = [];
         for await (const [name, h] of handle.entries()) {
-            if (h.kind !== 'file' || !/\.exam$/i.test(name)) continue;
+            if (h.kind !== 'file' || !EXAM_FILE.test(name)) continue;
             try { files.push({ name, text: await (await h.getFile()).text() }); } catch (e) { unreadable.push({ name, message: String(e && e.message || e) }); }
         }
         files.sort((a, b) => a.name.localeCompare(b.name));
@@ -60,6 +61,7 @@ App.folder = (function () {
         entries = r.ok.map(entryOf);
         cache = new Map(r.ok.map(x => [x.key, x.data]));
         state.count = entries.length; state.bad = r.bad.concat(unreadable); state.at = Date.now(); state.name = handle.name;
+        App.discovery.done = true;
         App.events.emit('catalogChange', { source: 'folder' });
         return { found: entries.length, bad: state.bad };
     }
@@ -79,15 +81,14 @@ App.folder = (function () {
         hasFolder: () => !!handle,
         readFiles,
 
-        // At start-up: use the remembered folder when the browser still allows it without asking.
+        // At start-up only REMEMBER the folder; nothing is read until the user presses "Check for exams".
         async restore() {
             if (!supported()) return false;
             handle = await load();
             if (!handle) return false;
             state.name = handle.name;
             state.access = await permission(false).catch(() => 'prompt');
-            if (state.access === 'granted') { try { await scan(); } catch (e) { state.access = 'prompt'; } }
-            return state.access === 'granted';
+            return true;
         },
         // Uses a directory handle (also what the tests pass in). Remembers it when possible.
         async useHandle(h) {
