@@ -48,6 +48,7 @@ module.exports = {
         check('free navigation still works in strict mode', await (async () => { await p.click('#session-action-trigger'); return (await S(p)).index === 1; })());
         // strict clock: time passes while the session is closed
         await p.evaluate(() => { const A = ExamSim.App; const s = A.state.session; A.ui.persist(); A.storage.raw().exams.demo.sessions[s.id].updatedAt -= 60000; A.storage.setPref('touch', 1); });
+        await p.waitForTimeout(250);       // let the IndexedDB write commit before reloading
         await p.reload();
         await p.waitForSelector('.sessions-box');
         await p.click('.sessions-box >> text=Resume');
