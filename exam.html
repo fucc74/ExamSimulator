@@ -500,7 +500,7 @@
     (function() {
         var p = new URLSearchParams(window.location.search);
         var c = p.get('content');
-        if (c) { document.write('<scr' + 'ipt src="' + c + '.js"></scr' + 'ipt>'); }
+        if (c && /^[\w.\-]+$/.test(c)) { document.write('<scr' + 'ipt src="' + c + '.js"></scr' + 'ipt>'); }
     })();
     </script>
 </head>
@@ -517,16 +517,21 @@
 
     <div class="main-wrapper">
         <div id="no-content-message" class="card hidden" style="text-align:center; padding:60px 30px;">
-            <h1 style="font-size:1.5rem; margin-bottom:15px; color:var(--dark);">No exam content loaded</h1>
-            <p style="color:var(--gray); font-size:1rem;">Use the URL parameter <code style="background:var(--light-gray);padding:2px 8px;border-radius:4px;font-weight:600;">?content=ExamName</code> to load an exam file.</p>
-            <p style="color:var(--gray); font-size:0.9rem; margin-top:10px;">Example: <code style="background:var(--light-gray);padding:2px 8px;border-radius:4px;">exam.html?content=genAI</code></p>
+            <div id="no-content-body">
+                <h1 style="font-size:1.5rem; margin-bottom:15px; color:var(--dark);">No exam content loaded</h1>
+                <p style="color:var(--gray); font-size:1rem;">Use the URL parameter <code style="background:var(--light-gray);padding:2px 8px;border-radius:4px;font-weight:600;">?content=ExamName</code> to load an exam file.</p>
+                <p style="color:var(--gray); font-size:0.9rem; margin-top:10px;">Example: <code style="background:var(--light-gray);padding:2px 8px;border-radius:4px;">exam.html?content=genAI</code></p>
+            </div>
+            <p style="color:var(--gray); margin:20px 0 10px;">oppure</p>
+            <button type="button" class="upload-exam-btn" style="padding:12px 24px;font-size:1rem;font-weight:600;border:none;border-radius:6px;background:var(--primary);color:var(--white);cursor:pointer;">Carica file domande (.js / .json)</button>
+            <input type="file" id="exam-file-input" accept=".js,.json" class="hidden">
         </div>
 
-        
         <!-- MAIN DASHBOARD -->
         <div id="main-dashboard" class="card hidden">
             <h1 id="dashboard-title">Exam Practice Repository</h1>
             <p id="dashboard-subtitle" class="subtitle"></p>
+            <button type="button" class="upload-exam-btn" style="margin-bottom:15px;padding:8px 16px;font-size:0.85rem;font-weight:600;border:1px solid var(--primary);border-radius:6px;background:transparent;color:var(--primary);cursor:pointer;">Carica un altro file domande</button>
             
             <div class="grid-dashboard">
                 <div>
@@ -633,7 +638,7 @@
                 // Clear and build layout options matching user requirement specifications
                 configSelectionMode.innerHTML = `
                     <option value="mock20">Standard Mock Exam (${window.ExamData.config.mockStandardCount} Randomized Questions)</option>
-                    <option value="mock40">Official Exam Simulation (${window.ExamData.config.mockOfficialCount} Questions · ${Math.floor(window.ExamData.config.mockOfficialTimeSec/60)} min · Pass 65%)</option>
+                    <option value="mock40">Official Exam Simulation (${window.ExamData.config.mockOfficialCount} Questions · ${Math.floor(window.ExamData.config.mockOfficialTimeSec/60)} min · Pass ${window.ExamData.config.passThresholdMockOfficial}%)</option>
                     <option value="all">Comprehensive Blueprint Evaluation (All ${window.ExamData.questions.length} Items)</option>
                     <optgroup id="topic-group-wrapper" label="Practice by Target Domain Topic"></optgroup>
                 `;
@@ -674,11 +679,27 @@
                     byTopic[q.topic].push(q);
                 });
 
-                const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
+                const shuffle = arr => {
+                    const a = [...arr];
+                    for (let i = a.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [a[i], a[j]] = [a[j], a[i]];
+                    }
+                    return a;
+                };
                 const pickOne = topic => shuffle(byTopic[topic] || []).slice(0, 1);
 
                 if (selectedScope === "mock20") {
-                    this.sessionItems = shuffle(window.ExamData.questions).slice(0, window.ExamData.config.mockStandardCount);
+                    // Una domanda garantita per topic, il resto casuale
+                    const pool = [];
+                    const used = new Set();
+                    Object.keys(byTopic).forEach(t => {
+                        const q = pickOne(t)[0];
+                        if (q) { pool.push(q); used.add(q.id); }
+                    });
+                    const rest = shuffle(window.ExamData.questions.filter(q => !used.has(q.id)));
+                    pool.push(...rest.slice(0, Math.max(0, window.ExamData.config.mockStandardCount - pool.length)));
+                    this.sessionItems = shuffle(pool).slice(0, window.ExamData.config.mockStandardCount);
                 } else if (selectedScope === "mock40") {
                     const pool = [];
                     const used = new Set();
@@ -938,33 +959,34 @@
     </script>
 
     <script>
+function normalizeQuestions() {
+    const stripLetter = t => String(t).replace(/^\s*[A-Ea-e][\)\.]\s+/, '');
+    window.ExamData.questions.forEach(q => {
+        if (!Array.isArray(q.options)) return;
+        if (!Array.isArray(q.answer)) q.answer = [q.answer];
+
+        // Le lettere sono assegnate dal motore: rimuove "A) " dal testo
+        q.options = q.options.map(stripLetter);
+
+        // Tipo domanda derivato dal numero di risposte corrette
+        q.type = q.answer.length > 1 ? 'multiple' : 'single';
+
+        // Fisher-Yates shuffle degli indici, poi ricalcolo di answer
+        const indices = q.options.map((_, i) => i);
+        for (let i = indices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [indices[i], indices[j]] = [indices[j], indices[i]];
+        }
+        q.options = indices.map(i => q.options[i]);
+        q.answer  = q.answer.map(oldIdx => indices.indexOf(oldIdx)).sort((a, b) => a - b);
+    });
+}
+
+let enhancementsApplied = false;
 function initExamEnhancements() {
-
-
-    // ── 1. SHUFFLE OPTIONS (con aggiornamento dell'indice corretto) ──────────
-    if (typeof window.ExamData.questions !== 'undefined' && Array.isArray(window.ExamData.questions)) {
-        window.ExamData.questions.forEach(q => {
-            if (!q.options || !Array.isArray(q.answer)) return;
-
-            // Crea array di indici originali
-            const indices = q.options.map((_, i) => i);
-
-            // Fisher-Yates shuffle degli indici
-            for (let i = indices.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [indices[i], indices[j]] = [indices[j], indices[i]];
-            }
-
-            // Riordina le opzioni secondo il nuovo ordine
-            const shuffledOptions = indices.map(i => q.options[i]);
-
-            // Ricalcola gli indici corretti
-            const newAnswer = q.answer.map(oldIdx => indices.indexOf(oldIdx));
-
-            q.options = shuffledOptions;
-            q.answer  = newAnswer;
-        });
-    }
+    normalizeQuestions();
+    if (enhancementsApplied) return;
+    enhancementsApplied = true;
 
     // ── 3. STATO ─────────────────────────────────────────────────────────────
     let isValidated   = false;
@@ -1057,86 +1079,18 @@ function initExamEnhancements() {
         }
     }
 
-    // ── 6. STRATIFIED SAMPLING per Mock 20 ──────────────────────────────────
-    // Override startExam per garantire almeno 1 domanda per topic
-    function patchStartExam() {
-        
-
-        const origStart = EngineController.startExam.bind(EngineController);
-        EngineController.startExam = function() {
-            const selectedScope = document.getElementById("config-selection-mode").value;
-
-            if (selectedScope === "mock20") {
-                // Raggruppa per topic
-                const byTopic = {};
-                window.ExamData.questions.forEach(q => {
-                    if (!byTopic[q.topic]) byTopic[q.topic] = [];
-                    byTopic[q.topic].push(q);
-                });
-
-                const topics = Object.keys(byTopic);
-                let pool = [];
-
-                // 1 domanda garantita per topic (shufflata internamente)
-                topics.forEach(t => {
-                    const arr = [...byTopic[t]].sort(() => Math.random() - 0.5);
-                    pool.push(arr[0]);
-                });
-
-                // Riempi fino a 20 con le rimaste, in ordine casuale
-                const used = new Set(pool.map(q => q.id));
-                const remaining = window.ExamData.questions.filter(q => !used.has(q.id))
-                                                    .sort(() => Math.random() - 0.5);
-                const needed = window.ExamData.config.mockStandardCount - pool.length;
-                pool = pool.concat(remaining.slice(0, needed));
-
-                // Shuffle finale del pool
-                pool.sort(() => Math.random() - 0.5);
-
-                this.sessionItems = pool;
-                this.currentActiveIndex = 0;
-                this.userSelections = {};
-
-                document.getElementById("main-dashboard").classList.add("hidden");
-                document.getElementById("runtime-interface").classList.remove("hidden");
-
-                this.initializeClock(pool.length * window.ExamData.config.timePerQuestionSec);
-                this.renderActiveQuestion();
-                this.buildMatrixGrid();
-            } else {
-                origStart();
-            }
-        };
-    }
-
-    // ── 7. SOGLIA DI PASSAGGIO CONFIGURABILE (72% per HPE0-V30) ─────────────
-    // Override submitExam per usare 72 invece di 70
-    function patchSubmitExam() {
-        
-
-        const origSubmit = EngineController.submitExam.bind(EngineController);
-        EngineController.submitExam = function() {
-            origSubmit();
-            // Aggiorna il colore del cerchio con soglia 72%
-            const pct = parseInt(document.getElementById("metric-percentage").innerText);
-            const pass = pct >= window.ExamData.config.passThresholdDefault;
-            document.getElementById("metric-percentage").style.borderColor = pass ? "var(--success)" : "var(--error)";
-            document.getElementById("metric-percentage").style.color        = pass ? "var(--success)" : "var(--error)";
-        };
-    }
-
     // ── 8. localStorage: salva/ripristina progressione mid-session ───────────
     function enableSessionPersistence() {
         
 
-        const STORE_KEY = 'exam_session_' + window.ExamData.config.examCode;
+        const storeKey = () => 'exam_session_' + window.ExamData.config.examCode;
 
         // Salva dopo ogni selezione
         const origSelect = EngineController.selectOption.bind(EngineController);
         EngineController.selectOption = function(index) {
             origSelect(index);
             try {
-                localStorage.setItem(STORE_KEY, JSON.stringify({
+                localStorage.setItem(storeKey(), JSON.stringify({
                     sessionItems  : this.sessionItems,
                     currentIndex  : this.currentActiveIndex,
                     userSelections: this.userSelections
@@ -1147,14 +1101,14 @@ function initExamEnhancements() {
         // Tentativo di ripristino all'avvio
         const origStart = EngineController.startExam.bind(EngineController);
         EngineController.startExam = function() {
-            localStorage.removeItem(STORE_KEY); // nuova sessione = pulito
+            localStorage.removeItem(storeKey()); // nuova sessione = pulito
             EngineController.validatedAnswers = {}; // reset colori matrix
             origStart();
         };
 
         // Ripristino se c'è una sessione salvata e la pagina è stata ricaricata a metà
         try {
-            const saved = JSON.parse(localStorage.getItem(STORE_KEY));
+            const saved = JSON.parse(localStorage.getItem(storeKey()));
             if (saved && saved.sessionItems && saved.sessionItems.length > 0) {
                 if (confirm("È stata trovata una sessione precedente non completata. Vuoi riprenderla?")) {
                     EngineController.sessionItems       = saved.sessionItems;
@@ -1167,7 +1121,7 @@ function initExamEnhancements() {
                     EngineController.renderActiveQuestion();
                     EngineController.buildMatrixGrid();
                 } else {
-                    localStorage.removeItem(STORE_KEY);
+                    localStorage.removeItem(storeKey());
                 }
             }
         } catch(e) {}
@@ -1175,14 +1129,12 @@ function initExamEnhancements() {
         // Pulizia al submit
         const origSubmitP = EngineController.submitExam.bind(EngineController);
         EngineController.submitExam = function() {
-            localStorage.removeItem(STORE_KEY);
+            localStorage.removeItem(storeKey());
             origSubmitP();
         };
     }
 
     patchEngine();
-    patchStartExam();
-    patchSubmitExam();
     enableSessionPersistence();
 
 
@@ -1193,33 +1145,80 @@ function initExamEnhancements() {
     (function() {
         var params = new URLSearchParams(window.location.search);
         var contentName = params.get('content');
+        var msg = document.getElementById('no-content-message');
+        var msgBody = document.getElementById('no-content-body');
 
-        if (!contentName) {
-            document.getElementById('no-content-message').classList.remove('hidden');
-            return;
-        }
-
-        if (!window.ExamData || !window.ExamData.config || !window.ExamData.questions) {
-            var msg = document.getElementById('no-content-message');
-            msg.innerHTML =
-                '<h1 style="font-size:1.5rem;margin-bottom:15px;color:var(--error);">Failed to load exam file</h1>' +
-                '<p style="color:var(--gray);">Could not load <strong>' + contentName + '.js</strong>. Make sure the file is in the same directory.</p>';
+        function showError(html) {
+            msgBody.innerHTML = html;
             msg.classList.remove('hidden');
-            return;
+            document.getElementById('main-dashboard').classList.add('hidden');
         }
 
-        var cfg = window.ExamData.config;
-        document.title = cfg.examTitle || 'Exam Simulator';
-        document.getElementById('logo-exam-code').textContent  = cfg.examCode || 'EXAM';
-        document.getElementById('logo-version').textContent    = cfg.version  || '';
-        document.getElementById('dashboard-title').textContent = (cfg.examCode || 'Exam') + ' Exam Practice Repository';
-        document.getElementById('dashboard-subtitle').textContent = cfg.subtitle || '';
+        function validExamData(d) {
+            return d && d.config && Array.isArray(d.questions) && d.questions.length > 0 &&
+                d.questions.every(function(q) {
+                    return q && q.topic && q.question && Array.isArray(q.options) &&
+                        q.answer !== undefined;
+                });
+        }
 
-        document.getElementById('no-content-message').classList.add('hidden');
-        document.getElementById('main-dashboard').classList.remove('hidden');
+        function startApp() {
+            var cfg = window.ExamData.config;
+            document.title = cfg.examTitle || 'Exam Simulator';
+            document.getElementById('logo-exam-code').textContent  = cfg.examCode || 'EXAM';
+            document.getElementById('logo-version').textContent    = cfg.version  || '';
+            document.getElementById('dashboard-title').textContent = (cfg.examCode || 'Exam') + ' Exam Practice Repository';
+            document.getElementById('dashboard-subtitle').textContent = cfg.subtitle || '';
+            msg.classList.add('hidden');
+            document.getElementById('main-dashboard').classList.remove('hidden');
+            initExamEnhancements();
+            EngineController.init();
+        }
 
-        initExamEnhancements();
-        EngineController.init();
+        function loadFromFile(file) {
+            var reader = new FileReader();
+            reader.onerror = function() { alert('Impossibile leggere il file.'); };
+            reader.onload = function() {
+                var previous = window.ExamData;
+                try {
+                    window.ExamData = undefined;
+                    if (/\.json$/i.test(file.name)) {
+                        window.ExamData = JSON.parse(reader.result);
+                    } else {
+                        // file .js: assegna window.ExamData
+                        (0, eval)(reader.result);
+                    }
+                    if (!validExamData(window.ExamData)) throw new Error('Formato non valido: servono config e questions.');
+                } catch (e) {
+                    window.ExamData = previous;
+                    alert('Errore nel file "' + file.name + '": ' + e.message);
+                    return;
+                }
+                startApp();
+            };
+            reader.readAsText(file);
+        }
+
+        var input = document.getElementById('exam-file-input');
+        input.addEventListener('change', function() {
+            if (input.files && input.files[0]) loadFromFile(input.files[0]);
+            input.value = '';
+        });
+        document.querySelectorAll('.upload-exam-btn').forEach(function(b) {
+            b.addEventListener('click', function() { input.click(); });
+        });
+
+        if (validExamData(window.ExamData)) {
+            startApp();
+        } else if (contentName) {
+            var safeName = document.createElement('strong');
+            safeName.textContent = contentName + '.js';
+            showError('<h1 style="font-size:1.5rem;margin-bottom:15px;color:var(--error);">Failed to load exam file</h1>' +
+                '<p style="color:var(--gray);">Could not load <span id="failed-name"></span>. Check the name, or load the file manually.</p>');
+            document.getElementById('failed-name').appendChild(safeName);
+        } else {
+            msg.classList.remove('hidden');
+        }
     })();
     </script>
 </body>
