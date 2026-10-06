@@ -2,11 +2,13 @@
 <html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#01a982">
     <title>Exam Simulator</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-
         :root {
             --primary: #01a982;
             --primary-hover: #018566;
@@ -560,680 +562,2281 @@
         .review-option { margin: 6px 0; }
         .review-correct { color: var(--success); font-weight: 600; background-color: var(--success-light); border-radius: 4px; padding: 2px 6px; }
         .review-wrong { color: var(--error); font-weight: 600; background-color: var(--error-light); border-radius: 4px; padding: 2px 6px; }
+    
+
+
+/* ===== Engine v2 components ===== */
+.skip-link { position: absolute; left: -999px; top: 8px; background: var(--primary); color: var(--on-accent); padding: 8px 14px; border-radius: 6px; z-index: 100; }
+.skip-link:focus { left: 8px; }
+:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+button { font-family: inherit; }
+
+/* Real inputs inside option cards: visually hidden, still focusable */
+.option-input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; padding: 0; border: 0; }
+.option-card { position: relative; }
+.option-card:focus-within { outline: 3px solid var(--primary); outline-offset: 2px; }
+.option-card.selected .option-text { color: var(--dark); }
+.nav-grid-btn { padding: 0; font-family: inherit; color: var(--dark); background-color: var(--white); position: relative; }
+.nav-grid-btn.flagged::after { content: "⚑"; position: absolute; top: -6px; right: -4px; font-size: 0.72rem; color: var(--warning); }
+.nav-grid-btn.unanswered-hint { border-style: dashed; }
+
+.card-title-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 16px; }
+.btn-small { padding: 7px 14px; font-size: 0.85rem; border-radius: 6px; }
+.btn-ghost { background: transparent; color: var(--primary); border: 1px solid var(--primary); font-weight: 600; cursor: pointer; }
+.btn-ghost:hover { background: var(--primary-light); }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.sessions-box { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 18px; background: var(--white); }
+.sessions-box h3 { font-size: 1rem; margin-bottom: 8px; }
+.session-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--border); flex-wrap: wrap; }
+.session-row:first-of-type { border-top: 0; }
+.session-info { font-size: 0.9rem; color: var(--dark-gray); }
+.checkbox-row { display: flex; align-items: center; gap: 8px; margin: 10px 0; }
+.checkbox-row input { width: 18px; height: 18px; padding: 0; }
+.checkbox-row label { margin: 0; font-weight: 500; }
+.hint { font-size: 0.82rem; color: var(--gray); margin: 4px 0 10px; }
+.mini-acc { display: inline-block; min-width: 46px; text-align: right; font-size: 0.78rem; color: var(--gray); margin-left: 8px; }
+.topic-count-wrap { display: flex; align-items: center; }
+
+/* Question area */
+.question-actions { display: flex; align-items: center; gap: 8px; }
+.flag-btn { border: 1px solid var(--border); background: var(--white); color: var(--gray); border-radius: 6px; padding: 4px 10px; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+.flag-btn[aria-pressed="true"] { border-color: var(--warning); color: var(--warning); }
+.note-box { margin: 0 0 18px; }
+.note-box summary { cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--gray); }
+.note-box textarea { width: 100%; min-height: 70px; margin-top: 8px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--white); color: var(--dark); font-size: 0.9rem; resize: vertical; }
+.nav-controls { gap: 10px; flex-wrap: wrap; }
+.nav-controls .spacer { flex: 1; }
+.kbd-help { font-size: 0.78rem; color: var(--gray); margin-top: 14px; }
+.legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.75rem; color: var(--gray); margin-bottom: 14px; }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; background: var(--white); border: 1px solid var(--border); }
+.legend .lg-answered::before { background: var(--dark); border-color: var(--dark); }
+.legend .lg-flagged::before { content: "⚑"; width: auto; height: auto; border: 0; background: none; color: var(--warning); }
+.type-hint { font-size: 0.85rem; color: var(--gray); margin-bottom: 10px; }
+
+/* Ordering / matching / numeric / scenario */
+.ordering-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.ordering-row { display: flex; align-items: center; gap: 12px; border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; background: var(--white); }
+.order-pos { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--gray); flex-shrink: 0; }
+.order-text { flex: 1; font-size: 0.95rem; }
+.order-btns { display: flex; gap: 6px; }
+.mini-btn { width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 6px; background: var(--white); color: var(--dark); cursor: pointer; font-size: 1rem; }
+.mini-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+.mini-btn:disabled { opacity: 0.35; cursor: default; }
+.row-ok { border-color: var(--success) !important; background: var(--success-light); }
+.row-bad { border-color: var(--error) !important; background: var(--error-light); }
+.match-row { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 8px; flex-wrap: wrap; background: var(--white); }
+.match-left { flex: 1 1 200px; font-weight: 600; font-size: 0.95rem; }
+.match-select { flex: 1 1 220px; width: auto; }
+.match-correct { flex-basis: 100%; font-size: 0.85rem; color: var(--success); font-weight: 600; }
+.numeric-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.numeric-input { max-width: 220px; font-size: 1.1rem; }
+.numeric-unit { color: var(--gray); font-weight: 600; }
+.scenario-context { background: var(--light-gray); border-left: 4px solid var(--primary); padding: 14px 16px; border-radius: 0 8px 8px 0; margin-bottom: 18px; white-space: pre-line; font-size: 0.95rem; }
+.scenario-part { margin-bottom: 22px; }
+.scenario-part-title { font-size: 1rem; margin-bottom: 10px; white-space: pre-line; }
+.part-expl { font-size: 0.88rem; color: var(--dark-gray); margin-top: 6px; }
+.review-options .type-hint { margin: 8px 0 2px; }
+
+/* Review before finishing */
+.review-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 8px; margin: 16px 0; }
+.review-block { margin: 14px 0; }
+.review-block h3 { font-size: 1rem; margin-bottom: 8px; }
+.pill-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill { border: 1px solid var(--border); background: var(--white); color: var(--dark); border-radius: 999px; padding: 4px 12px; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+.pill:hover { border-color: var(--primary); color: var(--primary); }
+.review-item-card .meta { font-size: 0.78rem; color: var(--gray); margin-bottom: 6px; }
+.review-item-card.is-unanswered { border-left: 5px solid var(--warning); }
+.is-unanswered .review-status-badge { background-color: var(--light-gray); color: var(--warning); }
+
+/* Statistics */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 16px 0 22px; }
+.tile { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; background: var(--white); }
+.tile .tile-value { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+.tile .tile-label { font-size: 0.78rem; color: var(--gray); }
+.stat-section { margin: 22px 0; }
+.stat-section h3 { font-size: 1.05rem; margin-bottom: 10px; }
+.bar-row { display: grid; grid-template-columns: minmax(120px, 38%) 1fr 52px; gap: 10px; align-items: center; padding: 5px 0; font-size: 0.88rem; }
+.bar-track { height: 12px; border-radius: 6px; background: var(--light-gray); border: 1px solid var(--border); overflow: hidden; }
+.bar-fill { height: 100%; background: var(--primary); }
+.bar-fill.low { background: var(--error); } .bar-fill.mid { background: var(--warning); }
+.bar-pct { text-align: right; font-weight: 600; color: var(--dark-gray); }
+.chart-box svg { width: 100%; height: 170px; display: block; }
+.chart-axis { stroke: var(--border); } .chart-line { stroke: var(--primary); fill: none; stroke-width: 2.5; }
+.chart-dot { fill: var(--primary); } .chart-dot.fail { fill: var(--error); }
+.chart-thr { stroke: var(--warning); stroke-dasharray: 4 4; } .chart-label { fill: var(--gray); font-size: 10px; }
+.hard-row { padding: 8px 0; border-top: 1px solid var(--border); font-size: 0.9rem; }
+.hard-row:first-of-type { border-top: 0; }
+.hard-meta { font-size: 0.78rem; color: var(--gray); }
+
+/* Toast */
+#toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 50; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
+.toast-msg { background: var(--dark); color: var(--white); padding: 10px 16px; border-radius: 8px; font-size: 0.9rem; box-shadow: 0 6px 20px var(--shadow); max-width: 90vw; }
+
+.error-box { text-align: left; background: var(--error-light); border: 1px solid var(--error); border-radius: 8px; padding: 12px 16px; margin: 14px auto; max-width: 720px; font-size: 0.9rem; }
+.error-box p { margin: 4px 0; }
+
+@media (max-width: 600px) {
+    .main-wrapper { padding: 14px 10px; }
+    .card { padding: 18px 14px; }
+    .grid-navigation { grid-template-columns: repeat(6, 1fr); }
+    .bar-row { grid-template-columns: 1fr 52px; }
+    .bar-row .bar-track { grid-column: 1 / -1; order: 3; }
+    .nav-controls .btn, .nav-controls #validate-btn { flex: 1 1 40%; margin-right: 0; }
+    .header-controls { gap: 6px; }
+    .q-number { font-size: 0.78rem; }
+    .runtime-layout .sidebar-box { order: 2; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+.question-header { flex-wrap: wrap; gap: 8px; }
+@media (max-width: 600px) {
+    header { padding: 10px 12px; }
+    .header-container { flex-wrap: wrap; gap: 6px; }
+    .logo-text { font-size: 0.95rem; }
+    #timer-label { display: none; }
+    .tag-topic { font-size: 0.7rem; }
+}
+
     </style>
-    <script src="exams.js"></script>
     <script>
-    // Theme applied before first paint to avoid a flash
+    // Apply the saved theme before first paint (avoids a flash)
     (function () {
         var theme = null;
-        try { theme = localStorage.getItem('exam_theme'); } catch (e) {}
+        try {
+            var raw = localStorage.getItem('examsim:v2');
+            if (raw) theme = (JSON.parse(raw).prefs || {}).theme;
+            if (!theme) theme = localStorage.getItem('exam_theme');
+        } catch (e) {}
         if (theme !== 'dark' && theme !== 'light') {
             theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         }
         document.documentElement.setAttribute('data-theme', theme);
     })();
-    // Exam content: ?content=name loads name.exam
-    (function() {
-        var c = new URLSearchParams(window.location.search).get('content');
-        if (c && /^[\w.\-]+$/.test(c)) { document.write('<scr' + 'ipt src="' + c + '.exam"></scr' + 'ipt>'); }
-    })();
     </script>
+    <script src="exams.js" onerror="void 0"></script>
 </head>
 <body>
+<a class="skip-link" href="#main" id="skip-link">Skip to content</a>
 <header>
     <div class="header-container">
         <div class="logo-area">
             <div class="hpe-element"></div>
-            <div class="logo-text"><span id="logo-exam-code">EXAM</span> <span id="logo-simulator" data-i18n="simulator">SIMULATOR</span> <span id="logo-version" style="font-size:0.7rem;color:var(--gray);font-weight:400;"></span></div>
+            <div class="logo-text"><span id="logo-exam-code">EXAM</span> <span id="logo-simulator">SIMULATOR</span> <span id="logo-version" style="font-size:0.7rem;color:var(--gray);font-weight:400;"></span></div>
         </div>
         <div class="header-controls">
-            <div id="runtime-timer-box" class="q-number hidden"><span data-i18n="timeRemaining">Time remaining:</span> <span id="runtime-clock-string" style="color: var(--dark); font-weight: 600;">--:--</span></div>
-            <button type="button" id="lang-btn" class="icon-btn" title="Language / Lingua">EN</button>
-            <button type="button" id="theme-btn" class="icon-btn" title="Theme / Tema">☾</button>
+            <div id="runtime-timer-box" class="q-number hidden"><span id="timer-label"></span> <span id="runtime-clock-string" style="color: var(--dark); font-weight: 600;">--:--</span></div>
+            <button type="button" id="lang-btn" class="icon-btn">EN</button>
+            <button type="button" id="theme-btn" class="icon-btn">☾</button>
         </div>
     </div>
 </header>
 
-<div class="main-wrapper">
-    <!-- EXAM PICKER (no exam loaded) -->
-    <div id="no-content-message" class="card hidden" style="text-align:center; padding:50px 30px;">
-        <div id="no-content-body">
-            <h1 style="font-size:1.5rem; margin-bottom:12px;" data-i18n="noExamTitle">Choose an exam</h1>
-            <p style="color:var(--gray);" data-i18n="noExamText">Select one of the available exams below to start practicing.</p>
-        </div>
-        <div id="exam-list" style="margin-top:25px; text-align:left;"></div>
-    </div>
-
-    <!-- MAIN DASHBOARD -->
-    <div id="main-dashboard" class="card hidden">
-        <h1 id="dashboard-title">Exam Practice</h1>
-        <p id="dashboard-subtitle" class="subtitle"></p>
-
-        <div class="exam-switcher">
-            <span class="exam-switcher-label" data-i18n="switchExam">Exams:</span>
-            <div id="dash-exam-list" class="exam-chips"></div>
-        </div>
-
-        <div class="grid-dashboard">
-            <div>
-                <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 10px;" data-i18n="distribution">Question distribution</h3>
-                <div id="distribution-payload-box" class="topic-list"></div>
-            </div>
-
-            <div class="sidebar-box" style="margin-top: 15px;">
-                <h3 class="sidebar-title" data-i18n="sessionConfig">Session setup</h3>
-                <div class="setup-box">
-                    <div class="form-group">
-                        <label for="config-selection-mode" data-i18n="selectMode">Select mode</label>
-                        <select id="config-selection-mode"></select>
-                    </div>
-                    <button id="start-btn" class="btn" type="button" data-i18n="startSession">Start session</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- RUNTIME ENGINE INTERFACE -->
-    <div id="runtime-interface" class="hidden">
-        <div class="runtime-layout">
-            <div class="card" style="margin-bottom: 0;">
-                <div class="question-header">
-                    <span id="runtime-topic-tag" class="tag-topic">TOPIC</span>
-                    <span id="runtime-position-string" class="q-number"></span>
-                </div>
-
-                <div id="runtime-question-text" class="question-text"></div>
-
-                <div id="runtime-options-box" class="options-list"></div>
-
-                <div class="nav-controls">
-                    <button id="prev-btn" class="btn btn-secondary" type="button" data-i18n="previous">Previous</button>
-                    <button id="validate-btn" type="button" data-i18n="validate">Check answer</button>
-                    <button id="session-action-trigger" class="btn" type="button"></button>
-                </div>
-            </div>
-
-            <div class="sidebar-box">
-                <h3 class="sidebar-title" data-i18n="progress">Progress</h3>
-                <div id="runtime-matrix-grid" class="grid-navigation"></div>
-                <button id="submit-btn" class="btn btn-secondary btn-danger-outline" type="button" data-i18n="endScore">End and score</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- SUMMARY RESULTS DASHBOARD -->
-    <div id="summary-dashboard" class="card hidden">
-        <h1 data-i18n="resultsTitle">Results</h1>
-        <p class="subtitle" data-i18n="resultsSubtitle">Review each question and its explanation below.</p>
-
-        <div class="metrics-summary-box">
-            <div id="metric-percentage" class="score-circle">--%</div>
-            <div>
-                <h2 id="metric-raw-string" style="font-size: 1.3rem; font-weight: 600; margin-bottom: 4px;"></h2>
-            </div>
-        </div>
-
-        <div style="margin-bottom: 25px; display: flex; gap: 15px;">
-            <button id="return-btn" class="btn" type="button" data-i18n="backToMenu">Back to main menu</button>
-        </div>
-
-        <div id="review-payload-box"></div>
-    </div>
-</div>
+<main id="main" class="main-wrapper" tabindex="-1">
+    <section id="view-picker" class="card hidden"></section>
+    <section id="view-dashboard" class="card hidden"></section>
+    <section id="view-runtime" class="hidden"></section>
+    <section id="view-review" class="card hidden"></section>
+    <section id="view-summary" class="card hidden"></section>
+    <section id="view-stats" class="card hidden"></section>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="import-file" accept=".json,application/json" class="hidden">
 
 <script>
+window.ExamCatalogDefault = [{"file":"demo","title":{"en":"Engine Demo — all question types","it":"Demo del motore — tutti i tipi di domanda"},"description":{"en":"A tiny exam that shows every question type, localized content, difficulty levels and custom modes.","it":"Un piccolo esame che mostra ogni tipo di domanda, contenuti localizzati, livelli di difficoltà e modalità personalizzate."},"code":"DEMO","version":"1.0","questionCount":12,"topicCount":3},{"file":"managedServices","title":"HPE Managed Services Expertise Exam Simulator","description":"Comprehensive validation bank for HPE Managed Services knowledge across ITSM, delivery, tooling, security, and partner programs.","code":"MS-EXPERTISE","version":"v1.0","questionCount":120,"topicCount":5},{"file":"v31","title":"V31 Practice Test","description":"Practice test, scenario-based and advanced questions on AI fundamentals, HPE Private Cloud AI architecture and sizing, deployment and administration, NVIDIA and AI Essentials, operations, edge AI and HPC.","code":"V31","version":"v1.0","questionCount":200,"topicCount":19},{"file":"v31advanced","title":"V31 Advanced Practice Test","description":"Expert-level scenario questions on HPE Private Cloud AI sizing, AI Essentials resource governance, MLIS/NIM model serving, air-gapped deployments, edge inferencing and HPC/AI.","code":"V31-ADV","version":"v1.0","questionCount":100,"topicCount":7}];
+</script>
+<script>
 (function () {
-    'use strict';
+'use strict';
+/* Core: namespace, utilities, event bus, extension points */
+const App = {
+    version: '2.0.0',
+    FORMAT_VERSION: 2,
+    types: {},        // question type handlers (see 20-types.js)
+    modeBuilders: {}, // extra study modes registered by plugins
+    util: {}
+};
 
-    // ── Translations (UI only; exam content keeps its own language) ─────────
-    const I18N = {
-        en: {
-            simulator: 'SIMULATOR', timeRemaining: 'Time remaining:',
-            noExamTitle: 'Choose an exam', noExamText: 'Select one of the available exams below to start practicing.',
-            availableExams: 'Available exams', switchExam: 'Exams:',
-            loadFailedTitle: 'Failed to load exam file',
-            loadFailedText: 'Could not load "{name}". Choose an exam from the list below.',
-            distribution: 'Question distribution',
-            totalQuestions: 'Total questions', nQuestions: '{n} questions',
-            sessionConfig: 'Session setup', selectMode: 'Select mode', startSession: 'Start session',
-            modeMock20: 'Standard mock exam ({n} random questions)',
-            modeMock40: 'Official exam simulation ({n} questions · {m} min · pass {p}%)',
-            modeAll: 'Full bank (all {n} questions)', modeTopics: 'Practice by topic',
-            questionOf: 'Question {i} of {n}', previous: 'Previous', validate: 'Check answer',
-            next: 'Next question', finish: 'Finish exam', progress: 'Progress', endScore: 'End and score',
-            explanation: 'Explanation', noExplanation: 'No explanation available.',
-            selectFirst: 'Select an answer before checking!',
-            resultsTitle: 'Results', resultsSubtitle: 'Review each question and its explanation below.',
-            scoreLine: 'You answered {c} out of {n} questions correctly.',
-            pass: '✅ PASS — {t}% threshold reached', fail: '❌ FAIL — {t}% threshold not reached',
-            correct: 'Correct', incorrect: 'Incorrect', questionN: 'Question {n}: {q}',
-            backToMenu: 'Back to main menu',
-            resume: 'An unfinished session was found. Do you want to resume it?',
-            langTitle: 'Switch language', themeTitle: 'Switch light/dark theme'
-        },
-        it: {
-            simulator: 'SIMULATORE', timeRemaining: 'Tempo rimanente:',
-            noExamTitle: 'Scegli un esame', noExamText: 'Seleziona uno degli esami disponibili qui sotto per iniziare.',
-            availableExams: 'Esami disponibili', switchExam: 'Esami:',
-            loadFailedTitle: "Impossibile caricare l'esame",
-            loadFailedText: 'Impossibile caricare "{name}". Scegli un esame dall\'elenco qui sotto.',
-            distribution: 'Distribuzione delle domande',
-            totalQuestions: 'Domande totali', nQuestions: '{n} domande',
-            sessionConfig: 'Configurazione sessione', selectMode: 'Seleziona la modalità', startSession: 'Avvia sessione',
-            modeMock20: 'Simulazione standard ({n} domande casuali)',
-            modeMock40: 'Simulazione esame ufficiale ({n} domande · {m} min · soglia {p}%)',
-            modeAll: 'Intero archivio (tutte le {n} domande)', modeTopics: 'Esercitazione per argomento',
-            questionOf: 'Domanda {i} di {n}', previous: 'Precedente', validate: 'Verifica risposta',
-            next: 'Domanda successiva', finish: "Termina l'esame", progress: 'Avanzamento', endScore: 'Termina e valuta',
-            explanation: 'Spiegazione', noExplanation: 'Nessuna spiegazione disponibile.',
-            selectFirst: 'Seleziona una risposta prima di verificare!',
-            resultsTitle: 'Risultati', resultsSubtitle: 'Rivedi ogni domanda e la relativa spiegazione qui sotto.',
-            scoreLine: 'Hai risposto correttamente a {c} domande su {n}.',
-            pass: '✅ SUPERATO — soglia del {t}% raggiunta', fail: '❌ NON SUPERATO — soglia del {t}% non raggiunta',
-            correct: 'Corretta', incorrect: 'Errata', questionN: 'Domanda {n}: {q}',
-            backToMenu: 'Torna al menu principale',
-            resume: 'È stata trovata una sessione precedente non completata. Vuoi riprenderla?',
-            langTitle: 'Cambia lingua', themeTitle: 'Cambia tema chiaro/scuro'
+App.util.shuffle = function (arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+};
+
+App.util.sameSet = function (a, b) {
+    const x = [...a].sort((p, q) => p - q), y = [...b].sort((p, q) => p - q);
+    return x.length === y.length && x.every((v, i) => v === y[i]);
+};
+
+App.util.clone = o => JSON.parse(JSON.stringify(o));
+App.util.uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+App.util.clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
+App.util.isObj = v => v !== null && typeof v === 'object' && !Array.isArray(v);
+
+// Builds a DOM element. Text always goes through textContent (never innerHTML).
+App.util.el = function (tag, props, ...children) {
+    const node = document.createElement(tag);
+    Object.entries(props || {}).forEach(([k, v]) => {
+        if (v === undefined || v === null) return;
+        if (k === 'text') node.textContent = v;
+        else if (k === 'style') node.style.cssText = v;
+        else if (k === 'class') node.className = v;
+        else if (k === 'dataset') Object.entries(v).forEach(([dk, dv]) => { node.dataset[dk] = dv; });
+        else if (k === 'aria') Object.entries(v).forEach(([ak, av]) => node.setAttribute('aria-' + ak, av));
+        else if (k.startsWith('on') && typeof v === 'function') node.addEventListener(k.slice(2), v);
+        else node[k] = v;
+    });
+    children.flat().forEach(c => { if (c) node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+    return node;
+};
+
+// Tiny event bus: App.events.on('answer', fn) ... App.events.emit('answer', payload)
+App.events = (function () {
+    const handlers = {};
+    return {
+        on(name, fn) { (handlers[name] = handlers[name] || []).push(fn); return () => this.off(name, fn); },
+        off(name, fn) { handlers[name] = (handlers[name] || []).filter(h => h !== fn); },
+        emit(name, payload) {
+            (handlers[name] || []).slice().forEach(fn => {
+                try { fn(payload); } catch (e) { if (typeof console !== 'undefined') console.error('[ExamSim] handler error for "' + name + '":', e); }
+            });
         }
     };
+})();
 
-    // ── Helpers ─────────────────────────────────────────────────────────────
-    const $ = id => document.getElementById(id);
+// Extension points
+App.registerType = function (name, handler) { App.types[name] = handler; };
+App.registerMode = function (id, builder) { App.modeBuilders[id] = builder; };
+
+/* UI translations (EN/IT) and localized-content helper.
+   Exam content may be a plain string or an object {en, it}; strings are used as-is. */
+App.I18N = {
+    en: {
+        simulator: 'SIMULATOR', timeRemaining: 'Time remaining:',
+        noExamTitle: 'Choose an exam', noExamText: 'Select one of the available exams below to start practicing.',
+        availableExams: 'Available exams', switchExam: 'Exams:', noCatalog: 'No exams are listed. Add .exam files and rebuild the catalog (npm run build).',
+        loading: 'Loading…',
+        loadFailedTitle: 'Failed to load exam',
+        errNotFound: 'File "{name}" was not found. Check that it is in the same folder as exam.html.',
+        errNetwork: 'Could not download "{name}". Check the address and your connection.',
+        errParse: 'File "{name}" could not be read: {detail}',
+        errInvalid: 'Exam "{name}" is not valid ({n} problems). First problems:',
+        errNoRegister: 'File "{name}" did not register an exam.',
+        totalQuestions: 'Total questions', nQuestions: '{n} questions', oneQuestion: '1 question',
+        distribution: 'Question distribution', sessionConfig: 'Session setup', selectMode: 'Mode',
+        startSession: 'Start session', studyMode: 'Study mode (check answers as you go)',
+        examModeHint: 'Exam mode: answers can be changed and are checked at the end.',
+        studyModeHint: 'Study mode: check each answer right away and see the explanation.',
+        count: 'Number of questions', timerLabel: 'Timer', timerDefault: 'Default', timerNone: 'No timer',
+        timerPerQuestion: 'Per question ({s} s)', timerTotal: 'Total ({m} min)',
+        modeGroupExam: 'Exam modes', modeGroupPractice: 'Practice', modeGroupTopics: 'By topic',
+        modeAll: 'Full bank (all {n} questions)', modeTopic: 'Topic: {t}',
+        modeReview: 'Spaced-repetition review (due questions)', modeMistakes: 'My mistakes',
+        modeFlagged: 'Flagged questions', modeUnseen: 'Unseen questions', modeDifficulty: 'Difficulty: {d}',
+        diffEasy: 'Easy', diffMedium: 'Medium', diffHard: 'Hard',
+        modeEmpty: 'No questions match this mode yet.',
+        resumeTitle: 'Sessions in progress', resumeBtn: 'Resume', deleteBtn: 'Delete',
+        resumeInfo: '{mode} · {done}/{n} answered · {when}',
+        confirmDeleteSession: 'Delete this session?',
+        questionOf: 'Question {i} of {n}', previous: 'Previous', validate: 'Check answer',
+        next: 'Next question', finish: 'Review and finish', finishNow: 'Finish exam', progress: 'Progress',
+        endScore: 'End and score', explanation: 'Explanation', noExplanation: 'No explanation available.',
+        selectFirst: 'Select an answer before checking!',
+        flag: 'Flag', unflag: 'Flagged', note: 'Note', notePlaceholder: 'Your note for this question…',
+        skip: 'Skip', keyboardHelp: 'Keyboard: 1–6 or A–F select · ← → move · Enter check/next · M flag',
+        legendAnswered: 'Answered', legendUnanswered: 'Unanswered', legendFlagged: 'Flagged',
+        reviewTitle: 'Review before finishing', reviewText: 'You answered {a} of {n} questions. {u} unanswered, {f} flagged.',
+        reviewBack: 'Back to the exam', reviewSubmit: 'Submit and see results',
+        reviewUnanswered: 'Unanswered', reviewFlagged: 'Flagged',
+        resultsTitle: 'Results', resultsSubtitle: 'Review each question and its explanation below.',
+        scoreLine: 'You answered {c} out of {n} questions correctly.',
+        pass: '✅ PASS — {t}% threshold reached', fail: '❌ FAIL — {t}% threshold not reached',
+        correct: 'Correct', incorrect: 'Incorrect', unansweredBadge: 'Unanswered', questionN: 'Question {n}: {q}',
+        yourAnswer: 'Your answer', correctAnswer: 'Correct answer',
+        backToMenu: 'Back to main menu', retryWrong: 'Practice my mistakes from this session',
+        langTitle: 'Switch language', themeTitle: 'Switch light/dark theme',
+        statsBtn: 'Statistics', statsTitle: 'Statistics', statsEmpty: 'No attempts yet. Complete a session to see your statistics.',
+        statsAttempts: 'Attempts', statsAccuracy: 'Overall accuracy', statsAnswered: 'Answers given',
+        statsMastered: 'Mastered questions', statsAvgTime: 'Avg time / question', statsBest: 'Best score',
+        statsHistory: 'Score history', statsTopics: 'Accuracy by topic', statsHardest: 'Hardest questions',
+        statsNoHard: 'Not enough data yet.', statsErrRate: '{p}% wrong ({w}/{n})',
+        statsSeen: 'seen {n}×', backBtn: 'Back',
+        exportBtn: 'Export progress', importBtn: 'Import progress',
+        importDone: 'Progress imported: {a} attempts, {q} question records.', importFail: 'Could not import: {detail}',
+        exportDone: 'Progress exported.',
+        storageError: 'Could not save your progress (storage full or disabled).',
+        typeTrueFalse: 'True / False', hintOrdering: 'Put the items in the correct order.',
+        hintMatching: 'Match each item with its counterpart.', hintNumeric: 'Type a number.',
+        moveUp: 'Move up', moveDown: 'Move down', chooseOne: '— select —',
+        sub: 'Part {n}', unit: 'Unit',
+        offlineReady: 'Ready to use offline.', installHint: 'Install',
+        justNow: 'just now', minutesAgo: '{n} min ago', hoursAgo: '{n} h ago', daysAgo: '{n} d ago',
+        notDue: 'Nothing is due for review right now. Showing questions with the lowest mastery instead.',
+        newFeature: 'New', skipLink: 'Skip to content', timerQuestionLabel: 'Question time:', examCardMeta: '{n} questions · {t} topics', loadingExam: 'Loading exam…', resultTime: 'Time spent: {m}',
+        continueSession: 'Continue', done: 'done'
+    },
+    it: {
+        simulator: 'SIMULATORE', timeRemaining: 'Tempo rimanente:',
+        noExamTitle: 'Scegli un esame', noExamText: 'Seleziona uno degli esami disponibili qui sotto per iniziare.',
+        availableExams: 'Esami disponibili', switchExam: 'Esami:', noCatalog: 'Nessun esame elencato. Aggiungi file .exam e rigenera il catalogo (npm run build).',
+        loading: 'Caricamento…',
+        loadFailedTitle: "Impossibile caricare l'esame",
+        errNotFound: 'Il file "{name}" non è stato trovato. Controlla che sia nella stessa cartella di exam.html.',
+        errNetwork: 'Impossibile scaricare "{name}". Controlla l\'indirizzo e la connessione.',
+        errParse: 'Il file "{name}" non è leggibile: {detail}',
+        errInvalid: 'L\'esame "{name}" non è valido ({n} problemi). Primi problemi:',
+        errNoRegister: 'Il file "{name}" non ha registrato alcun esame.',
+        totalQuestions: 'Domande totali', nQuestions: '{n} domande', oneQuestion: '1 domanda',
+        distribution: 'Distribuzione delle domande', sessionConfig: 'Configurazione sessione', selectMode: 'Modalità',
+        startSession: 'Avvia sessione', studyMode: 'Modalità studio (verifica ogni risposta subito)',
+        examModeHint: 'Modalità esame: le risposte si possono cambiare e vengono verificate alla fine.',
+        studyModeHint: 'Modalità studio: verifichi subito ogni risposta e vedi la spiegazione.',
+        count: 'Numero di domande', timerLabel: 'Timer', timerDefault: 'Predefinito', timerNone: 'Nessun timer',
+        timerPerQuestion: 'Per domanda ({s} s)', timerTotal: 'Totale ({m} min)',
+        modeGroupExam: 'Modalità esame', modeGroupPractice: 'Esercitazione', modeGroupTopics: 'Per argomento',
+        modeAll: 'Intero archivio (tutte le {n} domande)', modeTopic: 'Argomento: {t}',
+        modeReview: 'Ripasso a ripetizione dilazionata (domande in scadenza)', modeMistakes: 'I miei errori',
+        modeFlagged: 'Domande segnate', modeUnseen: 'Domande mai viste', modeDifficulty: 'Difficoltà: {d}',
+        diffEasy: 'Facile', diffMedium: 'Media', diffHard: 'Difficile',
+        modeEmpty: 'Nessuna domanda corrisponde a questa modalità, per ora.',
+        resumeTitle: 'Sessioni in corso', resumeBtn: 'Riprendi', deleteBtn: 'Elimina',
+        resumeInfo: '{mode} · {done}/{n} risposte · {when}',
+        confirmDeleteSession: 'Eliminare questa sessione?',
+        questionOf: 'Domanda {i} di {n}', previous: 'Precedente', validate: 'Verifica risposta',
+        next: 'Domanda successiva', finish: 'Rivedi e termina', finishNow: "Termina l'esame", progress: 'Avanzamento',
+        endScore: 'Termina e valuta', explanation: 'Spiegazione', noExplanation: 'Nessuna spiegazione disponibile.',
+        selectFirst: 'Seleziona una risposta prima di verificare!',
+        flag: 'Segna', unflag: 'Segnata', note: 'Nota', notePlaceholder: 'La tua nota su questa domanda…',
+        skip: 'Salta', keyboardHelp: 'Tastiera: 1–6 o A–F selezionano · ← → navigano · Invio verifica/avanza · M segna',
+        legendAnswered: 'Con risposta', legendUnanswered: 'Senza risposta', legendFlagged: 'Segnata',
+        reviewTitle: 'Riepilogo prima di terminare', reviewText: 'Hai risposto a {a} domande su {n}. {u} senza risposta, {f} segnate.',
+        reviewBack: "Torna all'esame", reviewSubmit: 'Consegna e vedi i risultati',
+        reviewUnanswered: 'Senza risposta', reviewFlagged: 'Segnate',
+        resultsTitle: 'Risultati', resultsSubtitle: 'Rivedi ogni domanda e la relativa spiegazione qui sotto.',
+        scoreLine: 'Hai risposto correttamente a {c} domande su {n}.',
+        pass: '✅ SUPERATO — soglia del {t}% raggiunta', fail: '❌ NON SUPERATO — soglia del {t}% non raggiunta',
+        correct: 'Corretta', incorrect: 'Errata', unansweredBadge: 'Senza risposta', questionN: 'Domanda {n}: {q}',
+        yourAnswer: 'La tua risposta', correctAnswer: 'Risposta corretta',
+        backToMenu: 'Torna al menu principale', retryWrong: 'Ripassa gli errori di questa sessione',
+        langTitle: 'Cambia lingua', themeTitle: 'Cambia tema chiaro/scuro',
+        statsBtn: 'Statistiche', statsTitle: 'Statistiche', statsEmpty: 'Ancora nessun tentativo. Completa una sessione per vedere le statistiche.',
+        statsAttempts: 'Tentativi', statsAccuracy: 'Precisione complessiva', statsAnswered: 'Risposte date',
+        statsMastered: 'Domande padroneggiate', statsAvgTime: 'Tempo medio / domanda', statsBest: 'Miglior punteggio',
+        statsHistory: 'Storico dei punteggi', statsTopics: 'Precisione per argomento', statsHardest: 'Domande più difficili',
+        statsNoHard: 'Dati ancora insufficienti.', statsErrRate: '{p}% errate ({w}/{n})',
+        statsSeen: 'vista {n}×', backBtn: 'Indietro',
+        exportBtn: 'Esporta progressi', importBtn: 'Importa progressi',
+        importDone: 'Progressi importati: {a} tentativi, {q} record di domande.', importFail: 'Importazione non riuscita: {detail}',
+        exportDone: 'Progressi esportati.',
+        storageError: 'Impossibile salvare i progressi (spazio esaurito o archivio disattivato).',
+        typeTrueFalse: 'Vero / Falso', hintOrdering: 'Metti gli elementi nell\'ordine corretto.',
+        hintMatching: 'Abbina ogni elemento al suo corrispondente.', hintNumeric: 'Scrivi un numero.',
+        moveUp: 'Sposta su', moveDown: 'Sposta giù', chooseOne: '— seleziona —',
+        sub: 'Parte {n}', unit: 'Unità',
+        offlineReady: 'Pronto per l\'uso offline.', installHint: 'Installa',
+        justNow: 'adesso', minutesAgo: '{n} min fa', hoursAgo: '{n} h fa', daysAgo: '{n} g fa',
+        notDue: 'Nessuna domanda è in scadenza per il ripasso. Mostro quelle con minore padronanza.',
+        newFeature: 'Novità', skipLink: 'Vai al contenuto', timerQuestionLabel: 'Tempo domanda:', examCardMeta: '{n} domande · {t} argomenti', loadingExam: 'Caricamento esame…', resultTime: 'Tempo impiegato: {m}',
+        continueSession: 'Continua', done: 'fatto'
+    }
+};
+
+App.lang = 'en';
+App.setLang = function (l) { App.lang = (l === 'it') ? 'it' : 'en'; };
+
+App.t = function (key, params) {
+    let s = (App.I18N[App.lang] && App.I18N[App.lang][key]) || App.I18N.en[key] || key;
+    Object.keys(params || {}).forEach(k => { s = s.split('{' + k + '}').join(params[k]); });
+    return s;
+};
+
+// Localized content value: string | {en,it,...} -> string in the current language
+App.loc = function (v) {
+    if (v === undefined || v === null) return '';
+    if (typeof v === 'string' || typeof v === 'number') return String(v);
+    return v[App.lang] || v.en || Object.values(v)[0] || '';
+};
+
+/* Question types. Each handler implements:
+     prepare(def, ctx)            -> runtime item (shuffles, normalizes the answer)
+     hasAnswer(item, value)       -> bool
+     isCorrect(item, value)       -> bool
+     render(ctx)                  -> DOM node; ctx = {item, value, onChange(value,{silent}), locked, reveal, uid}
+     renderReview(item, value)    -> DOM node (answers with correct/wrong marks)
+     validateDef(def, path, rep)  -> adds problems with rep.error(path, msg) / rep.warn(path, msg)
+   Custom types can be added with App.registerType(name, handler). */
+(function () {
+    const { el, shuffle, sameSet, isObj } = App.util;
     const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
-    function readPref(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
-    function writePref(key, value) { try { localStorage.setItem(key, value); } catch (e) { /* ignore */ } }
+    App.util.isLoc = v => typeof v === 'string' ? v.trim().length > 0
+        : (isObj(v) && Object.keys(v).length > 0 && Object.values(v).every(x => typeof x === 'string' && x.trim().length > 0));
 
-    let lang = readPref('exam_lang');
-    if (lang !== 'en' && lang !== 'it') lang = 'en';
-
-    function t(key, params) {
-        let s = (I18N[lang] && I18N[lang][key]) || I18N.en[key] || key;
-        Object.keys(params || {}).forEach(k => { s = s.split('{' + k + '}').join(params[k]); });
-        return s;
-    }
-
-    // Builds a DOM element; text always goes through textContent (no innerHTML).
-    function el(tag, props, ...children) {
-        const node = document.createElement(tag);
-        Object.entries(props || {}).forEach(([k, v]) => {
-            if (k === 'text') node.textContent = v;
-            else if (k === 'style') node.style.cssText = v;
-            else if (k === 'class') node.className = v;
-            else node[k] = v;
-        });
-        children.forEach(c => c && node.appendChild(c));
-        return node;
-    }
-
-    function shuffle(arr) {
-        const a = [...arr];
-        for (let i = a.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [a[i], a[j]] = [a[j], a[i]];
-        }
-        return a;
-    }
-
-    const sameSet = (a, b) => {
-        const x = [...a].sort((p, q) => p - q), y = [...b].sort((p, q) => p - q);
-        return x.length === y.length && x.every((v, i) => v === y[i]);
+    App.questionType = function (def) {
+        if (def.type) return def.type;
+        if (Array.isArray(def.parts)) return 'scenario';
+        if (Array.isArray(def.pairs)) return 'matching';
+        if (Array.isArray(def.items)) return 'ordering';
+        if (typeof def.answer === 'boolean') return 'truefalse';
+        if (isObj(def.answer) && 'value' in def.answer) return 'numeric';
+        const a = Array.isArray(def.answer) ? def.answer : [def.answer];
+        return a.length > 1 ? 'multiple' : 'single';
     };
 
-    const data = () => window.ExamData;
-    const cfg = () => window.ExamData.config;
-    const loc = v => (v && typeof v === 'object') ? (v[lang] || v.en || '') : (v || '');
+    const textOf = d => d.text !== undefined ? d.text : d.question;
 
-    // ── Question preparation ────────────────────────────────────────────────
-    // Letters are rendered by the engine, type derives from answer count, options are shuffled.
-    function normalizeQuestions() {
-        const stripLetter = s => String(s).replace(/^\s*[A-Fa-f][)\.]\s+/, '');
-        data().questions.forEach(q => {
-            if (!Array.isArray(q.options)) return;
-            if (!Array.isArray(q.answer)) q.answer = [q.answer];
-            q.type = q.answer.length > 1 ? 'multiple' : 'single';
-
-            // shuffle:false keeps the option order (e.g. "All of the above")
-            const identity = q.options.map((_, i) => i);
-            const order = q.shuffle === false ? identity : shuffle(identity);
-            const opts = q.options.map(stripLetter);
-            q.options = order.map(i => opts[i]);
-            q.answer = q.answer.map(old => order.indexOf(old)).sort((a, b) => a - b);
-        });
-    }
-
-    // ── State ───────────────────────────────────────────────────────────────
-    const state = {
-        screen: 'picker',   // picker | dashboard | runtime | summary
-        items: [], index: 0, selections: {}, validated: {}, mode: null,
-        secondsLeft: 0, timer: null, examFile: null
-    };
-
-    const storeKey = () => 'exam_session_' + cfg().examCode;
-
-    function saveSession() {
-        writePref(storeKey(), JSON.stringify({
-            items: state.items, index: state.index, selections: state.selections,
-            validated: state.validated, mode: state.mode, secondsLeft: state.secondsLeft
-        }));
-    }
-    function clearSession() { try { localStorage.removeItem(storeKey()); } catch (e) { /* ignore */ } }
-
-    function isCorrect(i) {
-        const sel = state.selections[i];
-        if (sel === undefined) return false;
-        return sameSet(Array.isArray(sel) ? sel : [sel], state.items[i].answer);
-    }
-
-    // ── Screens ─────────────────────────────────────────────────────────────
-    function show(screen) {
-        state.screen = screen;
-        $('no-content-message').classList.toggle('hidden', screen !== 'picker');
-        $('main-dashboard').classList.toggle('hidden', screen !== 'dashboard');
-        $('runtime-interface').classList.toggle('hidden', screen !== 'runtime');
-        $('summary-dashboard').classList.toggle('hidden', screen !== 'summary');
-    }
-
-    function applyStaticText() {
-        document.documentElement.lang = lang;
-        document.querySelectorAll('[data-i18n]').forEach(node => { node.textContent = t(node.getAttribute('data-i18n')); });
-        $('lang-btn').textContent = lang.toUpperCase();
-        $('lang-btn').title = t('langTitle');
-        $('theme-btn').title = t('themeTitle');
-    }
-
-    function renderTheme() {
-        const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-        $('theme-btn').textContent = dark ? '☀' : '☾';
-    }
-
-    // Exam catalog (from exams.js)
-    // Built-in list, used when exams.js is missing or empty (exams.js, if present, replaces it)
-    const DEFAULT_CATALOG = [
-        { file: 'managedServices', title: 'HPE Managed Services Expertise',
-          description: { en: 'ITSM, delivery, tooling, security and partner programs.', it: 'ITSM, delivery, tooling, sicurezza e programmi partner.' } },
-        { file: 'v31', title: 'V31 Practice Test',
-          description: { en: 'AI fundamentals, Private Cloud AI, AI Essentials, NIM/MLIS, edge and HPC — base, scenario and advanced questions.', it: 'Fondamenti di AI, Private Cloud AI, AI Essentials, NIM/MLIS, edge e HPC — domande base, scenario e advanced.' } },
-        { file: 'v31advanced', title: 'V31 Advanced Practice Test',
-          description: { en: 'Expert-level questions: sizing, KAI Scheduler, MLIS multi-node, air-gapped NIM, edge and HPC.', it: 'Domande di livello expert: sizing, KAI Scheduler, MLIS multi-node, NIM air-gapped, edge e HPC.' } }
-    ];
-    function catalog() {
-        return Array.isArray(window.ExamCatalog) && window.ExamCatalog.length ? window.ExamCatalog : DEFAULT_CATALOG;
-    }
-
-    function renderExamLists() {
-        const picker = $('exam-list');
-        picker.textContent = '';
-        if (catalog().length) {
-            picker.appendChild(el('h3', { style: 'font-size:1.05rem;font-weight:600;margin-bottom:10px;text-align:center;', text: t('availableExams') }));
-        }
-        catalog().forEach(item => {
-            const current = item.file === state.examFile;
-            picker.appendChild(el('a', { href: '?content=' + encodeURIComponent(item.file), class: 'exam-card' + (current ? ' current' : '') },
-                el('div', { class: 'exam-card-title', text: loc(item.title) || item.file }),
-                el('div', { class: 'exam-card-desc', text: loc(item.description) })));
-        });
-
-        const chips = $('dash-exam-list');
-        chips.textContent = '';
-        catalog().forEach(item => {
-            const current = item.file === state.examFile;
-            chips.appendChild(el('a', { href: '?content=' + encodeURIComponent(item.file), class: 'exam-chip' + (current ? ' current' : ''), text: loc(item.title) || item.file, title: loc(item.description) }));
-        });
-    }
-
-    function renderDashboard() {
-        const questions = data().questions;
-        const counts = {};
-        questions.forEach(q => { counts[q.topic] = (counts[q.topic] || 0) + 1; });
-
-        $('dashboard-title').textContent = cfg().examTitle || cfg().examCode || 'Exam';
-        $('dashboard-subtitle').textContent = loc(cfg().subtitle);
-
-        const select = $('config-selection-mode');
-        const previous = select.value;
-        select.textContent = '';
-        const addOpt = (parent, value, label) => parent.appendChild(el('option', { value: value, text: label }));
-        addOpt(select, 'mock20', t('modeMock20', { n: cfg().mockStandardCount }));
-        addOpt(select, 'mock40', t('modeMock40', { n: cfg().mockOfficialCount, m: Math.floor(cfg().mockOfficialTimeSec / 60), p: cfg().passThresholdMockOfficial }));
-        addOpt(select, 'all', t('modeAll', { n: questions.length }));
-        const group = el('optgroup', { label: t('modeTopics') });
-        select.appendChild(group);
-
-        const box = $('distribution-payload-box');
-        box.textContent = '';
-        box.appendChild(el('div', { class: 'topic-item topic-total' },
-            el('span', { class: 'topic-name', style: 'color: var(--primary); font-weight: 700;', text: t('totalQuestions') }),
-            el('span', { class: 'topic-count', style: 'background-color: var(--primary); color: var(--on-accent);', text: t('nQuestions', { n: questions.length }) })));
-        Object.keys(counts).forEach(topic => {
-            box.appendChild(el('div', { class: 'topic-item' },
-                el('span', { class: 'topic-name', text: topic }),
-                el('span', { class: 'topic-count', text: t('nQuestions', { n: counts[topic] }) })));
-            addOpt(group, topic, `${topic} (${t('nQuestions', { n: counts[topic] })})`);
-        });
-        if (previous) select.value = previous;
-        renderExamLists();
-    }
-
-    // ── Question selection ──────────────────────────────────────────────────
-    function pickItems(mode) {
-        const questions = data().questions;
-        const byTopic = {};
-        questions.forEach(q => (byTopic[q.topic] = byTopic[q.topic] || []).push(q));
-
-        if (mode === 'mock20') {
-            const pool = Object.keys(byTopic).map(k => shuffle(byTopic[k])[0]);
-            const used = new Set(pool.map(q => q.id));
-            const rest = shuffle(questions.filter(q => !used.has(q.id)));
-            pool.push(...rest.slice(0, Math.max(0, cfg().mockStandardCount - pool.length)));
-            return shuffle(pool).slice(0, cfg().mockStandardCount);
-        }
-        if (mode === 'mock40') {
-            const pool = [];
-            const used = new Set();
-            cfg().macroGroups.forEach(group => {
-                let remaining = group.weight;
-                for (let round = 0; remaining > 0 && round < 50; round++) {
-                    for (const topic of shuffle(group.topics)) {
-                        if (remaining <= 0) break;
-                        const q = shuffle((byTopic[topic] || []).filter(x => !used.has(x.id)))[0];
-                        if (!q) continue;
-                        used.add(q.id);
-                        pool.push(q);
-                        remaining--;
-                    }
-                }
-            });
-            if (pool.length < cfg().mockOfficialCount) {
-                const rest = shuffle(questions.filter(q => !used.has(q.id)));
-                pool.push(...rest.slice(0, cfg().mockOfficialCount - pool.length));
-            }
-            return shuffle(pool).slice(0, cfg().mockOfficialCount);
-        }
-        if (mode === 'all') return [...questions];
-        return questions.filter(q => q.topic === mode);
-    }
-
-    // ── Session ─────────────────────────────────────────────────────────────
-    function startExam() {
-        state.mode = $('config-selection-mode').value;
-        state.items = pickItems(state.mode);
-        state.index = 0;
-        state.selections = {};
-        state.validated = {};
-        const seconds = state.mode === 'mock40' ? cfg().mockOfficialTimeSec : state.items.length * cfg().timePerQuestionSec;
-        beginSession(seconds);
-    }
-
-    function beginSession(seconds) {
-        show('runtime');
-        startClock(seconds);
-        renderQuestion();
-        renderMatrix();
-        saveSession();
-    }
-
-    function startClock(seconds) {
-        clearInterval(state.timer);
-        state.secondsLeft = seconds;
-        $('runtime-timer-box').classList.remove('hidden');
-        const tick = () => {
-            if (state.secondsLeft <= 0) { submitExam(); return; }
-            state.secondsLeft--;
-            const m = String(Math.floor(state.secondsLeft / 60)).padStart(2, '0');
-            const s = String(state.secondsLeft % 60).padStart(2, '0');
-            $('runtime-clock-string').textContent = `${m}:${s}`;
+    function baseItem(def, ctx) {
+        return {
+            uid: def.uid !== undefined ? String(def.uid) : String(def.id),
+            id: def.id, topic: def.topic, text: textOf(def), explanation: def.explanation,
+            difficulty: def.difficulty, tags: def.tags, source: def.source, estimatedSec: def.estimatedSec
         };
-        tick();
-        state.timer = setInterval(tick, 1000);
     }
+
+    function prepareAny(def, ctx) {
+        const type = App.questionType(def);
+        const h = App.types[type];
+        if (!h) throw new Error('Unknown question type "' + type + '"');
+        const item = h.prepare(def, ctx || {});
+        item.kind = item.kind || type;
+        return item;
+    }
+    App.prepareQuestion = prepareAny;
+    App.typeHandler = item => App.types[item.kind];
+
+    // ---- single / multiple / truefalse ---------------------------------------------------
+    function choicePrepare(def, ctx, multi) {
+        const item = baseItem(def, ctx);
+        const identity = def.options.map((_, i) => i);
+        const keep = def.shuffle === false || ctx.shuffleOptions === false;
+        const order = keep ? identity : shuffle(identity);
+        const answers = (Array.isArray(def.answer) ? def.answer : [def.answer]);
+        item.options = order.map(i => def.options[i]);
+        item.answer = answers.map(a => order.indexOf(a)).sort((a, b) => a - b);
+        item.kind = multi ? 'multiple' : 'single';
+        return item;
+    }
+
+    function choiceRender(multi) {
+        return function (ctx) {
+            const { item, value, onChange, locked, reveal, uid } = ctx;
+            let current = multi ? (Array.isArray(value) ? [...value] : []) : value;
+            const isPicked = i => multi ? current.includes(i) : current === i;
+            const group = el('div', { class: 'options-list', role: multi ? 'group' : 'radiogroup' });
+            const labels = [];
+
+            const paint = () => labels.forEach((lab, i) => {
+                let cls = 'option-card' + (isPicked(i) ? ' selected' : '');
+                if (reveal && item.answer.includes(i)) cls += ' correct-reveal';
+                else if (reveal && isPicked(i)) cls += ' incorrect-reveal';
+                lab.className = cls;
+                lab.querySelector('input').checked = isPicked(i);
+            });
+
+            item.options.forEach((opt, i) => {
+                const input = el('input', { type: multi ? 'checkbox' : 'radio', name: 'opt-' + uid, class: 'option-input', disabled: !!locked, checked: isPicked(i) });
+                input.addEventListener('change', () => {
+                    if (multi) {
+                        current = current.includes(i) ? current.filter(x => x !== i) : [...current, i].sort((a, b) => a - b);
+                        onChange(current, { silent: true });
+                    } else {
+                        current = i;
+                        onChange(i, { silent: true });
+                    }
+                    paint();
+                });
+                const lab = el('label', { class: 'option-card', dataset: { index: i } },
+                    input,
+                    el('span', { class: 'option-marker', text: LETTERS[i] }),
+                    el('span', { class: 'option-text', text: App.loc(opt) }));
+                labels.push(lab);
+                group.appendChild(lab);
+            });
+            paint();
+            return group;
+        };
+    }
+
+    function choiceReview(item, value) {
+        const chosen = Array.isArray(value) ? value : (value === undefined ? [] : [value]);
+        const box = el('div', { class: 'review-options' });
+        item.options.forEach((opt, k) => {
+            let cls = 'review-option';
+            if (item.answer.includes(k)) cls += ' review-correct';
+            else if (chosen.includes(k)) cls += ' review-wrong';
+            box.appendChild(el('p', { class: cls }, el('strong', { text: LETTERS[k] + ': ' }), App.loc(opt)));
+        });
+        return box;
+    }
+
+    function choiceValidate(multi) {
+        return function (def, path, rep) {
+            if (!Array.isArray(def.options) || def.options.length < 2 || def.options.length > 6) {
+                rep.error(path + '.options', 'must be a list of 2 to 6 options'); return;
+            }
+            def.options.forEach((o, i) => { if (!App.util.isLoc(o)) rep.error(path + '.options[' + i + ']', 'must be a non-empty string or {en,it} object'); });
+            const a = Array.isArray(def.answer) ? def.answer : [def.answer];
+            if (!a.length || a.some(x => !Number.isInteger(x))) { rep.error(path + '.answer', 'must be a list of option indexes (0-based)'); return; }
+            a.forEach(x => { if (x < 0 || x >= def.options.length) rep.error(path + '.answer', 'index ' + x + ' is out of range (' + def.options.length + ' options)'); });
+            if (new Set(a).size !== a.length) rep.error(path + '.answer', 'contains duplicate indexes');
+            if (multi && a.length < 2) rep.error(path + '.answer', 'type "multiple" needs at least 2 correct answers');
+            if (!multi && a.length !== 1) rep.error(path + '.answer', 'type "single" needs exactly 1 correct answer (use "multiple" otherwise)');
+            if (multi) {
+                const txt = App.loc(textOf(def)) + ' ' + (isObj(textOf(def)) ? Object.values(textOf(def)).join(' ') : '');
+                if (!/select|choose|seleziona|scegli|\b(two|three|four|five|due|tre|quattro|cinque|[2-5])\b/i.test(txt)) rep.warn(path + '.text', 'multiple-answer question should say how many answers to select');
+            }
+        };
+    }
+
+    App.registerType('single', {
+        prepare: (d, c) => choicePrepare(d, c, false),
+        hasAnswer: (it, v) => v !== undefined,
+        isCorrect: (it, v) => v !== undefined && it.answer.includes(v) && it.answer.length === 1,
+        render: choiceRender(false), renderReview: choiceReview, validateDef: choiceValidate(false)
+    });
+    App.registerType('multiple', {
+        prepare: (d, c) => choicePrepare(d, c, true),
+        hasAnswer: (it, v) => Array.isArray(v) && v.length > 0,
+        isCorrect: (it, v) => Array.isArray(v) && sameSet(v, it.answer),
+        render: choiceRender(true), renderReview: choiceReview, validateDef: choiceValidate(true)
+    });
+    App.registerType('truefalse', {
+        prepare(def, ctx) {
+            const d = Object.assign({}, def, {
+                options: def.options || [{ en: 'True', it: 'Vero' }, { en: 'False', it: 'Falso' }],
+                answer: typeof def.answer === 'boolean' ? [def.answer ? 0 : 1] : def.answer,
+                shuffle: false
+            });
+            const item = choicePrepare(d, ctx, false);
+            item.kind = 'single';
+            return item;
+        },
+        validateDef(def, path, rep) {
+            if (typeof def.answer !== 'boolean' && !(Array.isArray(def.answer) && def.answer.length === 1)) {
+                rep.error(path + '.answer', 'true/false questions need answer: true or false');
+            }
+        }
+    });
+
+    // ---- ordering ------------------------------------------------------------------------
+    App.registerType('ordering', {
+        prepare(def, ctx) {
+            const item = baseItem(def, ctx);
+            item.items = def.items;
+            const n = def.items.length;
+            let perm = shuffle([...Array(n).keys()]);
+            for (let tries = 0; tries < 10 && perm.every((x, i) => x === i); tries++) perm = shuffle(perm);
+            item.shownOrder = perm;
+            return item;
+        },
+        hasAnswer: (it, v) => Array.isArray(v),
+        isCorrect: (it, v) => Array.isArray(v) && v.length === it.items.length && v.every((x, i) => x === i),
+        render(ctx) {
+            const { item, onChange, locked, reveal } = ctx;
+            let order = Array.isArray(ctx.value) ? [...ctx.value] : [...item.shownOrder];
+            const wrap = el('div', { class: 'ordering' });
+            const hint = el('p', { class: 'type-hint', text: App.t('hintOrdering') });
+            const list = el('ol', { class: 'ordering-list' });
+            wrap.appendChild(hint);
+            wrap.appendChild(list);
+            let focusPos = null, focusDir = null;
+
+            function draw() {
+                list.textContent = '';
+                order.forEach((idx, p) => {
+                    let cls = 'ordering-row';
+                    if (reveal) cls += idx === p ? ' row-ok' : ' row-bad';
+                    const up = el('button', { type: 'button', class: 'mini-btn', text: '↑', disabled: locked || p === 0, aria: { label: App.t('moveUp') } });
+                    const down = el('button', { type: 'button', class: 'mini-btn', text: '↓', disabled: locked || p === order.length - 1, aria: { label: App.t('moveDown') } });
+                    const move = (to) => {
+                        const tmp = order[p]; order[p] = order[to]; order[to] = tmp;
+                        focusPos = to; focusDir = to > p ? 'down' : 'up';
+                        onChange([...order], { silent: true });
+                        draw();
+                    };
+                    up.addEventListener('click', () => move(p - 1));
+                    down.addEventListener('click', () => move(p + 1));
+                    list.appendChild(el('li', { class: cls },
+                        el('span', { class: 'order-pos', text: String(p + 1) }),
+                        el('span', { class: 'order-text', text: App.loc(item.items[idx]) }),
+                        el('span', { class: 'order-btns' }, up, down)));
+                });
+                if (focusPos !== null) {
+                    const row = list.children[focusPos];
+                    const btns = row.querySelectorAll('button');
+                    const target = (focusDir === 'down' ? btns[1] : btns[0]);
+                    (target && !target.disabled ? target : (btns[0].disabled ? btns[1] : btns[0])).focus();
+                    focusPos = null;
+                }
+            }
+            draw();
+            if (reveal) {
+                wrap.appendChild(el('p', { class: 'type-hint', text: App.t('correctAnswer') + ':' }));
+                wrap.appendChild(el('ol', { class: 'ordering-list correct-order' }, ...item.items.map((t, i) =>
+                    el('li', { class: 'ordering-row row-ok' }, el('span', { class: 'order-pos', text: String(i + 1) }), el('span', { class: 'order-text', text: App.loc(t) })))));
+            }
+            return wrap;
+        },
+        renderReview(item, value) {
+            const order = Array.isArray(value) ? value : null;
+            const box = el('div', { class: 'review-options' });
+            box.appendChild(el('p', { class: 'type-hint', text: App.t('yourAnswer') + ':' }));
+            if (!order) box.appendChild(el('p', { class: 'review-option review-wrong', text: '—' }));
+            else order.forEach((idx, p) => box.appendChild(el('p', { class: 'review-option ' + (idx === p ? 'review-correct' : 'review-wrong') }, el('strong', { text: (p + 1) + '. ' }), App.loc(item.items[idx]))));
+            box.appendChild(el('p', { class: 'type-hint', text: App.t('correctAnswer') + ':' }));
+            item.items.forEach((t, i) => box.appendChild(el('p', { class: 'review-option review-correct' }, el('strong', { text: (i + 1) + '. ' }), App.loc(t))));
+            return box;
+        },
+        validateDef(def, path, rep) {
+            if (!Array.isArray(def.items) || def.items.length < 2 || def.items.length > 10) { rep.error(path + '.items', 'must list 2 to 10 items in the CORRECT order'); return; }
+            def.items.forEach((o, i) => { if (!App.util.isLoc(o)) rep.error(path + '.items[' + i + ']', 'must be a non-empty string or {en,it} object'); });
+        }
+    });
+
+    // ---- matching ------------------------------------------------------------------------
+    App.registerType('matching', {
+        prepare(def, ctx) {
+            const item = baseItem(def, ctx);
+            item.lefts = def.pairs.map(p => p.left);
+            item.rights = def.pairs.map(p => p.right);
+            item.rightOrder = shuffle([...Array(def.pairs.length).keys()]);
+            return item;
+        },
+        hasAnswer: (it, v) => Array.isArray(v) && v.some(x => x >= 0),
+        isCorrect: (it, v) => Array.isArray(v) && v.length === it.lefts.length && v.every((x, i) => x === i),
+        render(ctx) {
+            const { item, onChange, locked, reveal } = ctx;
+            const val = Array.isArray(ctx.value) ? [...ctx.value] : item.lefts.map(() => -1);
+            const wrap = el('div', { class: 'matching' }, el('p', { class: 'type-hint', text: App.t('hintMatching') }));
+            item.lefts.forEach((left, i) => {
+                const sel = el('select', { class: 'match-select', disabled: !!locked, aria: { label: App.loc(left) } });
+                sel.appendChild(el('option', { value: '-1', text: App.t('chooseOne') }));
+                item.rightOrder.forEach(r => sel.appendChild(el('option', { value: String(r), text: App.loc(item.rights[r]) })));
+                sel.value = String(val[i]);
+                sel.addEventListener('change', () => { val[i] = parseInt(sel.value, 10); onChange([...val], { silent: true }); });
+                let cls = 'match-row';
+                if (reveal) cls += val[i] === i ? ' row-ok' : ' row-bad';
+                const row = el('div', { class: cls }, el('span', { class: 'match-left', text: App.loc(left) }), sel);
+                if (reveal && val[i] !== i) row.appendChild(el('span', { class: 'match-correct', text: '→ ' + App.loc(item.rights[i]) }));
+                wrap.appendChild(row);
+            });
+            return wrap;
+        },
+        renderReview(item, value) {
+            const v = Array.isArray(value) ? value : [];
+            const box = el('div', { class: 'review-options' });
+            item.lefts.forEach((left, i) => {
+                const ok = v[i] === i;
+                const chosen = v[i] >= 0 && v[i] !== undefined ? App.loc(item.rights[v[i]]) : '—';
+                box.appendChild(el('p', { class: 'review-option ' + (ok ? 'review-correct' : 'review-wrong') },
+                    el('strong', { text: App.loc(left) + ' → ' }), ok ? chosen : chosen + '  (' + App.t('correctAnswer') + ': ' + App.loc(item.rights[i]) + ')'));
+            });
+            return box;
+        },
+        validateDef(def, path, rep) {
+            if (!Array.isArray(def.pairs) || def.pairs.length < 2 || def.pairs.length > 8) { rep.error(path + '.pairs', 'must be a list of 2 to 8 {left, right} pairs'); return; }
+            def.pairs.forEach((p, i) => {
+                if (!p || !App.util.isLoc(p.left) || !App.util.isLoc(p.right)) rep.error(path + '.pairs[' + i + ']', 'needs non-empty "left" and "right"');
+            });
+        }
+    });
+
+    // ---- numeric -------------------------------------------------------------------------
+    function numAnswer(def) {
+        const a = isObj(def.answer) ? def.answer : { value: def.answer };
+        return { value: Number(a.value), tolerance: Number(a.tolerance || 0), unit: a.unit || def.unit || '' };
+    }
+    function parseNum(s) {
+        const n = parseFloat(String(s).trim().replace(/\s/g, '').replace(',', '.'));
+        return isNaN(n) ? null : n;
+    }
+    App.registerType('numeric', {
+        prepare(def, ctx) { const item = baseItem(def, ctx); item.numeric = numAnswer(def); return item; },
+        hasAnswer: (it, v) => typeof v === 'string' && v.trim().length > 0,
+        isCorrect(it, v) {
+            const n = parseNum(v === undefined ? '' : v);
+            return n !== null && Math.abs(n - it.numeric.value) <= it.numeric.tolerance + 1e-12;
+        },
+        render(ctx) {
+            const { item, value, onChange, locked, reveal } = ctx;
+            const input = el('input', { type: 'text', class: 'numeric-input', inputMode: 'decimal', autocomplete: 'off', value: value || '', disabled: !!locked, aria: { label: App.t('hintNumeric') } });
+            input.addEventListener('input', () => onChange(input.value, { silent: true }));
+            const wrap = el('div', { class: 'numeric' }, el('p', { class: 'type-hint', text: App.t('hintNumeric') }),
+                el('div', { class: 'numeric-row' }, input, item.numeric.unit ? el('span', { class: 'numeric-unit', text: item.numeric.unit }) : null));
+            if (reveal) {
+                const ok = App.types.numeric.isCorrect(item, value);
+                input.classList.add(ok ? 'row-ok' : 'row-bad');
+                wrap.appendChild(el('p', { class: 'review-option review-correct', text: App.t('correctAnswer') + ': ' + item.numeric.value + (item.numeric.tolerance ? ' (±' + item.numeric.tolerance + ')' : '') + (item.numeric.unit ? ' ' + item.numeric.unit : '') }));
+            }
+            return wrap;
+        },
+        renderReview(item, value) {
+            const ok = App.types.numeric.isCorrect(item, value);
+            return el('div', { class: 'review-options' },
+                el('p', { class: 'review-option ' + (ok ? 'review-correct' : 'review-wrong'), text: App.t('yourAnswer') + ': ' + (value || '—') }),
+                el('p', { class: 'review-option review-correct', text: App.t('correctAnswer') + ': ' + item.numeric.value + (item.numeric.tolerance ? ' (±' + item.numeric.tolerance + ')' : '') + (item.numeric.unit ? ' ' + item.numeric.unit : '') }));
+        },
+        validateDef(def, path, rep) {
+            const a = numAnswer(def);
+            if (!isFinite(a.value)) rep.error(path + '.answer', 'must be a number or {value, tolerance, unit}');
+            if (!isFinite(a.tolerance) || a.tolerance < 0) rep.error(path + '.answer.tolerance', 'must be a non-negative number');
+        }
+    });
+
+    // ---- scenario (one context, several sub-questions; correct only if all parts are) ----
+    App.registerType('scenario', {
+        prepare(def, ctx) {
+            const item = baseItem(def, ctx);
+            item.context = def.context;
+            item.parts = def.parts.map(p => prepareAny(Object.assign({ topic: def.topic, uid: (def.uid !== undefined ? def.uid : def.id) + '#p' }, p), ctx));
+            return item;
+        },
+        hasAnswer: (it, v) => Array.isArray(v) && it.parts.some((p, i) => App.types[p.kind].hasAnswer(p, v[i])),
+        isCorrect: (it, v) => Array.isArray(v) && it.parts.every((p, i) => App.types[p.kind].isCorrect(p, v[i])),
+        render(ctx) {
+            const { item, onChange, locked, reveal, uid } = ctx;
+            const val = Array.isArray(ctx.value) ? [...ctx.value] : item.parts.map(() => undefined);
+            const wrap = el('div', { class: 'scenario' });
+            if (item.context) wrap.appendChild(el('div', { class: 'scenario-context', text: App.loc(item.context) }));
+            item.parts.forEach((part, i) => {
+                const h = App.types[part.kind];
+                const box = el('div', { class: 'scenario-part' },
+                    el('h4', { class: 'scenario-part-title', text: App.t('sub', { n: i + 1 }) + ' — ' + App.loc(part.text) }),
+                    h.render({
+                        item: part, value: val[i], locked, reveal, uid: uid + '-p' + i,
+                        onChange: (v, o) => { val[i] = v; onChange([...val], { silent: true }); }
+                    }));
+                if (reveal && part.explanation) box.appendChild(el('p', { class: 'part-expl', text: App.loc(part.explanation) }));
+                wrap.appendChild(box);
+            });
+            return wrap;
+        },
+        renderReview(item, value) {
+            const v = Array.isArray(value) ? value : [];
+            const wrap = el('div', { class: 'scenario' });
+            if (item.context) wrap.appendChild(el('div', { class: 'scenario-context', text: App.loc(item.context) }));
+            item.parts.forEach((part, i) => {
+                wrap.appendChild(el('h4', { class: 'scenario-part-title', text: App.t('sub', { n: i + 1 }) + ' — ' + App.loc(part.text) }));
+                wrap.appendChild(App.types[part.kind].renderReview(part, v[i]));
+            });
+            return wrap;
+        },
+        validateDef(def, path, rep) {
+            if (!Array.isArray(def.parts) || def.parts.length < 2) { rep.error(path + '.parts', 'a scenario needs at least 2 parts'); return; }
+            if (def.context !== undefined && !App.util.isLoc(def.context)) rep.error(path + '.context', 'must be a non-empty string or {en,it} object');
+            def.parts.forEach((p, i) => {
+                const t = App.questionType(p);
+                const pp = path + '.parts[' + i + ']';
+                if (t === 'scenario') { rep.error(pp, 'scenarios cannot be nested'); return; }
+                if (!App.types[t]) { rep.error(pp + '.type', 'unknown question type "' + t + '"'); return; }
+                if (!App.util.isLoc(textOf(p))) rep.error(pp + '.text', 'is required');
+                if (App.types[t].validateDef) App.types[t].validateDef(p, pp, rep);
+            });
+        }
+    });
+})();
+
+/* Exam format v2: validation, legacy conversion, normalization, quality lint. */
+(function () {
+    const { isObj, isLoc } = App.util;
+    const RESERVED_MODES = ['all', 'review', 'mistakes', 'flagged', 'unseen', 'topic', 'difficulty'];
+    const SELECTIONS = ['random', 'balanced', 'weighted'];
+    const textOf = d => d.text !== undefined ? d.text : d.question;
+
+    function newReport() {
+        const r = { errors: [], warnings: [] };
+        r.error = (path, message) => r.errors.push({ path, message });
+        r.warn = (path, message) => r.warnings.push({ path, message });
+        r.ok = () => r.errors.length === 0;
+        r.format = () => r.errors.map(e => '  ✗ ' + e.path + ': ' + e.message).concat(r.warnings.map(w => '  ! ' + w.path + ': ' + w.message)).join('\n');
+        return r;
+    }
+
+    function stripLetter(s) { return String(s).replace(/^\s*[A-Fa-f][)\.]\s+/, ''); }
+
+    // Legacy shape: { config: {...}, questions: [{id, topic, question, options:["A) ..."], answer:[i], explanation}] }
+    function fromLegacy(data, fileId) {
+        const c = data.config || {};
+        const modes = [];
+        const n = (data.questions || []).length;
+        if (c.mockStandardCount) modes.push({ id: 'standard', name: { en: 'Standard mock exam', it: 'Simulazione standard' }, selection: 'balanced', count: Math.min(c.mockStandardCount, n) });
+        if (c.mockOfficialCount) {
+            modes.push({
+                id: 'official', name: { en: 'Official exam simulation', it: 'Simulazione esame ufficiale' }, selection: 'weighted', exam: true,
+                count: Math.min(c.mockOfficialCount, n), timeSec: c.mockOfficialTimeSec, passThreshold: c.passThresholdMockOfficial,
+                groups: (c.macroGroups || []).map(g => ({ topics: g.topics, weight: g.weight }))
+            });
+        }
+        return {
+            format: 2, id: fileId || String(c.examCode || 'exam').toLowerCase(), code: c.examCode,
+            title: c.examTitle || c.examCode, description: c.subtitle, version: c.version,
+            settings: { passThreshold: c.passThresholdDefault, timePerQuestionSec: c.timePerQuestionSec },
+            modes,
+            questions: (data.questions || []).map(q => {
+                const out = { id: q.id, topic: q.topic, text: q.question, options: (q.options || []).map(stripLetter), answer: q.answer, explanation: q.explanation };
+                if (q.shuffle === false) out.shuffle = false;
+                const a = Array.isArray(q.answer) ? q.answer : [q.answer];
+                out.type = a.length > 1 ? 'multiple' : 'single';
+                return out;
+            })
+        };
+    }
+
+    function validate(exam) {
+        const rep = newReport();
+        if (!isObj(exam)) { rep.error('exam', 'must be an object'); return rep; }
+        if (exam.format !== App.FORMAT_VERSION) rep.error('format', 'must be ' + App.FORMAT_VERSION + ' (got ' + JSON.stringify(exam.format) + ')');
+        if (typeof exam.id !== 'string' || !/^[\w.\-]+$/.test(exam.id)) rep.error('id', 'must be a short identifier (letters, digits, "-", "_", ".")');
+        if (!isLoc(exam.title)) rep.error('title', 'is required (string or {en,it})');
+        ['description'].forEach(k => { if (exam[k] !== undefined && !isLoc(exam[k])) rep.error(k, 'must be a non-empty string or {en,it} object'); });
+
+        const s = exam.settings;
+        if (s !== undefined) {
+            if (!isObj(s)) rep.error('settings', 'must be an object');
+            else {
+                if (s.passThreshold !== undefined && !(s.passThreshold >= 0 && s.passThreshold <= 100)) rep.error('settings.passThreshold', 'must be between 0 and 100');
+                if (s.timePerQuestionSec !== undefined && !(s.timePerQuestionSec > 0)) rep.error('settings.timePerQuestionSec', 'must be a positive number');
+            }
+        }
+
+        const qs = exam.questions;
+        if (!Array.isArray(qs) || !qs.length) { rep.error('questions', 'must be a non-empty list'); return rep; }
+
+        const topicsSeen = new Set();
+        const uids = new Set();
+        const texts = new Map();
+        qs.forEach((q, i) => {
+            const p = 'questions[' + i + ']';
+            if (!isObj(q)) { rep.error(p, 'must be an object'); return; }
+            const label = p + (q.id !== undefined ? ' (id ' + q.id + ')' : '');
+            if (q.id === undefined || q.id === '') rep.error(label, 'is missing "id"');
+            const uid = q.uid !== undefined ? String(q.uid) : String(q.id);
+            if (uids.has(uid)) rep.error(label, 'duplicate uid/id "' + uid + '"'); uids.add(uid);
+            if (typeof q.topic !== 'string' || !q.topic.trim()) rep.error(label + '.topic', 'is required'); else topicsSeen.add(q.topic);
+            if (!isLoc(textOf(q))) rep.error(label + '.text', 'is required (string or {en,it})');
+            if (q.explanation !== undefined && !isLoc(q.explanation)) rep.error(label + '.explanation', 'must be a non-empty string or {en,it} object');
+            if (q.difficulty !== undefined && ![1, 2, 3].includes(q.difficulty)) rep.error(label + '.difficulty', 'must be 1, 2 or 3');
+            if (q.tags !== undefined && !(Array.isArray(q.tags) && q.tags.every(t => typeof t === 'string'))) rep.error(label + '.tags', 'must be a list of strings');
+            if (q.estimatedSec !== undefined && !(q.estimatedSec > 0)) rep.error(label + '.estimatedSec', 'must be a positive number');
+            const type = App.questionType(q);
+            const h = App.types[type];
+            if (!h) rep.error(label + '.type', 'unknown question type "' + type + '"');
+            else if (h.validateDef) h.validateDef(q, label, rep);
+            const key = App.loc(textOf(q)).trim().toLowerCase();
+            if (key) { if (texts.has(key)) rep.warn(label, 'same text as question ' + texts.get(key)); else texts.set(key, q.id); }
+        });
+
+        if (exam.topics !== undefined) {
+            if (!isObj(exam.topics)) rep.error('topics', 'must be an object mapping topic -> name');
+            else Object.keys(exam.topics).forEach(k => { if (!isLoc(exam.topics[k])) rep.error('topics.' + k, 'must be a non-empty string or {en,it} object'); });
+        }
+
+        if (exam.modes !== undefined) {
+            if (!Array.isArray(exam.modes)) rep.error('modes', 'must be a list');
+            else {
+                const ids = new Set();
+                exam.modes.forEach((m, i) => {
+                    const p = 'modes[' + i + ']';
+                    if (!isObj(m)) { rep.error(p, 'must be an object'); return; }
+                    if (typeof m.id !== 'string' || !/^[\w\-]+$/.test(m.id)) rep.error(p + '.id', 'must be a short identifier');
+                    else if (RESERVED_MODES.includes(m.id)) rep.error(p + '.id', '"' + m.id + '" is reserved for a built-in mode');
+                    else if (ids.has(m.id)) rep.error(p + '.id', 'duplicate mode id "' + m.id + '"'); else ids.add(m.id);
+                    if (!isLoc(m.name)) rep.error(p + '.name', 'is required (string or {en,it})');
+                    if (m.selection !== undefined && !SELECTIONS.includes(m.selection)) rep.error(p + '.selection', 'must be one of ' + SELECTIONS.join(', '));
+                    if (m.count !== undefined && !(Number.isInteger(m.count) && m.count > 0)) rep.error(p + '.count', 'must be a positive integer');
+                    if (m.count > qs.length) rep.warn(p + '.count', 'is larger than the number of questions (' + qs.length + ')');
+                    if (m.timeSec !== undefined && !(m.timeSec >= 0)) rep.error(p + '.timeSec', 'must be >= 0');
+                    if (m.passThreshold !== undefined && !(m.passThreshold >= 0 && m.passThreshold <= 100)) rep.error(p + '.passThreshold', 'must be between 0 and 100');
+                    if (m.selection === 'weighted') {
+                        if (!Array.isArray(m.groups) || !m.groups.length) rep.error(p + '.groups', 'weighted selection needs "groups": [{topics, weight}]');
+                        else {
+                            let sum = 0;
+                            m.groups.forEach((g, gi) => {
+                                const gp = p + '.groups[' + gi + ']';
+                                if (!isObj(g) || !Array.isArray(g.topics) || !g.topics.length) { rep.error(gp + '.topics', 'must be a non-empty list of topics'); return; }
+                                g.topics.forEach(t => { if (!topicsSeen.has(t)) rep.error(gp + '.topics', 'unknown topic "' + t + '"'); });
+                                if (!(Number.isInteger(g.weight) && g.weight > 0)) rep.error(gp + '.weight', 'must be a positive integer'); else sum += g.weight;
+                            });
+                            if (m.count && sum !== m.count) rep.warn(p + '.groups', 'weights sum to ' + sum + ' but count is ' + m.count);
+                        }
+                    }
+                });
+            }
+        }
+        return rep;
+    }
+
+    // Fills defaults and derived fields. Input must already be valid.
+    function normalize(raw, fileId) {
+        const exam = App.util.clone(raw);
+        exam.id = exam.id || fileId;
+        exam.settings = Object.assign({ passThreshold: 70, timePerQuestionSec: 90, shuffleOptions: true }, exam.settings || {});
+        Object.keys(exam.settings).forEach(k => { if (exam.settings[k] === undefined) delete exam.settings[k]; });
+        exam.settings = Object.assign({ passThreshold: 70, timePerQuestionSec: 90, shuffleOptions: true }, exam.settings);
+        exam.questions.forEach(q => {
+            if (q.text === undefined) q.text = q.question;
+            delete q.question;
+            q.uid = q.uid !== undefined ? String(q.uid) : String(q.id);
+            q.type = App.questionType(q);
+        });
+        exam.topicList = [];
+        exam.questions.forEach(q => { if (!exam.topicList.includes(q.topic)) exam.topicList.push(q.topic); });
+        exam.hasDifficulty = exam.questions.some(q => q.difficulty);
+        if (!Array.isArray(exam.modes) || !exam.modes.length) {
+            exam.modes = [{ id: 'standard', name: { en: 'Standard mock exam', it: 'Simulazione standard' }, selection: 'balanced', count: Math.min(20, exam.questions.length) }];
+        }
+        exam.modes.forEach(m => { m.selection = m.selection || 'random'; });
+        return exam;
+    }
+
+    // Accepts v2 or legacy data. Returns {exam, report}; exam is null when invalid.
+    function prepare(data, fileId) {
+        let raw = data;
+        if (isObj(data) && data.format === undefined && (data.config || data.questions)) raw = fromLegacy(data, fileId);
+        if (isObj(raw) && raw.id === undefined && fileId) raw = Object.assign({}, raw, { id: fileId });
+        const report = validate(raw);
+        return { exam: report.ok() ? normalize(raw, fileId) : null, report };
+    }
+
+    // Content-quality hints for single-answer questions (used by the validator CLI).
+    function lint(exam) {
+        const out = [];
+        const singles = exam.questions.filter(q => App.questionType(q) === 'single' && Array.isArray(q.options));
+        if (singles.length >= 10) {
+            const pos = [0, 0, 0, 0, 0, 0];
+            let longest = 0;
+            singles.forEach(q => {
+                const a = Array.isArray(q.answer) ? q.answer[0] : q.answer;
+                pos[a]++;
+                const lens = q.options.map(o => App.loc(o).length);
+                if (lens[a] === Math.max(...lens) && lens.filter(l => l === lens[a]).length === 1) longest++;
+            });
+            const n = singles.length;
+            const worst = Math.max(...pos);
+            if (worst / n > 0.4) out.push('correct answer is always in position ' + 'ABCDEF'[pos.indexOf(worst)] + ' (' + Math.round(100 * worst / n) + '%) — fine if options are shuffled at runtime');
+            if (longest / n > 0.45) out.push('the correct answer is the single longest option in ' + Math.round(100 * longest / n) + '% of single-answer questions');
+        }
+        return out;
+    }
+
+    App.schema = { validate, fromLegacy, normalize, prepare, lint, newReport };
+})();
+
+/* Versioned local storage: preferences, in-progress sessions, attempt history, per-question stats.
+   Everything lives under one key ("examsim:v2") so it can be exported/imported as a single file. */
+App.memoryBackend = function () {
+    const m = {};
+    return { getItem: k => (k in m ? m[k] : null), setItem: (k, v) => { m[k] = String(v); }, removeItem: k => { delete m[k]; } };
+};
+
+App.defaultBackend = function () {
+    try {
+        const ls = window.localStorage;
+        const k = '__examsim_probe__';
+        ls.setItem(k, '1'); ls.removeItem(k);
+        return ls;
+    } catch (e) { return App.memoryBackend(); }
+};
+
+App.createStorage = function (backend) {
+    const KEY = 'examsim:v2';
+    const MAX_ATTEMPTS = 500, MAX_SESSIONS = 10;
+    let db = null;
+
+    const empty = () => ({ v: 2, prefs: {}, exams: {} });
+
+    function migrate(data) {
+        if (!data || typeof data !== 'object') return empty();
+        // Future versions: add `if (data.v < 3) {...}` steps here.
+        if (!data.prefs) data.prefs = {};
+        if (!data.exams) data.exams = {};
+        data.v = 2;
+        return data;
+    }
+
+    function load() {
+        let raw = null;
+        try { raw = backend.getItem(KEY); } catch (e) { raw = null; }
+        try { db = migrate(raw ? JSON.parse(raw) : null); } catch (e) { db = empty(); }
+        return db;
+    }
+    function ensure() { return db || load(); }
+
+    function save() {
+        try { backend.setItem(KEY, JSON.stringify(ensure())); return true; }
+        catch (e) { App.events.emit('storageError', e); return false; }
+    }
+
+    function bucket(examId) {
+        const d = ensure();
+        if (!d.exams[examId]) d.exams[examId] = { attempts: [], sessions: {}, qstats: {} };
+        return d.exams[examId];
+    }
+
+    const api = {
+        reload: load,
+        raw: () => ensure(),
+
+        // ---- preferences (falls back to the keys used by earlier versions) ----
+        getPref(k) {
+            const v = ensure().prefs[k];
+            if (v !== undefined) return v;
+            try { const old = backend.getItem('exam_' + k); return old === null ? undefined : old; } catch (e) { return undefined; }
+        },
+        setPref(k, v) { ensure().prefs[k] = v; return save(); },
+
+        // ---- sessions in progress ----
+        saveSession(examId, session) {
+            const b = bucket(examId);
+            session.updatedAt = Date.now();
+            b.sessions[session.id] = session;
+            const ids = Object.keys(b.sessions).sort((x, y) => b.sessions[y].updatedAt - b.sessions[x].updatedAt);
+            ids.slice(MAX_SESSIONS).forEach(id => delete b.sessions[id]);
+            return save();
+        },
+        getSession(examId, id) { return bucket(examId).sessions[id] || null; },
+        listSessions(examId) {
+            const s = bucket(examId).sessions;
+            return Object.keys(s).map(k => s[k]).sort((a, b) => b.updatedAt - a.updatedAt);
+        },
+        deleteSession(examId, id) { delete bucket(examId).sessions[id]; return save(); },
+
+        // ---- attempts ----
+        addAttempt(examId, attempt) {
+            const b = bucket(examId);
+            b.attempts.push(attempt);
+            if (b.attempts.length > MAX_ATTEMPTS) b.attempts.splice(0, b.attempts.length - MAX_ATTEMPTS);
+            return save();
+        },
+        listAttempts(examId) { return bucket(examId).attempts.slice(); },
+
+        // ---- per-question stats / flags / notes ----
+        getQStat(examId, uid) { return bucket(examId).qstats[uid] || null; },
+        allQStats(examId) { return bucket(examId).qstats; },
+        patchQStat(examId, uid, fn) {
+            const b = bucket(examId);
+            const cur = b.qstats[uid] || { seen: 0, correct: 0, wrong: 0, box: 0, due: 0, last: 0, lastOk: null, time: 0, flag: false, note: '' };
+            const next = fn(cur) || cur;
+            b.qstats[uid] = next;
+            return save();
+        },
+
+        // ---- maintenance ----
+        clearExam(examId) { delete ensure().exams[examId]; return save(); },
+        examIds() { return Object.keys(ensure().exams); },
+
+        exportData(examIds) {
+            const d = ensure();
+            const out = { app: 'examsim', v: 2, exportedAt: new Date().toISOString(), prefs: d.prefs, exams: {} };
+            (examIds || Object.keys(d.exams)).forEach(id => { if (d.exams[id]) out.exams[id] = d.exams[id]; });
+            return out;
+        },
+
+        // Merges an exported file into the current data. Returns {attempts, qstats} counts or throws.
+        importData(obj) {
+            if (!obj || obj.app !== 'examsim' || typeof obj.exams !== 'object') throw new Error('not an ExamSim export file');
+            if (obj.v > 2) throw new Error('export was made by a newer version (v' + obj.v + ')');
+            let attempts = 0, qstats = 0;
+            Object.keys(obj.exams).forEach(id => {
+                const src = obj.exams[id] || {};
+                const b = bucket(id);
+                const known = new Set(b.attempts.map(a => a.id));
+                (src.attempts || []).forEach(a => { if (a && a.id && !known.has(a.id)) { b.attempts.push(a); attempts++; } });
+                b.attempts.sort((x, y) => x.ts - y.ts);
+                Object.keys(src.qstats || {}).forEach(uid => {
+                    const inc = src.qstats[uid], cur = b.qstats[uid];
+                    if (!cur || (inc.last || 0) > (cur.last || 0)) {
+                        // keep user-authored data if the winner lacks it
+                        const merged = Object.assign({}, inc);
+                        if (cur) { merged.note = inc.note || cur.note || ''; merged.flag = inc.flag || cur.flag || false; }
+                        b.qstats[uid] = merged; qstats++;
+                    } else if (inc.note && !cur.note) { cur.note = inc.note; }
+                });
+                Object.keys(src.sessions || {}).forEach(sid => { if (!b.sessions[sid]) b.sessions[sid] = src.sessions[sid]; });
+            });
+            save();
+            return { attempts, qstats };
+        }
+    };
+    return api;
+};
+
+App.storage = App.createStorage(App.defaultBackend());
+
+/* Study modes and spaced repetition (Leitner boxes). Pure logic, no DOM. */
+(function () {
+    const { shuffle } = App.util;
+    const DAY = 86400000;
+    const INTERVAL_DAYS = [0, 1, 3, 7, 21];   // wait before a question is due again, per box
+    const MAX_BOX = INTERVAL_DAYS.length - 1;
+
+    App.srs = {
+        DAY, INTERVAL_DAYS,
+        update(stat, ok, sec, now) {
+            const s = Object.assign({}, stat);
+            s.seen = (s.seen || 0) + 1;
+            if (ok) s.correct = (s.correct || 0) + 1; else s.wrong = (s.wrong || 0) + 1;
+            s.box = ok ? Math.min((s.box || 0) + 1, MAX_BOX) : 0;
+            s.due = now + INTERVAL_DAYS[s.box] * DAY;
+            s.last = now;
+            s.lastOk = !!ok;
+            s.time = (s.time || 0) + (sec || 0);
+            return s;
+        },
+        isDue: (stat, now) => !!stat && stat.seen > 0 && (stat.due || 0) <= now,
+        isMastered: stat => !!stat && (stat.box || 0) >= 3
+    };
+
+    // Records one answer in the persistent per-question stats.
+    App.recordAnswer = function (examId, uid, ok, sec, storage, now) {
+        storage = storage || App.storage;
+        now = now || Date.now();
+        storage.patchQStat(examId, uid, cur => App.srs.update(cur, ok, sec, now));
+        App.events.emit('answerRecorded', { examId, uid, ok });
+    };
+
+    function byTopic(questions) {
+        const m = {};
+        questions.forEach(q => (m[q.topic] = m[q.topic] || []).push(q));
+        return m;
+    }
+
+    function balanced(questions, count) {
+        const groups = byTopic(questions);
+        const pool = Object.keys(groups).map(t => shuffle(groups[t])[0]);
+        const used = new Set(pool.map(q => q.uid));
+        pool.push(...shuffle(questions.filter(q => !used.has(q.uid))).slice(0, Math.max(0, count - pool.length)));
+        return shuffle(pool).slice(0, count);
+    }
+
+    function weighted(questions, mode) {
+        const groups = byTopic(questions);
+        const pool = [], used = new Set();
+        mode.groups.forEach(g => {
+            let remaining = g.weight;
+            for (let round = 0; remaining > 0 && round < 100; round++) {
+                for (const topic of shuffle(g.topics)) {
+                    if (remaining <= 0) break;
+                    const q = shuffle((groups[topic] || []).filter(x => !used.has(x.uid)))[0];
+                    if (!q) continue;
+                    used.add(q.uid); pool.push(q); remaining--;
+                }
+                if (!g.topics.some(t => (groups[t] || []).some(x => !used.has(x.uid)))) break;
+            }
+        });
+        const count = mode.count || pool.length;
+        if (pool.length < count) pool.push(...shuffle(questions.filter(q => !used.has(q.uid))).slice(0, count - pool.length));
+        return shuffle(pool).slice(0, count);
+    }
+
+    // Lists the modes offered for an exam. `stats` = per-question stats map, used to size the practice pools.
+    App.modes = {
+        list(exam, stats, now) {
+            now = now || Date.now();
+            stats = stats || {};
+            const out = [];
+            exam.modes.forEach(m => out.push({
+                id: m.id, group: 'exam', label: m.name, defined: m, studyDefault: !m.exam,
+                count: m.count, available: exam.questions.length
+            }));
+            out.push({ id: 'all', group: 'practice', labelKey: 'modeAll', labelParams: { n: exam.questions.length }, studyDefault: true, available: exam.questions.length });
+            exam.topicList.forEach(t => out.push({
+                id: 'topic:' + t, group: 'topic', labelKey: 'modeTopic', labelParams: { t: (exam.topics && exam.topics[t]) ? exam.topics[t] : t },
+                studyDefault: true, available: exam.questions.filter(q => q.topic === t).length
+            }));
+            const poolSize = id => App.modes.pool(exam, id, stats, now).questions.length;
+            ['review', 'mistakes', 'flagged', 'unseen'].forEach(id => out.push({
+                id, group: 'practice', labelKey: { review: 'modeReview', mistakes: 'modeMistakes', flagged: 'modeFlagged', unseen: 'modeUnseen' }[id],
+                studyDefault: true, available: poolSize(id), defaultCount: id === 'flagged' ? undefined : 20
+            }));
+            if (exam.hasDifficulty) [1, 2, 3].forEach(d => out.push({
+                id: 'difficulty:' + d, group: 'practice', labelKey: 'modeDifficulty', labelParams: { d: App.t(['', 'diffEasy', 'diffMedium', 'diffHard'][d]) },
+                studyDefault: true, available: exam.questions.filter(q => q.difficulty === d).length
+            }));
+            return out;
+        },
+
+        // All questions that belong to a practice mode (before applying the count).
+        pool(exam, id, stats, now) {
+            now = now || Date.now();
+            stats = stats || {};
+            const qs = exam.questions;
+            if (id === 'all') return { questions: qs.slice() };
+            if (id.startsWith('topic:')) return { questions: qs.filter(q => q.topic === id.slice(6)) };
+            if (id.startsWith('difficulty:')) return { questions: qs.filter(q => q.difficulty === Number(id.slice(11))) };
+            if (id === 'flagged') return { questions: qs.filter(q => stats[q.uid] && stats[q.uid].flag) };
+            if (id === 'unseen') return { questions: qs.filter(q => !stats[q.uid] || !stats[q.uid].seen) };
+            if (id === 'mistakes') {
+                return { questions: qs.filter(q => { const s = stats[q.uid]; return s && s.seen && s.lastOk === false; }) };   // latest answer was wrong
+            }
+            if (id === 'review') {
+                const seen = qs.filter(q => stats[q.uid] && stats[q.uid].seen);
+                const due = seen.filter(q => App.srs.isDue(stats[q.uid], now)).sort((a, b) => (stats[a.uid].due || 0) - (stats[b.uid].due || 0));
+                if (due.length) return { questions: due };
+                const weakest = seen.slice().sort((a, b) => (stats[a.uid].box || 0) - (stats[b.uid].box || 0) || (stats[a.uid].due || 0) - (stats[b.uid].due || 0));
+                return { questions: weakest, fallback: true };
+            }
+            if (App.modeBuilders[id]) return { questions: App.modeBuilders[id](exam, stats, now) };
+            return { questions: [] };
+        },
+
+        // Picks the questions for a session. opts.count caps the number of questions.
+        pick(exam, id, stats, opts) {
+            opts = opts || {};
+            const now = opts.now || Date.now();
+            const defined = exam.modes.find(m => m.id === id);
+            let qs, fallback = false;
+            if (defined) {
+                const count = opts.count || defined.count || exam.questions.length;
+                if (defined.selection === 'weighted') qs = weighted(exam.questions, Object.assign({}, defined, { count }));
+                else if (defined.selection === 'balanced') qs = balanced(exam.questions, count);
+                else qs = shuffle(exam.questions).slice(0, count);
+            } else {
+                const p = App.modes.pool(exam, id, stats, now);
+                fallback = !!p.fallback;
+                qs = p.questions;
+                const ordered = id === 'all' || id.startsWith('topic:');
+                if (id === 'review' || id === 'mistakes') qs = shuffle(qs.slice(0, opts.count || 20));
+                else if (ordered && (!opts.count || opts.count >= qs.length)) qs = qs.slice();   // whole pool: keep file order
+                else qs = shuffle(qs).slice(0, opts.count || qs.length);
+            }
+            return { questions: qs, fallback };
+        }
+    };
+})();
+
+/* Statistics computed from attempts and per-question stats (exam-agnostic, no DOM). */
+App.stats = {
+    compute(exam, storage, now) {
+        storage = storage || App.storage;
+        now = now || Date.now();
+        const attempts = storage.listAttempts(exam.id).sort((a, b) => a.ts - b.ts);
+        const qstats = storage.allQStats(exam.id);
+        const byUid = {};
+        exam.questions.forEach(q => { byUid[q.uid] = q; });
+
+        let answered = 0, correct = 0, time = 0, mastered = 0, seenQuestions = 0, flagged = 0;
+        const topics = {};
+        exam.topicList.forEach(t => { topics[t] = { topic: t, total: exam.questions.filter(q => q.topic === t).length, seen: 0, correct: 0, wrong: 0, mastered: 0, answeredQuestions: 0 }; });
+        const hard = [];
+
+        Object.keys(qstats).forEach(uid => {
+            const q = byUid[uid], s = qstats[uid];
+            if (!q || !s) return;
+            if (s.flag) flagged++;
+            if (!s.seen) return;
+            answered += s.seen; correct += s.correct || 0; time += s.time || 0;
+            seenQuestions++;
+            if (App.srs.isMastered(s)) mastered++;
+            const t = topics[q.topic];
+            t.seen += s.seen; t.correct += s.correct || 0; t.wrong += s.wrong || 0; t.answeredQuestions++;
+            if (App.srs.isMastered(s)) t.mastered++;
+            if ((s.wrong || 0) > 0) hard.push({ uid, topic: q.topic, text: q.text, seen: s.seen, wrong: s.wrong, rate: s.wrong / s.seen, last: s.last });
+        });
+
+        hard.sort((a, b) => b.rate - a.rate || b.wrong - a.wrong || b.seen - a.seen);
+        const topicList = Object.values(topics).map(t => Object.assign(t, { pct: t.seen ? Math.round(100 * t.correct / t.seen) : null }));
+        const pcts = attempts.map(a => a.pct);
+
+        return {
+            attempts, attemptCount: attempts.length,
+            bestPct: pcts.length ? Math.max(...pcts) : null,
+            avgPct: pcts.length ? Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length) : null,
+            answered, correct, accuracy: answered ? Math.round(100 * correct / answered) : null,
+            avgTimeSec: answered ? Math.round(time / answered) : null,
+            seenQuestions, mastered, flagged, totalQuestions: exam.questions.length,
+            topics: topicList, hardest: hard.slice(0, 10)
+        };
+    }
+};
+
+/* A practice session: items, answers, timers, scoring. No DOM, fully serializable. */
+App.Session = (function () {
+    const hint = x => x;
+
+    class Session {
+        constructor(data) { Object.assign(this, data); }
+
+        // questions: raw question defs; options: {examId, modeId, modeLabel, studyMode, timerMode, totalSec, perQuestionSec, threshold, shuffleOptions}
+        static create(questions, options) {
+            const items = questions.map(q => App.prepareQuestion(q, { shuffleOptions: options.shuffleOptions !== false }));
+            const timerMode = options.timerMode || 'total';
+            return new Session({
+                id: App.util.uid(), examId: options.examId, modeId: options.modeId, modeLabel: options.modeLabel || options.modeId,
+                createdAt: Date.now(), updatedAt: Date.now(), studyMode: !!options.studyMode, threshold: options.threshold,
+                items, index: 0, values: {}, validated: {}, applied: {}, times: {},
+                timerMode, totalSec: options.totalSec || 0, secondsLeft: options.totalSec || 0,
+                perQuestionSec: options.perQuestionSec || 0, qLeft: options.perQuestionSec || 0
+            });
+        }
+
+        static fromJSON(obj) { return new Session(App.util.clone(obj)); }
+        toJSON() { return Object.assign({}, this); }
+
+        get length() { return this.items.length; }
+        item(i) { return this.items[i === undefined ? this.index : i]; }
+        handler(i) { return App.types[this.item(i).kind]; }
+        value(i) { return this.values[i === undefined ? this.index : i]; }
+        setValue(i, v) { this.values[i] = v; }
+        hasAnswer(i) { return this.handler(i).hasAnswer(this.item(i), this.values[i]); }
+        isCorrect(i) { return this.hasAnswer(i) && this.handler(i).isCorrect(this.item(i), this.values[i]); }
+        isChecked(i) { return this.validated[i] !== undefined; }
+        answeredCount() { let n = 0; for (let i = 0; i < this.length; i++) if (this.hasAnswer(i)) n++; return n; }
+        unanswered() { const out = []; for (let i = 0; i < this.length; i++) if (!this.hasAnswer(i)) out.push(i); return out; }
+
+        goTo(i) {
+            if (i < 0 || i >= this.length) return false;
+            this.index = i;
+            if (this.timerMode === 'perQuestion') this.qLeft = this.perQuestionSec;
+            return true;
+        }
+
+        // Study mode: check one answer now (locks it and records the result in the SRS stats).
+        check(i, storage) {
+            if (this.isChecked(i)) return this.validated[i];
+            if (!this.hasAnswer(i)) return null;
+            const ok = this.isCorrect(i);
+            this.validated[i] = ok;
+            this._record(i, ok, storage);
+            return ok;
+        }
+
+        _record(i, ok, storage) {
+            if (this.applied[i]) return;
+            this.applied[i] = true;
+            App.recordAnswer(this.examId, this.item(i).uid, ok, this.times[i] || 0, storage);
+        }
+
+        // Called once per second by the UI. Returns 'total' | 'question' when a timer runs out.
+        tick() {
+            this.times[this.index] = (this.times[this.index] || 0) + 1;
+            if (this.timerMode === 'total') {
+                this.secondsLeft = Math.max(0, this.secondsLeft - 1);
+                if (this.secondsLeft <= 0) return 'total';
+            } else if (this.timerMode === 'perQuestion') {
+                this.qLeft = Math.max(0, this.qLeft - 1);
+                if (this.qLeft <= 0) return 'question';
+            }
+            return null;
+        }
+
+        // Scores the session. Returns the attempt record (also emitted as 'sessionEnd').
+        submit(storage, now) {
+            now = now || Date.now();
+            let correct = 0;
+            const answers = [];
+            for (let i = 0; i < this.length; i++) {
+                const answered = this.hasAnswer(i);
+                const ok = answered && this.isCorrect(i);
+                if (ok) correct++;
+                if (answered && !this.applied[i]) this._record(i, ok, storage);
+                answers.push([this.item(i).uid, ok ? 1 : 0, this.times[i] || 0, answered ? 1 : 0]);
+            }
+            const total = this.length;
+            const pct = total ? Math.round(100 * correct / total) : 0;
+            const attempt = {
+                id: App.util.uid(), ts: now, started: this.createdAt, mode: this.modeId, modeLabel: this.modeLabel,
+                studyMode: this.studyMode, durationSec: Object.values(this.times).reduce((a, b) => a + b, 0),
+                total, correct, pct, threshold: this.threshold, passed: pct >= this.threshold, answers
+            };
+            App.events.emit('sessionEnd', { session: this, attempt });
+            return attempt;
+        }
+    }
+    return Session;
+})();
+
+/* Exam loading. Exam files look like:   ExamSim.register({ ...pure JSON... });
+   - over http(s) the text is fetched and the JSON is parsed WITHOUT executing it;
+   - from file:// (where fetch is blocked) a <script> tag is used instead;
+   - legacy files (window.ExamData = {...}) still load through the script path. */
+App.loader = (function () {
+    let pending = null;
+
+    class LoadError extends Error {
+        constructor(code, info) { super(code); this.code = code; Object.assign(this, info || {}); }
+    }
+
+    function register(data) { pending = data; }
+
+    // Extracts the JSON argument of ExamSim.register(...). Returns null when the text is not in that shape.
+    function parseText(text) {
+        const t = String(text).replace(/^﻿/, '').replace(/^(\s*(\/\/[^\n]*\n|\/\*[\s\S]*?\*\/))*/, '').trim();
+        const m = t.match(/^ExamSim\.register\(([\s\S]*)\)\s*;?\s*$/);
+        if (!m) {
+            if (t.startsWith('{')) { try { return JSON.parse(t); } catch (e) { throw new LoadError('parse', { detail: e.message }); } }
+            return null;
+        }
+        try { return JSON.parse(m[1]); } catch (e) { throw new LoadError('parse', { detail: e.message }); }
+    }
+
+    function finalize(data, fileId, label) {
+        const { exam, report } = App.schema.prepare(data, fileId);
+        if (!exam) throw new LoadError('invalid', { report, name: label || fileId });
+        exam.sourceFile = fileId;
+        return exam;
+    }
+
+    async function fetchText(url, name) {
+        let resp;
+        try { resp = await fetch(url, { cache: 'no-cache' }); } catch (e) { throw new LoadError('network', { name }); }
+        if (resp.status === 404) throw new LoadError('notFound', { name });
+        if (!resp.ok) throw new LoadError('network', { name });
+        return resp.text();
+    }
+
+    function loadScript(url, name) {
+        return new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = url;
+            s.onload = () => { s.remove(); resolve(); };
+            s.onerror = () => { s.remove(); reject(new LoadError('notFound', { name })); };
+            document.head.appendChild(s);
+        });
+    }
+
+    const isHttp = () => typeof location !== 'undefined' && /^https?:$/.test(location.protocol);
+
+    async function loadByName(name) {
+        const file = name + '.exam';
+        let data = null;
+        pending = null;
+        if (isHttp()) {
+            try { data = parseText(await fetchText(file, file)); }
+            catch (e) { if (e.code === 'notFound' || e.code === 'parse') { if (!e.name || e.name === 'LoadError' || e.name === 'Error') e.name = file; throw e; } /* network trouble: try the script path */ }
+        }
+        if (!data) {
+            pending = null;
+            try { delete window.ExamData; } catch (e) { window.ExamData = undefined; }
+            await loadScript(file, file);
+            data = pending || window.ExamData;
+            try { delete window.ExamData; } catch (e) { window.ExamData = undefined; }
+            if (!data) throw new LoadError('noRegister', { name: file });
+        }
+        return finalize(data, name, file);
+    }
+
+    async function loadByUrl(url) {
+        let u;
+        try { u = new URL(url, location.href); } catch (e) { throw new LoadError('network', { name: url }); }
+        if (!/^https?:$/.test(u.protocol)) throw new LoadError('network', { name: url });
+        const data = parseText(await fetchText(u.href, url));
+        if (!data) throw new LoadError('parse', { name: url, detail: 'not an ExamSim format 2 file' });
+        const base = (u.pathname.split('/').pop() || 'remote').replace(/\.exam$|\.json$/g, '').replace(/[^\w.\-]/g, '_');
+        return finalize(data, base || 'remote', url);
+    }
+
+    // Exam list: exams.js (generated, optional) overrides the list embedded in exam.html at build time.
+    function catalog() {
+        if (typeof window === 'undefined') return [];
+        if (Array.isArray(window.ExamCatalog) && window.ExamCatalog.length) return window.ExamCatalog;
+        return Array.isArray(window.ExamCatalogDefault) ? window.ExamCatalogDefault : [];
+    }
+
+    // Human-readable message for a load error.
+    function describe(err) {
+        const T = App.t;
+        const name = err.name || '';
+        switch (err.code) {
+            case 'notFound': return [T('errNotFound', { name })];
+            case 'network': return [T('errNetwork', { name })];
+            case 'parse': return [T('errParse', { name: name || '', detail: err.detail || '' })];
+            case 'noRegister': return [T('errNoRegister', { name })];
+            case 'invalid': {
+                const lines = (err.report && err.report.errors || []).slice(0, 6).map(e => '• ' + e.path + ': ' + e.message);
+                return [T('errInvalid', { name, n: err.report ? err.report.errors.length : '?' })].concat(lines);
+            }
+            default: return [String(err && err.message || err)];
+        }
+    }
+
+    return { register, parseText, finalize, loadByName, loadByUrl, catalog, describe, LoadError };
+})();
+
+if (typeof window !== 'undefined') window.ExamSim = { register: d => App.loader.register(d), version: App.version, App };
+
+/* UI: shared state, view switching, toast, theme/language, import/export helpers. */
+App.state = { exam: null, session: null, screen: 'picker', loadError: null, lastResult: null, dash: {}, clockTimer: null, persistTimer: null };
+App.ui = {};
+
+(function () {
+    const { el } = App.util;
+    const $ = id => document.getElementById(id);
+    App.ui.$ = $;
+
+    const VIEWS = ['picker', 'dashboard', 'runtime', 'review', 'summary', 'stats'];
+    App.ui.show = function (view) {
+        App.state.screen = view;
+        VIEWS.forEach(v => $('view-' + v).classList.toggle('hidden', v !== view));
+        window.scrollTo(0, 0);
+        App.events.emit('viewChange', { view });
+    };
+
+    App.ui.toast = function (msg, ms) {
+        const box = $('toast');
+        const node = el('div', { class: 'toast-msg', text: msg });
+        box.appendChild(node);
+        setTimeout(() => node.remove(), ms || 3500);
+    };
+    App.events.on('storageError', () => App.ui.toast(App.t('storageError'), 6000));
+
+    App.ui.fmtTime = function (sec) {
+        sec = Math.max(0, Math.round(sec));
+        const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+        const mm = String(m).padStart(2, '0'), ss = String(s).padStart(2, '0');
+        return h ? h + ':' + mm + ':' + ss : mm + ':' + ss;
+    };
+
+    App.ui.timeAgo = function (ts) {
+        const d = (Date.now() - ts) / 1000;
+        if (d < 60) return App.t('justNow');
+        if (d < 3600) return App.t('minutesAgo', { n: Math.round(d / 60) });
+        if (d < 86400) return App.t('hoursAgo', { n: Math.round(d / 3600) });
+        return App.t('daysAgo', { n: Math.round(d / 86400) });
+    };
+
+    // ---- theme / language ----
+    App.ui.theme = () => document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    App.ui.setTheme = function (theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        App.storage.setPref('theme', theme);
+        $('theme-btn').textContent = theme === 'dark' ? '☀' : '☾';
+    };
+    App.ui.applyStatic = function () {
+        document.documentElement.lang = App.lang;
+        $('lang-btn').textContent = App.lang.toUpperCase();
+        $('lang-btn').title = App.t('langTitle');
+        $('lang-btn').setAttribute('aria-label', App.t('langTitle'));
+        $('theme-btn').title = App.t('themeTitle');
+        $('theme-btn').setAttribute('aria-label', App.t('themeTitle'));
+        $('theme-btn').textContent = App.ui.theme() === 'dark' ? '☀' : '☾';
+        $('logo-simulator').textContent = App.t('simulator');
+        $('skip-link').textContent = App.t('skipLink');
+    };
+    App.ui.setLang = function (lang) {
+        App.setLang(lang);
+        App.storage.setPref('lang', App.lang);
+        App.ui.applyStatic();
+        App.ui.rerender();
+    };
+
+    // Re-renders the visible screen (after a language change)
+    App.ui.rerender = function () {
+        const s = App.state.screen;
+        if (s === 'picker') App.ui.renderPicker();
+        else if (s === 'dashboard') App.ui.renderDashboard();
+        else if (s === 'runtime') App.ui.refreshRuntime();
+        else if (s === 'review') App.ui.renderReview();
+        else if (s === 'summary') App.ui.renderSummary();
+        else if (s === 'stats') App.ui.renderStats();
+    };
+
+    // ---- export / import of progress ----
+    App.ui.exportProgress = function (examIds) {
+        const data = App.storage.exportData(examIds);
+        const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
+        const a = el('a', { href: URL.createObjectURL(blob), download: 'examsim-progress-' + new Date().toISOString().slice(0, 10) + '.json' });
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+        App.ui.toast(App.t('exportDone'));
+    };
+    App.ui.importProgress = function () { $('import-file').click(); };
+    App.ui.handleImportFile = function (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+            try {
+                const r = App.storage.importData(JSON.parse(reader.result));
+                App.ui.toast(App.t('importDone', { a: r.attempts, q: r.qstats }));
+                App.ui.rerender();
+            } catch (e) { App.ui.toast(App.t('importFail', { detail: e.message }), 6000); }
+        };
+        reader.onerror = () => App.ui.toast(App.t('importFail', { detail: 'read error' }), 6000);
+        reader.readAsText(file);
+    };
+
+    App.ui.toolbarButtons = function (opts) {
+        const bar = el('div', { class: 'toolbar' });
+        const btn = (label, fn) => bar.appendChild(el('button', { type: 'button', class: 'btn btn-ghost btn-small', text: label, onclick: fn }));
+        if (opts.stats) btn('📊 ' + App.t('statsBtn'), () => App.ui.openStats());
+        btn('⬇ ' + App.t('exportBtn'), () => App.ui.exportProgress(opts.examIds));
+        btn('⬆ ' + App.t('importBtn'), () => App.ui.importProgress());
+        return bar;
+    };
+})();
+
+/* UI: exam picker and exam dashboard (mode selection, sessions in progress). */
+(function () {
+    const { el } = App.util;
+    const $ = App.ui.$;
+
+    App.ui.renderPicker = function () {
+        const v = $('view-picker');
+        v.textContent = '';
+        v.appendChild(el('h1', { text: App.state.loadError ? App.t('loadFailedTitle') : App.t('noExamTitle'), style: App.state.loadError ? 'color:var(--error)' : '' }));
+        v.appendChild(el('p', { class: 'subtitle', text: App.t('noExamText') }));
+        if (App.state.loadError) {
+            const box = el('div', { class: 'error-box', role: 'alert' });
+            App.state.loadError.forEach(line => box.appendChild(el('p', { text: line })));
+            v.appendChild(box);
+        }
+        const list = el('div', { id: 'exam-list' });
+        const cat = App.loader.catalog();
+        if (!cat.length) list.appendChild(el('p', { class: 'hint', text: App.t('noCatalog') }));
+        else list.appendChild(el('h2', { style: 'font-size:1.05rem;margin:10px 0;', text: App.t('availableExams') }));
+        cat.forEach(item => {
+            const meta = item.questionCount ? App.t('examCardMeta', { n: item.questionCount, t: item.topicCount || '–' }) : '';
+            list.appendChild(el('a', { href: '?content=' + encodeURIComponent(item.file), class: 'exam-card' },
+                el('div', { class: 'exam-card-title', text: App.loc(item.title) || item.file }),
+                el('div', { class: 'exam-card-desc', text: App.loc(item.description) }),
+                meta ? el('div', { class: 'hint', text: meta }) : null));
+        });
+        v.appendChild(list);
+        v.appendChild(App.ui.toolbarButtons({ stats: false }));
+    };
+
+    function examChips() {
+        const chips = el('div', { class: 'exam-chips' });
+        App.loader.catalog().forEach(item => {
+            const cur = item.file === App.state.exam.sourceFile;
+            chips.appendChild(el('a', { href: '?content=' + encodeURIComponent(item.file), class: 'exam-chip' + (cur ? ' current' : ''), text: App.loc(item.title) || item.file, aria: cur ? { current: 'page' } : {} }));
+        });
+        return chips;
+    }
+
+    function modeLabel(m) {
+        const base = m.label ? App.loc(m.label) : App.t(m.labelKey, Object.assign({}, m.labelParams, m.labelParams && m.labelParams.t ? { t: App.loc(m.labelParams.t) } : {}));
+        return m.group === 'exam' ? base : base + ' (' + m.available + ')';
+    }
+
+    App.ui.renderDashboard = function () {
+        const exam = App.state.exam;
+        const v = $('view-dashboard');
+        v.textContent = '';
+        const qstats = App.storage.allQStats(exam.id);
+        const stats = App.stats.compute(exam, App.storage);
+
+        v.appendChild(el('h1', { text: App.loc(exam.title) }));
+        if (exam.description) v.appendChild(el('p', { class: 'subtitle', text: App.loc(exam.description) }));
+        v.appendChild(el('div', { class: 'exam-switcher' }, el('span', { class: 'exam-switcher-label', text: App.t('switchExam') }), examChips()));
+        v.appendChild(App.ui.toolbarButtons({ stats: true, examIds: [exam.id] }));
+
+        // sessions in progress
+        const sessions = App.storage.listSessions(exam.id);
+        if (sessions.length) {
+            const box = el('div', { class: 'sessions-box' }, el('h3', { text: App.t('resumeTitle') }));
+            sessions.forEach(sd => {
+                const s = App.Session.fromJSON(sd);
+                const info = App.t('resumeInfo', { mode: s.modeLabel, done: s.answeredCount(), n: s.length, when: App.ui.timeAgo(s.updatedAt) });
+                box.appendChild(el('div', { class: 'session-row' },
+                    el('span', { class: 'session-info', text: info }),
+                    el('span', {},
+                        el('button', { type: 'button', class: 'btn btn-small', text: App.t('resumeBtn'), onclick: () => App.ui.resumeSession(s) }), ' ',
+                        el('button', { type: 'button', class: 'btn btn-ghost btn-small', text: App.t('deleteBtn'), onclick: () => { if (confirm(App.t('confirmDeleteSession'))) { App.storage.deleteSession(exam.id, s.id); App.ui.renderDashboard(); } } }))));
+            });
+            v.appendChild(box);
+        }
+
+        const grid = el('div', { class: 'grid-dashboard' });
+        // left: distribution
+        const left = el('div', {}, el('h2', { style: 'font-size:1.1rem;font-weight:600;margin-bottom:10px;', text: App.t('distribution') }));
+        const list = el('div', { class: 'topic-list' });
+        list.appendChild(el('div', { class: 'topic-item topic-total' },
+            el('span', { class: 'topic-name', style: 'color:var(--primary);font-weight:700;', text: App.t('totalQuestions') }),
+            el('span', { class: 'topic-count', style: 'background:var(--primary);color:var(--on-accent);', text: App.t('nQuestions', { n: exam.questions.length }) })));
+        stats.topics.forEach(t => {
+            const name = exam.topics && exam.topics[t.topic] ? App.loc(exam.topics[t.topic]) : t.topic;
+            list.appendChild(el('div', { class: 'topic-item' },
+                el('span', { class: 'topic-name', text: name }),
+                el('span', { class: 'topic-count-wrap' },
+                    el('span', { class: 'topic-count', text: App.t('nQuestions', { n: t.total }) }),
+                    t.pct !== null ? el('span', { class: 'mini-acc', text: t.pct + '%', title: App.t('statsAccuracy') }) : null)));
+        });
+        left.appendChild(list);
+
+        // right: setup
+        const modes = App.modes.list(exam, qstats);
+        const d = App.state.dash;
+        const select = el('select', { id: 'cfg-mode' });
+        const groups = { exam: el('optgroup', { label: App.t('modeGroupExam') }), practice: el('optgroup', { label: App.t('modeGroupPractice') }), topic: el('optgroup', { label: App.t('modeGroupTopics') }) };
+        modes.forEach(m => groups[m.group].appendChild(el('option', { value: m.id, text: modeLabel(m), disabled: m.available === 0 })));
+        ['exam', 'practice', 'topic'].forEach(g => { if (groups[g].children.length) select.appendChild(groups[g]); });
+        const count = el('input', { type: 'number', id: 'cfg-count', min: 1, step: 1 });
+        const study = el('input', { type: 'checkbox', id: 'cfg-study' });
+        const timer = el('select', { id: 'cfg-timer' });
+        const hintEl = el('p', { class: 'hint', id: 'cfg-hint' });
+        const startBtn = el('button', { id: 'start-btn', class: 'btn', type: 'button', text: App.t('startSession') });
+
+        function current() { return modes.find(m => m.id === select.value) || modes[0]; }
+        function refresh(fromChange) {
+            const m = current();
+            const defined = m.defined;
+            const def = Math.min(m.count || m.defaultCount || m.available, m.available) || 1;
+            count.max = m.available;
+            if (fromChange || !count.value) count.value = def;
+            count.disabled = !!(defined && defined.selection === 'weighted');
+            if (count.disabled) count.value = def;
+            if (fromChange) study.checked = m.studyDefault;
+            hintEl.textContent = study.checked ? App.t('studyModeHint') : App.t('examModeHint');
+            const totalSec = (defined && defined.timeSec) ? defined.timeSec : (Number(count.value) || def) * exam.settings.timePerQuestionSec;
+            const keep = timer.value || 'default';
+            timer.textContent = '';
+            timer.appendChild(el('option', { value: 'default', text: App.t('timerDefault') + ' — ' + App.t('timerTotal', { m: Math.max(1, Math.round(totalSec / 60)) }) }));
+            timer.appendChild(el('option', { value: 'perQuestion', text: App.t('timerPerQuestion', { s: exam.settings.timePerQuestionSec }) }));
+            timer.appendChild(el('option', { value: 'none', text: App.t('timerNone') }));
+            timer.value = keep;
+            startBtn.disabled = m.available === 0;
+        }
+        select.value = d.mode && modes.some(m => m.id === d.mode && m.available) ? d.mode : (modes.find(m => m.available) || modes[0]).id;
+        select.addEventListener('change', () => { d.mode = select.value; refresh(true); });
+        count.addEventListener('input', () => refresh(false));
+        study.addEventListener('change', () => { hintEl.textContent = study.checked ? App.t('studyModeHint') : App.t('examModeHint'); });
+        refresh(true);
+        if (d.count && d.mode === select.value && !count.disabled) count.value = Math.min(d.count, count.max);
+        if (d.study !== undefined && d.mode === select.value) study.checked = d.study;
+        if (d.timer) timer.value = d.timer;
+        hintEl.textContent = study.checked ? App.t('studyModeHint') : App.t('examModeHint');
+
+        startBtn.addEventListener('click', () => {
+            Object.assign(d, { mode: select.value, count: Number(count.value), study: study.checked, timer: timer.value });
+            App.ui.startFromDashboard(current(), Number(count.value), study.checked, timer.value);
+        });
+
+        const setup = el('div', { class: 'sidebar-box', style: 'margin-top:15px;' },
+            el('h2', { class: 'sidebar-title', text: App.t('sessionConfig') }),
+            el('div', { class: 'setup-box' },
+                el('div', { class: 'form-group' }, el('label', { for: 'cfg-mode', text: App.t('selectMode') }), select),
+                el('div', { class: 'form-group' }, el('label', { for: 'cfg-count', text: App.t('count') }), count),
+                el('div', { class: 'checkbox-row' }, study, el('label', { for: 'cfg-study', text: App.t('studyMode') })),
+                hintEl,
+                el('div', { class: 'form-group' }, el('label', { for: 'cfg-timer', text: App.t('timerLabel') }), timer),
+                startBtn));
+        grid.appendChild(left);
+        grid.appendChild(setup);
+        v.appendChild(grid);
+    };
+
+    App.ui.startFromDashboard = function (mode, count, studyMode, timerChoice) {
+        const exam = App.state.exam;
+        const qstats = App.storage.allQStats(exam.id);
+        const picked = App.modes.pick(exam, mode.id, qstats, { count });
+        if (!picked.questions.length) { App.ui.toast(App.t('modeEmpty')); return; }
+        if (picked.fallback) App.ui.toast(App.t('notDue'), 5000);
+        const defined = mode.defined;
+        const n = picked.questions.length;
+        let timerMode = timerChoice === 'none' ? 'none' : (timerChoice === 'perQuestion' ? 'perQuestion' : 'total');
+        const totalSec = (defined && defined.timeSec) ? defined.timeSec : n * exam.settings.timePerQuestionSec;
+        const label = mode.label ? App.loc(mode.label) : App.t(mode.labelKey, Object.assign({}, mode.labelParams, mode.labelParams && mode.labelParams.t ? { t: App.loc(mode.labelParams.t) } : {}));
+        const session = App.Session.create(picked.questions, {
+            examId: exam.id, modeId: mode.id, modeLabel: label, studyMode,
+            timerMode, totalSec: timerMode === 'total' ? totalSec : 0, perQuestionSec: exam.settings.timePerQuestionSec,
+            threshold: (defined && defined.passThreshold !== undefined) ? defined.passThreshold : exam.settings.passThreshold,
+            shuffleOptions: exam.settings.shuffleOptions
+        });
+        App.ui.beginSession(session);
+    };
+})();
+
+/* UI: the exam runtime (question view, progress grid, flags, notes, timers, keyboard). */
+(function () {
+    const { el } = App.util;
+    const $ = App.ui.$;
+    let refs = {};
+
+    const S = () => App.state.session;
+
+    App.ui.persist = function () {
+        const s = S();
+        if (s && !s.submitted) App.storage.saveSession(s.examId, s.toJSON());
+    };
+    function schedulePersist() {
+        clearTimeout(App.state.persistTimer);
+        App.state.persistTimer = setTimeout(App.ui.persist, 400);
+    }
+
+    App.ui.resumeSession = function (session) { App.ui.beginSession(session, true); };
+
+    App.ui.beginSession = function (session, resumed) {
+        App.state.session = session;
+        App.state.lastResult = null;
+        buildSkeleton();
+        App.ui.show('runtime');
+        App.ui.persist();
+        startClock();
+        App.ui.refreshRuntime();
+        App.events.emit('sessionStart', { session, resumed: !!resumed });
+    };
+
+    function buildSkeleton() {
+        const v = $('view-runtime');
+        v.textContent = '';
+        refs = {};
+        refs.topic = el('span', { class: 'tag-topic' });
+        refs.pos = el('span', { class: 'q-number', aria: { live: 'polite' } });
+        refs.flag = el('button', { type: 'button', class: 'flag-btn', onclick: () => toggleFlag() });
+        refs.text = el('div', { class: 'question-text', id: 'q-text' });
+        refs.body = el('div', { id: 'q-body' });
+        refs.expl = el('div', { id: 'q-expl', aria: { live: 'polite' } });
+        refs.noteSummary = el('summary', {});
+        refs.noteArea = el('textarea', { id: 'q-note', maxLength: 2000 });
+        refs.noteArea.addEventListener('input', () => {
+            const s = S(), uid = s.item().uid;
+            clearTimeout(refs.noteTimer);
+            refs.noteTimer = setTimeout(() => App.storage.patchQStat(s.examId, uid, st => { st.note = refs.noteArea.value; return st; }), 400);
+        });
+        refs.note = el('details', { class: 'note-box' }, refs.noteSummary, refs.noteArea);
+        refs.prev = el('button', { type: 'button', class: 'btn btn-secondary', onclick: () => go(S().index - 1) });
+        refs.check = el('button', { type: 'button', id: 'validate-btn', onclick: () => checkAnswer() });
+        refs.next = el('button', { type: 'button', class: 'btn', id: 'session-action-trigger', onclick: () => nextQuestion() });
+        refs.help = el('p', { class: 'kbd-help' });
+        refs.legend = el('div', { class: 'legend' });
+        refs.grid = el('div', { class: 'grid-navigation', role: 'group' });
+        refs.finish = el('button', { type: 'button', class: 'btn btn-secondary btn-danger-outline', onclick: () => App.ui.openReview() });
+
+        const main = el('div', { class: 'card', style: 'margin-bottom:0;' },
+            el('div', { class: 'question-header' }, refs.topic, el('span', { class: 'question-actions' }, refs.pos, refs.flag)),
+            refs.text, refs.body, refs.expl, refs.note,
+            el('div', { class: 'nav-controls' }, refs.prev, refs.check, el('span', { class: 'spacer' }), refs.next),
+            refs.help);
+        const side = el('div', { class: 'sidebar-box' }, el('h2', { class: 'sidebar-title', id: 'progress-title' }), refs.legend, refs.grid, refs.finish);
+        refs.progressTitle = side.querySelector('#progress-title');
+        v.appendChild(el('div', { class: 'runtime-layout' }, main, side));
+    }
+
+    function topicName(t) {
+        const ex = App.state.exam;
+        return ex && ex.topics && ex.topics[t] ? App.loc(ex.topics[t]) : t;
+    }
+
+    // Full refresh of the runtime view (also after language change)
+    App.ui.refreshRuntime = function () {
+        const s = S();
+        if (!s) return;
+        refs.prev.textContent = App.t('previous');
+        refs.check.textContent = App.t('validate');
+        refs.check.classList.toggle('hidden', !s.studyMode);
+        refs.progressTitle.textContent = App.t('progress');
+        refs.finish.textContent = App.t('endScore');
+        refs.help.textContent = App.t('keyboardHelp');
+        refs.noteSummary.textContent = '📝 ' + App.t('note');
+        refs.noteArea.placeholder = App.t('notePlaceholder');
+        refs.legend.textContent = '';
+        refs.legend.appendChild(el('span', { class: 'lg-answered', text: App.t('legendAnswered') }));
+        refs.legend.appendChild(el('span', { text: App.t('legendUnanswered') }));
+        refs.legend.appendChild(el('span', { class: 'lg-flagged', text: App.t('legendFlagged') }));
+        renderQuestion();
+        renderGrid();
+        updateClock();
+    };
 
     function renderQuestion() {
-        const q = state.items[state.index];
-        const multiple = q.type === 'multiple';
-        const sel = state.selections[state.index];
-        const chosen = multiple ? (Array.isArray(sel) ? sel : []) : [sel];
-        const validated = state.validated[state.index] !== undefined;
-
-        $('runtime-topic-tag').textContent = q.topic;
-        $('runtime-position-string').textContent = t('questionOf', { i: state.index + 1, n: state.items.length });
-        $('runtime-question-text').textContent = q.question;
-
-        const box = $('runtime-options-box');
-        box.textContent = '';
-        q.options.forEach((text, i) => {
-            const picked = chosen.includes(i);
-            let cls = 'option-card' + (picked ? ' selected' : '');
-            if (validated && q.answer.includes(i)) cls += ' correct-reveal';
-            else if (validated && picked) cls += ' incorrect-reveal';
-
-            const marker = el('div', { class: 'option-marker' });
-            if (multiple) marker.appendChild(el('input', { type: 'checkbox', disabled: true, checked: picked }));
-            else marker.textContent = LETTERS[i];
-
-            const card = el('div', { class: cls }, marker, el('div', { class: 'option-text', text: text }));
-            card.addEventListener('click', () => selectOption(i));
-            box.appendChild(card);
-        });
-
-        const oldExp = document.querySelector('.dynamic-explanation-box');
-        if (oldExp) oldExp.remove();
-        if (validated) {
-            box.parentNode.insertBefore(el('div', { class: 'dynamic-explanation-box' },
-                el('h4', { text: t('explanation') }),
-                el('p', { text: q.explanation || t('noExplanation') })), box.nextSibling);
+        const s = S();
+        const i = s.index;
+        const item = s.item(i);
+        const h = s.handler(i);
+        const checked = s.studyMode && s.isChecked(i);
+        refs.topic.textContent = topicName(item.topic);
+        refs.pos.textContent = App.t('questionOf', { i: i + 1, n: s.length });
+        refs.text.textContent = App.loc(item.text);
+        refs.text.setAttribute('aria-label', '');
+        refs.body.textContent = '';
+        refs.body.appendChild(h.render({
+            item, value: s.value(i), locked: checked, reveal: checked, uid: 'q' + i,
+            onChange: (v, o) => {
+                s.setValue(i, v);
+                App.events.emit('answer', { session: s, index: i, value: v });
+                renderGrid();
+                schedulePersist();
+                if (!o || !o.silent) renderQuestion();
+            }
+        }));
+        refs.expl.textContent = '';
+        if (checked) {
+            refs.expl.appendChild(el('div', { class: 'dynamic-explanation-box' },
+                el('h3', { text: App.t('explanation') }),
+                el('p', { text: App.loc(item.explanation) || App.t('noExplanation') })));
         }
-
-        $('validate-btn').disabled = validated;
-        const last = state.index === state.items.length - 1;
-        const next = $('session-action-trigger');
-        next.textContent = last ? t('finish') : t('next');
-        next.classList.toggle('btn-final', last);
+        refs.check.disabled = !!checked;
+        const last = i === s.length - 1;
+        refs.next.textContent = last ? App.t('finish') : App.t('next');
+        refs.next.classList.toggle('btn-final', last);
+        refs.prev.disabled = i === 0;
+        const st = App.storage.getQStat(s.examId, item.uid) || {};
+        refs.flag.setAttribute('aria-pressed', st.flag ? 'true' : 'false');
+        refs.flag.textContent = '⚑ ' + (st.flag ? App.t('unflag') : App.t('flag'));
+        refs.noteArea.value = st.note || '';
+        refs.note.open = !!st.note;
     }
 
-    function renderMatrix() {
-        const box = $('runtime-matrix-grid');
-        box.textContent = '';
-        state.items.forEach((_, i) => {
-            let cls = 'nav-grid-btn' + (i === state.index ? ' active' : '');
-            if (state.validated[i] === true) cls += ' answered-correct';
-            else if (state.validated[i] === false) cls += ' answered-wrong';
-            else if (state.selections[i] !== undefined) cls += ' answered';
-            const btn = el('div', { class: cls, text: String(i + 1) });
-            btn.addEventListener('click', () => goTo(i));
-            box.appendChild(btn);
-        });
-    }
-
-    function selectOption(i) {
-        if (state.validated[state.index] !== undefined) return; // locked after checking
-        const q = state.items[state.index];
-        if (q.type === 'multiple') {
-            const cur = Array.isArray(state.selections[state.index]) ? state.selections[state.index] : [];
-            state.selections[state.index] = cur.includes(i) ? cur.filter(x => x !== i) : [...cur, i].sort((a, b) => a - b);
-        } else {
-            state.selections[state.index] = i;
+    function renderGrid() {
+        const s = S();
+        const stats = App.storage.allQStats(s.examId);
+        refs.grid.textContent = '';
+        for (let i = 0; i < s.length; i++) {
+            let cls = 'nav-grid-btn' + (i === s.index ? ' active' : '');
+            if (s.studyMode && s.validated[i] === true) cls += ' answered-correct';
+            else if (s.studyMode && s.validated[i] === false) cls += ' answered-wrong';
+            else if (s.hasAnswer(i)) cls += ' answered';
+            const st = stats[s.item(i).uid];
+            if (st && st.flag) cls += ' flagged';
+            const b = el('button', { type: 'button', class: cls, text: String(i + 1), onclick: () => go(i),
+                aria: { label: App.t('questionOf', { i: i + 1, n: s.length }), current: i === s.index ? 'true' : 'false' } });
+            refs.grid.appendChild(b);
         }
-        renderQuestion();
-        renderMatrix();
-        saveSession();
     }
 
-    function validateAnswer() {
-        const idx = state.index;
-        if (state.validated[idx] !== undefined) return;
-        const sel = state.selections[idx];
-        if (sel === undefined || (Array.isArray(sel) && sel.length === 0)) { alert(t('selectFirst')); return; }
-        state.validated[idx] = isCorrect(idx);
-        renderQuestion();
-        renderMatrix();
-        saveSession();
-    }
-
-    function goTo(i) {
-        if (i < 0 || i >= state.items.length) return;
-        state.index = i;
-        renderQuestion();
-        renderMatrix();
-        saveSession();
+    function go(i) {
+        const s = S();
+        if (s.goTo(i)) { renderQuestion(); renderGrid(); updateClock(); App.ui.persist(); App.events.emit('navigate', { session: s, index: i }); }
     }
 
     function nextQuestion() {
-        if (state.index === state.items.length - 1) submitExam();
-        else goTo(state.index + 1);
+        const s = S();
+        if (s.index === s.length - 1) App.ui.openReview(); else go(s.index + 1);
     }
 
-    // ── Results ─────────────────────────────────────────────────────────────
-    function submitExam() {
-        clearInterval(state.timer);
-        clearSession();
+    function checkAnswer() {
+        const s = S();
+        const r = s.check(s.index);
+        if (r === null) { App.ui.toast(App.t('selectFirst')); return; }
+        App.events.emit('check', { session: s, index: s.index, correct: r });
+        renderQuestion(); renderGrid(); App.ui.persist();
+    }
+
+    function toggleFlag() {
+        const s = S(), uid = s.item().uid;
+        App.storage.patchQStat(s.examId, uid, st => { st.flag = !st.flag; return st; });
+        renderQuestion(); renderGrid();
+    }
+
+    // ---- clock ----
+    function updateClock() {
+        const s = S();
+        const box = $('runtime-timer-box');
+        if (!s || App.state.screen !== 'runtime' || s.timerMode === 'none') { box.classList.add('hidden'); return; }
+        box.classList.remove('hidden');
+        $('timer-label').textContent = s.timerMode === 'perQuestion' ? App.t('timerQuestionLabel') : App.t('timeRemaining');
+        $('runtime-clock-string').textContent = App.ui.fmtTime(s.timerMode === 'perQuestion' ? s.qLeft : s.secondsLeft);
+    }
+    App.ui.updateClock = updateClock;
+
+    function startClock() {
+        clearInterval(App.state.clockTimer);
+        App.state.clockTimer = setInterval(() => {
+            const s = S();
+            if (!s || App.state.screen !== 'runtime') return;
+            const ev = s.tick();
+            updateClock();
+            if (ev === 'total') { App.ui.submit(true); return; }
+            if (ev === 'question') { if (s.index < s.length - 1) go(s.index + 1); else App.ui.openReview(); return; }
+            if (s.times[s.index] % 10 === 0) App.ui.persist();
+        }, 1000);
+    }
+    App.ui.stopClock = function () {
+        clearInterval(App.state.clockTimer);
+        App.state.clockTimer = null;
         $('runtime-timer-box').classList.add('hidden');
-        show('summary');
-        renderSummary();
-    }
+    };
 
-    function renderSummary() {
-        const review = $('review-payload-box');
-        review.textContent = '';
-        let correctCount = 0;
+    // ---- keyboard ----
+    document.addEventListener('keydown', e => {
+        if (App.state.screen !== 'runtime' || e.ctrlKey || e.metaKey || e.altKey) return;
+        const t = e.target;
+        const typing = t && (t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || (t.tagName === 'INPUT' && t.type === 'text') || (e.key.startsWith('Arrow') && t.classList && t.classList.contains('option-input')));
+        if (typing) return;
+        const s = S();
+        const key = e.key.toLowerCase();
+        const pick = idx => {
+            const inputs = refs.body.querySelectorAll('.option-input');
+            if (inputs[idx] && !inputs[idx].disabled) { inputs[idx].click(); e.preventDefault(); }
+        };
+        if (/^[1-6]$/.test(key)) pick(parseInt(key, 10) - 1);
+        else if (/^[a-f]$/.test(key)) pick(key.charCodeAt(0) - 97);
+        else if (key === 'arrowright') { if (s.index < s.length - 1) go(s.index + 1); e.preventDefault(); }
+        else if (key === 'arrowleft') { go(s.index - 1); e.preventDefault(); }
+        else if (key === 'm') { toggleFlag(); e.preventDefault(); }
+        else if (key === 'enter' && t.tagName !== 'BUTTON' && t.tagName !== 'A') {
+            if (s.studyMode && !s.isChecked(s.index) && s.hasAnswer(s.index)) checkAnswer(); else nextQuestion();
+            e.preventDefault();
+        }
+    });
+})();
 
-        state.items.forEach((q, i) => {
-            const ok = isCorrect(i);
-            if (ok) correctCount++;
-            const sel = state.selections[i];
-            const chosen = Array.isArray(sel) ? sel : (sel === undefined ? [] : [sel]);
+/* UI: review before finishing, results and per-question review. */
+(function () {
+    const { el } = App.util;
+    const $ = App.ui.$;
+    const S = () => App.state.session;
 
-            const optionsBox = el('div', { style: 'margin-bottom:15px; font-size:0.95rem;' });
-            q.options.forEach((opt, k) => {
-                let cls = 'review-option';
-                if (q.answer.includes(k)) cls += ' review-correct';
-                else if (chosen.includes(k)) cls += ' review-wrong';
-                optionsBox.appendChild(el('p', { class: cls }, el('strong', { text: LETTERS[k] + ': ' }), document.createTextNode(opt)));
-            });
+    App.ui.openReview = function () {
+        App.ui.show('review');
+        App.ui.renderReview();
+    };
 
-            review.appendChild(el('div', { class: 'review-item-card ' + (ok ? 'is-correct' : 'is-incorrect') },
-                el('span', { class: 'review-status-badge', text: ok ? t('correct') : t('incorrect') }),
-                el('h3', { style: 'font-size:1.05rem; margin-bottom:10px;', text: t('questionN', { n: i + 1, q: q.question }) }),
-                optionsBox,
-                el('div', { class: 'explanation-box', style: 'margin-top:15px;' },
-                    el('h4', { style: 'font-size:0.95rem;', text: t('explanation') }),
-                    el('p', { style: 'font-size:0.9rem;', text: q.explanation || '' }))));
+    App.ui.renderReview = function () {
+        const s = S();
+        const v = $('view-review');
+        v.textContent = '';
+        const unanswered = s.unanswered();
+        const stats = App.storage.allQStats(s.examId);
+        const flagged = [];
+        for (let i = 0; i < s.length; i++) { const st = stats[s.item(i).uid]; if (st && st.flag) flagged.push(i); }
+
+        v.appendChild(el('h1', { text: App.t('reviewTitle') }));
+        v.appendChild(el('p', { class: 'subtitle', text: App.t('reviewText', { a: s.length - unanswered.length, n: s.length, u: unanswered.length, f: flagged.length }) }));
+
+        const grid = el('div', { class: 'review-grid' });
+        for (let i = 0; i < s.length; i++) {
+            let cls = 'nav-grid-btn' + (s.hasAnswer(i) ? ' answered' : ' unanswered-hint');
+            if (flagged.includes(i)) cls += ' flagged';
+            grid.appendChild(el('button', { type: 'button', class: cls, text: String(i + 1), onclick: () => { s.goTo(i); App.ui.show('runtime'); App.ui.refreshRuntime(); },
+                aria: { label: App.t('questionOf', { i: i + 1, n: s.length }) } }));
+        }
+        v.appendChild(grid);
+
+        const pills = (title, list) => {
+            if (!list.length) return;
+            const box = el('div', { class: 'review-block' }, el('h2', { text: title + ' (' + list.length + ')' }));
+            const pl = el('div', { class: 'pill-list' });
+            list.forEach(i => pl.appendChild(el('button', { type: 'button', class: 'pill', text: '#' + (i + 1), onclick: () => { s.goTo(i); App.ui.show('runtime'); App.ui.refreshRuntime(); } })));
+            box.appendChild(pl); v.appendChild(box);
+        };
+        pills(App.t('reviewUnanswered'), unanswered);
+        pills(App.t('reviewFlagged'), flagged);
+
+        v.appendChild(el('div', { class: 'toolbar', style: 'margin-top:20px;' },
+            el('button', { type: 'button', class: 'btn btn-secondary', text: App.t('reviewBack'), onclick: () => { App.ui.show('runtime'); App.ui.refreshRuntime(); } }),
+            el('button', { type: 'button', class: 'btn', id: 'submit-btn', text: App.t('reviewSubmit'), onclick: () => App.ui.submit(false) })));
+    };
+
+    App.ui.submit = function (auto) {
+        const s = S();
+        if (!s || s.submitted) return;
+        s.submitted = true;
+        App.ui.stopClock();
+        clearTimeout(App.state.persistTimer);
+        const attempt = s.submit(App.storage);
+        App.storage.addAttempt(s.examId, attempt);
+        App.storage.deleteSession(s.examId, s.id);
+        App.state.lastResult = { attempt, session: s };
+        App.ui.show('summary');
+        App.ui.renderSummary();
+    };
+
+    App.ui.renderSummary = function () {
+        const r = App.state.lastResult;
+        if (!r) return;
+        const { attempt, session: s } = r;
+        const v = $('view-summary');
+        v.textContent = '';
+        v.appendChild(el('h1', { text: App.t('resultsTitle') }));
+        v.appendChild(el('p', { class: 'subtitle', text: App.t('resultsSubtitle') }));
+
+        const color = attempt.passed ? 'var(--success)' : 'var(--error)';
+        v.appendChild(el('div', { class: 'metrics-summary-box' },
+            el('div', { class: 'score-circle', id: 'metric-percentage', style: 'border-color:' + color + ';color:' + color, text: attempt.pct + '%' }),
+            el('div', {},
+                el('h2', { id: 'metric-raw-string', style: 'font-size:1.3rem;font-weight:600;margin-bottom:4px;', text: App.t('scoreLine', { c: attempt.correct, n: attempt.total }) }),
+                el('p', { id: 'exam-result-badge', style: 'font-size:1rem;font-weight:700;color:' + color, text: App.t(attempt.passed ? 'pass' : 'fail', { t: attempt.threshold }) }),
+                el('p', { class: 'hint', text: s.modeLabel + ' · ' + App.t('resultTime', { m: App.ui.fmtTime(attempt.durationSec) }) }))));
+
+        const wrong = [];
+        for (let i = 0; i < s.length; i++) if (!s.isCorrect(i)) wrong.push(s.item(i).uid);
+        const bar = el('div', { class: 'toolbar' },
+            el('button', { type: 'button', class: 'btn', id: 'return-btn', text: App.t('backToMenu'), onclick: () => { App.ui.renderDashboard(); App.ui.show('dashboard'); } }));
+        if (wrong.length) bar.appendChild(el('button', { type: 'button', class: 'btn btn-ghost', text: App.t('retryWrong') + ' (' + wrong.length + ')', onclick: () => App.ui.retry(wrong) }));
+        bar.appendChild(el('button', { type: 'button', class: 'btn btn-ghost', text: '📊 ' + App.t('statsBtn'), onclick: () => App.ui.openStats() }));
+        v.appendChild(bar);
+
+        const box = el('div', { id: 'review-payload-box' });
+        for (let i = 0; i < s.length; i++) {
+            const item = s.item(i);
+            const answered = s.hasAnswer(i), ok = s.isCorrect(i);
+            const cls = ok ? 'is-correct' : (answered ? 'is-incorrect' : 'is-unanswered');
+            const badge = ok ? App.t('correct') : (answered ? App.t('incorrect') : App.t('unansweredBadge'));
+            const meta = [item.topic, item.difficulty ? '★'.repeat(item.difficulty) : '', (s.times[i] || 0) + 's'].filter(Boolean).join(' · ');
+            const card = el('div', { class: 'review-item-card ' + cls },
+                el('span', { class: 'review-status-badge', text: badge }),
+                el('div', { class: 'meta', text: meta }),
+                el('h3', { style: 'font-size:1.05rem;margin-bottom:10px;white-space:pre-line;', text: App.t('questionN', { n: i + 1, q: App.loc(item.text) }) }),
+                App.types[item.kind].renderReview(item, s.value(i)),
+                item.explanation ? el('div', { class: 'explanation-box', style: 'margin-top:15px;' },
+                    el('h4', { style: 'font-size:0.95rem;', text: App.t('explanation') }),
+                    el('p', { style: 'font-size:0.9rem;', text: App.loc(item.explanation) })) : null);
+            box.appendChild(card);
+        }
+        v.appendChild(box);
+    };
+
+    // New study session with the questions that were wrong/unanswered
+    App.ui.retry = function (uids) {
+        const exam = App.state.exam;
+        const set = new Set(uids);
+        const qs = exam.questions.filter(q => set.has(q.uid));
+        if (!qs.length) return;
+        const session = App.Session.create(qs, {
+            examId: exam.id, modeId: 'retry', modeLabel: App.t('retryWrong'), studyMode: true,
+            timerMode: 'none', threshold: exam.settings.passThreshold, shuffleOptions: exam.settings.shuffleOptions
         });
+        App.ui.beginSession(session);
+    };
+})();
 
-        const pct = Math.round((correctCount / state.items.length) * 100);
-        const threshold = state.mode === 'mock40' ? cfg().passThresholdMockOfficial : cfg().passThresholdDefault;
-        const passed = pct >= threshold;
-        const color = passed ? 'var(--success)' : 'var(--error)';
+/* UI: statistics screen (history chart, accuracy by topic, hardest questions). */
+(function () {
+    const { el } = App.util;
+    const $ = App.ui.$;
+    const SVGNS = 'http://www.w3.org/2000/svg';
+    const svg = (tag, attrs) => { const n = document.createElementNS(SVGNS, tag); Object.entries(attrs || {}).forEach(([k, v]) => n.setAttribute(k, v)); return n; };
 
-        const score = $('metric-percentage');
-        score.textContent = pct + '%';
-        score.style.borderColor = color;
-        score.style.color = color;
+    App.ui.openStats = function () { App.ui.show('stats'); App.ui.renderStats(); };
 
-        const oldBadge = $('exam-result-badge');
-        if (oldBadge) oldBadge.remove();
-        score.parentNode.appendChild(el('p', {
-            id: 'exam-result-badge',
-            style: 'font-size:1rem;font-weight:700;margin-top:8px;color:' + color,
-            text: t(passed ? 'pass' : 'fail', { t: threshold })
-        }));
-        $('metric-raw-string').textContent = t('scoreLine', { c: correctCount, n: state.items.length });
+    function historyChart(attempts, threshold) {
+        const list = attempts.slice(-30);
+        const W = 600, H = 170, L = 30, R = 10, T = 12, B = 22;
+        const root = svg('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': App.t('statsHistory') });
+        const y = pct => T + (H - T - B) * (1 - pct / 100);
+        [0, 50, 100].forEach(p => {
+            root.appendChild(svg('line', { x1: L, x2: W - R, y1: y(p), y2: y(p), class: 'chart-axis' }));
+            const t = svg('text', { x: 4, y: y(p) + 3, class: 'chart-label' }); t.textContent = p; root.appendChild(t);
+        });
+        if (threshold !== null) root.appendChild(svg('line', { x1: L, x2: W - R, y1: y(threshold), y2: y(threshold), class: 'chart-thr' }));
+        const x = i => list.length === 1 ? (L + W - R) / 2 : L + (W - L - R) * i / (list.length - 1);
+        root.appendChild(svg('polyline', { points: list.map((a, i) => x(i) + ',' + y(a.pct)).join(' '), class: 'chart-line' }));
+        list.forEach((a, i) => {
+            const c = svg('circle', { cx: x(i), cy: y(a.pct), r: 4, class: 'chart-dot' + (a.passed ? '' : ' fail') });
+            const title = svg('title'); title.textContent = a.pct + '% · ' + (a.modeLabel || a.mode) + ' · ' + new Date(a.ts).toLocaleDateString(); c.appendChild(title);
+            root.appendChild(c);
+        });
+        return root;
     }
 
-    function returnToMainMenu() {
-        const badge = $('exam-result-badge');
-        if (badge) badge.remove();
-        show('dashboard');
-        window.scrollTo(0, 0);
-        renderDashboard();
-    }
+    App.ui.renderStats = function () {
+        const exam = App.state.exam;
+        const v = $('view-stats');
+        v.textContent = '';
+        const st = App.stats.compute(exam, App.storage);
+        const head = el('div', { class: 'card-title-row' },
+            el('h1', { text: App.t('statsTitle') + ' — ' + App.loc(exam.title) }),
+            el('button', { type: 'button', class: 'btn btn-secondary btn-small', text: '← ' + App.t('backBtn'), onclick: () => { App.ui.renderDashboard(); App.ui.show('dashboard'); } }));
+        v.appendChild(head);
 
-    // ── Resume an interrupted session ───────────────────────────────────────
-    function offerResume() {
-        let saved;
-        try { saved = JSON.parse(localStorage.getItem(storeKey())); } catch (e) { return; }
-        if (!saved || !Array.isArray(saved.items) || !saved.items.length) return;
-        if (!confirm(t('resume'))) { clearSession(); return; }
-        state.items = saved.items;
-        state.index = Math.min(saved.index || 0, saved.items.length - 1);
-        state.selections = saved.selections || {};
-        state.validated = saved.validated || {};
-        state.mode = saved.mode;
-        beginSession(saved.secondsLeft > 0 ? saved.secondsLeft : saved.items.length * cfg().timePerQuestionSec);
-    }
+        if (!st.attemptCount && !st.answered) { v.appendChild(el('p', { class: 'subtitle', text: App.t('statsEmpty') })); return; }
 
-    // ── Loading ─────────────────────────────────────────────────────────────
-    function validExamData(d) {
-        return !!(d && d.config && Array.isArray(d.questions) && d.questions.length > 0 &&
-            d.questions.every(q => q && q.topic && q.question && Array.isArray(q.options) && q.answer !== undefined));
-    }
+        const tile = (value, label) => el('div', { class: 'tile' }, el('div', { class: 'tile-value', text: String(value) }), el('div', { class: 'tile-label', text: label }));
+        v.appendChild(el('div', { class: 'tiles' },
+            tile(st.attemptCount, App.t('statsAttempts')),
+            tile(st.accuracy === null ? '–' : st.accuracy + '%', App.t('statsAccuracy')),
+            tile(st.bestPct === null ? '–' : st.bestPct + '%', App.t('statsBest')),
+            tile(st.answered, App.t('statsAnswered')),
+            tile(st.mastered + ' / ' + st.totalQuestions, App.t('statsMastered')),
+            tile(st.avgTimeSec === null ? '–' : st.avgTimeSec + ' s', App.t('statsAvgTime'))));
 
-    function startApp(file) {
-        state.examFile = file;
-        normalizeQuestions();
-        document.title = cfg().examTitle || 'Exam Simulator';
-        $('logo-exam-code').textContent = cfg().examCode || 'EXAM';
-        $('logo-version').textContent = cfg().version || '';
-        show('dashboard');
-        renderDashboard();
-        offerResume();
-    }
+        if (st.attempts.length) {
+            const thr = st.attempts[st.attempts.length - 1].threshold;
+            v.appendChild(el('div', { class: 'stat-section chart-box' }, el('h2', { text: App.t('statsHistory') }), historyChart(st.attempts, typeof thr === 'number' ? thr : null)));
+        }
 
-    function showPicker(failedName) {
-        document.title = 'Exam Simulator';
+        const topics = el('div', { class: 'stat-section' }, el('h2', { text: App.t('statsTopics') }));
+        st.topics.forEach(t => {
+            const name = exam.topics && exam.topics[t.topic] ? App.loc(exam.topics[t.topic]) : t.topic;
+            const pct = t.pct === null ? 0 : t.pct;
+            const cls = t.pct === null ? '' : (t.pct < 50 ? ' low' : (t.pct < 75 ? ' mid' : ''));
+            topics.appendChild(el('div', { class: 'bar-row' },
+                el('span', { text: name }),
+                el('div', { class: 'bar-track', role: 'img', aria: { label: name + ' ' + (t.pct === null ? '–' : t.pct + '%') } }, el('div', { class: 'bar-fill' + cls, style: 'width:' + pct + '%' })),
+                el('span', { class: 'bar-pct', text: t.pct === null ? '–' : t.pct + '%' })));
+        });
+        v.appendChild(topics);
+
+        const hard = el('div', { class: 'stat-section' }, el('h2', { text: App.t('statsHardest') }));
+        if (!st.hardest.length) hard.appendChild(el('p', { class: 'hint', text: App.t('statsNoHard') }));
+        st.hardest.forEach(h => hard.appendChild(el('div', { class: 'hard-row' },
+            el('div', { text: App.loc(h.text).slice(0, 220) }),
+            el('div', { class: 'hard-meta', text: h.topic + ' · ' + App.t('statsErrRate', { p: Math.round(h.rate * 100), w: h.wrong, n: h.seen }) }))));
+        v.appendChild(hard);
+    };
+})();
+
+/* Boot: preferences, header controls, routing (?content=NAME or ?url=ADDRESS). */
+(function () {
+    const $ = App.ui.$;
+
+    function openExam(exam) {
+        App.state.exam = exam;
+        App.state.loadError = null;
+        App.state.dash = {};
+        $('logo-exam-code').textContent = exam.code || exam.id;
+        $('logo-version').textContent = exam.version || '';
+        document.title = App.loc(exam.title) + ' — Exam Simulator';
+        App.ui.renderDashboard();
+        App.ui.show('dashboard');
+        App.events.emit('examLoaded', { exam });
+    }
+    App.ui.openExam = openExam;
+
+    function showPicker(errorLines) {
+        App.state.exam = null;
+        App.state.loadError = errorLines || null;
         $('logo-exam-code').textContent = 'EXAM';
         $('logo-version').textContent = '';
-        const body = $('no-content-body');
-        body.textContent = '';
-        if (failedName) {
-            body.appendChild(el('h1', { style: 'font-size:1.5rem;margin-bottom:12px;color:var(--error);', text: t('loadFailedTitle') }));
-            body.appendChild(el('p', { style: 'color:var(--gray);', text: t('loadFailedText', { name: failedName + '.exam' }) }));
-        } else {
-            body.appendChild(el('h1', { style: 'font-size:1.5rem;margin-bottom:12px;', text: t('noExamTitle') }));
-            body.appendChild(el('p', { style: 'color:var(--gray);', text: t('noExamText') }));
+        document.title = 'Exam Simulator';
+        App.ui.renderPicker();
+        App.ui.show('picker');
+    }
+
+    async function route() {
+        const params = new URLSearchParams(window.location.search);
+        const name = params.get('content');
+        const url = params.get('url');
+        try {
+            if (name && /^[\w.\-]+$/.test(name)) {
+                showLoading();
+                openExam(await App.loader.loadByName(name));
+            } else if (url) {
+                showLoading();
+                openExam(await App.loader.loadByUrl(url));
+            } else showPicker();
+        } catch (err) {
+            if (err instanceof App.loader.LoadError) showPicker(App.loader.describe(err));
+            else { console.error(err); showPicker([String(err && err.message || err)]); }
         }
-        show('picker');
-        renderExamLists();
     }
 
-    // ── Language / theme ────────────────────────────────────────────────────
-    function rerender() {
-        applyStaticText();
-        renderTheme();
-        if (state.screen === 'picker') showPicker(state.failedName);
-        else if (state.screen === 'dashboard') renderDashboard();
-        else if (state.screen === 'runtime') { renderQuestion(); renderMatrix(); }
-        else if (state.screen === 'summary') renderSummary();
+    function showLoading() {
+        const v = $('view-picker');
+        v.textContent = '';
+        v.appendChild(App.util.el('p', { class: 'subtitle', text: App.t('loadingExam') }));
+        App.ui.show('picker');
     }
 
-    function bindControls() {
-        $('start-btn').addEventListener('click', startExam);
-        $('prev-btn').addEventListener('click', () => goTo(state.index - 1));
-        $('session-action-trigger').addEventListener('click', nextQuestion);
-        $('validate-btn').addEventListener('click', validateAnswer);
-        $('submit-btn').addEventListener('click', submitExam);
-        $('return-btn').addEventListener('click', returnToMainMenu);
-        $('lang-btn').addEventListener('click', () => {
-            lang = lang === 'en' ? 'it' : 'en';
-            writePref('exam_lang', lang);
-            rerender();
-        });
-        $('theme-btn').addEventListener('click', () => {
-            const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', next);
-            writePref('exam_theme', next);
-            renderTheme();
-        });
+    function boot() {
+        const lang = App.storage.getPref('lang');
+        App.setLang(lang === 'it' ? 'it' : 'en');
+        const theme = App.storage.getPref('theme');
+        if (theme === 'dark' || theme === 'light') document.documentElement.setAttribute('data-theme', theme);
+        App.ui.applyStatic();
+        $('lang-btn').addEventListener('click', () => App.ui.setLang(App.lang === 'en' ? 'it' : 'en'));
+        $('theme-btn').addEventListener('click', () => App.ui.setTheme(App.ui.theme() === 'dark' ? 'light' : 'dark'));
+        $('import-file').addEventListener('change', e => { if (e.target.files[0]) App.ui.handleImportFile(e.target.files[0]); e.target.value = ''; });
+        route();
+        if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+            const first = !navigator.serviceWorker.controller;
+            navigator.serviceWorker.register('sw.js')
+                .then(() => navigator.serviceWorker.ready)
+                .then(() => { if (first) App.ui.toast(App.t('offlineReady')); })
+                .catch(() => { /* offline support is optional */ });
+        }
     }
 
-    // ── Boot ────────────────────────────────────────────────────────────────
-    bindControls();
-    applyStaticText();
-    renderTheme();
-    const contentName = new URLSearchParams(window.location.search).get('content');
-    if (validExamData(window.ExamData)) startApp(contentName);
-    else { state.failedName = contentName && /^[\w.\-]+$/.test(contentName) ? contentName : null; showPicker(state.failedName); }
+    App.boot = boot;
+    if (typeof document !== 'undefined' && document.getElementById('view-picker')) boot();
 })();
+
+})();
+
 </script>
 </body>
 </html>

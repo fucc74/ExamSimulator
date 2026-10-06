@@ -1,0 +1,13 @@
+{
+  "name": "Exam Simulator",
+  "short_name": "ExamSim",
+  "description": "Exam-agnostic practice simulator",
+  "start_url": "exam.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f6f8",
+  "theme_color": "#01a982",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

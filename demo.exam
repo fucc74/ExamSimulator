@@ -1,0 +1,297 @@
+// ExamSim exam file (format 2). Pure JSON inside ExamSim.register(...); validate with: node tools/validate-exam.js demo.exam
+ExamSim.register({
+  "format": 2,
+  "id": "demo",
+  "code": "DEMO",
+  "title": {
+    "en": "Engine Demo — all question types",
+    "it": "Demo del motore — tutti i tipi di domanda"
+  },
+  "description": {
+    "en": "A tiny exam that shows every question type, localized content, difficulty levels and custom modes.",
+    "it": "Un piccolo esame che mostra ogni tipo di domanda, contenuti localizzati, livelli di difficoltà e modalità personalizzate."
+  },
+  "version": "1.0",
+  "settings": { "passThreshold": 70, "timePerQuestionSec": 45 },
+  "topics": {
+    "basics": { "en": "Basics", "it": "Fondamenti" },
+    "network": { "en": "Networking", "it": "Reti" },
+    "scenarios": { "en": "Scenarios", "it": "Scenari" }
+  },
+  "modes": [
+    {
+      "id": "quick",
+      "name": { "en": "Quick check (6 questions)", "it": "Verifica rapida (6 domande)" },
+      "selection": "balanced",
+      "count": 6
+    },
+    {
+      "id": "mock",
+      "name": {
+        "en": "Mini exam (10 questions, 5 min)",
+        "it": "Mini esame (10 domande, 5 min)"
+      },
+      "selection": "weighted",
+      "exam": true,
+      "count": 10,
+      "timeSec": 300,
+      "passThreshold": 60,
+      "groups": [
+        {
+          "topics": ["basics"],
+          "weight": 4
+        },
+        {
+          "topics": ["network"],
+          "weight": 4
+        },
+        {
+          "topics": ["scenarios"],
+          "weight": 2
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": 1,
+      "topic": "basics",
+      "type": "single",
+      "difficulty": 1,
+      "tags": ["ai"],
+      "source": "Engine demo",
+      "text": {
+        "en": "Which approach learns from labeled examples?",
+        "it": "Quale approccio impara da esempi etichettati?"
+      },
+      "options": [
+        { "en": "Supervised learning", "it": "Apprendimento supervisionato" },
+        { "en": "Unsupervised learning", "it": "Apprendimento non supervisionato" },
+        { "en": "Reinforcement learning", "it": "Apprendimento per rinforzo" },
+        { "en": "Random search", "it": "Ricerca casuale" }
+      ],
+      "answer": [0],
+      "explanation": {
+        "en": "Supervised learning uses labeled data.",
+        "it": "L'apprendimento supervisionato usa dati etichettati."
+      }
+    },
+    {
+      "id": 2,
+      "topic": "basics",
+      "type": "multiple",
+      "difficulty": 2,
+      "text": {
+        "en": "Which TWO are components of a RAG pipeline?",
+        "it": "Quali DUE sono componenti di una pipeline RAG?"
+      },
+      "options": [
+        { "en": "Embedding model", "it": "Modello di embedding" },
+        { "en": "Vector index", "it": "Indice vettoriale" },
+        { "en": "RAID controller", "it": "Controller RAID" },
+        { "en": "DNS server", "it": "Server DNS" }
+      ],
+      "answer": [0, 1],
+      "explanation": {
+        "en": "RAG needs embeddings and a vector index to retrieve context.",
+        "it": "RAG richiede embedding e un indice vettoriale per recuperare il contesto."
+      }
+    },
+    {
+      "id": 3,
+      "topic": "basics",
+      "type": "truefalse",
+      "difficulty": 1,
+      "text": {
+        "en": "Inference means running a trained model on new inputs.",
+        "it": "Inferenza significa eseguire un modello addestrato su nuovi input."
+      },
+      "answer": true,
+      "explanation": {
+        "en": "Correct: inference uses a trained model to produce predictions.",
+        "it": "Corretto: l'inferenza usa un modello addestrato per produrre predizioni."
+      }
+    },
+    {
+      "id": 4,
+      "topic": "basics",
+      "type": "truefalse",
+      "difficulty": 1,
+      "text": {
+        "en": "Fine-tuning always requires training from scratch.",
+        "it": "Il fine-tuning richiede sempre di addestrare da zero."
+      },
+      "answer": false,
+      "explanation": {
+        "en": "Fine-tuning adapts a pretrained model.",
+        "it": "Il fine-tuning adatta un modello già addestrato."
+      }
+    },
+    {
+      "id": 5,
+      "topic": "network",
+      "type": "ordering",
+      "difficulty": 2,
+      "text": {
+        "en": "Put the RAG steps in the correct order.",
+        "it": "Metti nell'ordine corretto i passaggi di RAG."
+      },
+      "items": [
+        { "en": "Embed the user query", "it": "Calcola l'embedding della domanda" },
+        { "en": "Retrieve relevant passages", "it": "Recupera i passaggi rilevanti" },
+        { "en": "Rerank the candidates", "it": "Riordina i candidati" },
+        { "en": "Generate the answer", "it": "Genera la risposta" }
+      ],
+      "explanation": {
+        "en": "Embed → retrieve → rerank → generate.",
+        "it": "Embedding → recupero → riordino → generazione."
+      }
+    },
+    {
+      "id": 6,
+      "topic": "network",
+      "type": "matching",
+      "difficulty": 2,
+      "text": {
+        "en": "Match each port with its role in multi-node inference.",
+        "it": "Abbina ogni porta al suo ruolo nell'inferenza multi-nodo."
+      },
+      "pairs": [
+        { "left": "6379", "right": "Ray GCS" },
+        {
+          "left": "29500",
+          "right": { "en": "vLLM coordination", "it": "Coordinamento vLLM" }
+        },
+        {
+          "left": "8080",
+          "right": { "en": "Inference API / health", "it": "API di inferenza / health" }
+        }
+      ],
+      "explanation": {
+        "en": "6379 Ray GCS, 29500 vLLM coordination, 8080 inference API.",
+        "it": "6379 Ray GCS, 29500 coordinamento vLLM, 8080 API di inferenza."
+      }
+    },
+    {
+      "id": 7,
+      "topic": "network",
+      "type": "numeric",
+      "difficulty": 2,
+      "text": {
+        "en": "Pipeline parallelism = 2 and tensor parallelism = 4. How many GPUs are required?",
+        "it": "Pipeline parallelism = 2 e tensor parallelism = 4. Quante GPU servono?"
+      },
+      "answer": { "value": 8, "unit": "GPU" },
+      "explanation": { "en": "GPUs = PP × TP = 8.", "it": "GPU = PP × TP = 8." }
+    },
+    {
+      "id": 8,
+      "topic": "network",
+      "type": "numeric",
+      "difficulty": 3,
+      "text": {
+        "en": "A link carries 400 Gb/s. How many GB/s is that (approximately, 1 byte = 8 bits)?",
+        "it": "Un collegamento da 400 Gb/s. Quanti GB/s sono (circa, 1 byte = 8 bit)?"
+      },
+      "answer": { "value": 50, "tolerance": 1, "unit": "GB/s" },
+      "explanation": { "en": "400 / 8 = 50 GB/s.", "it": "400 / 8 = 50 GB/s." }
+    },
+    {
+      "id": 9,
+      "topic": "network",
+      "type": "single",
+      "difficulty": 3,
+      "text": {
+        "en": "A distributed workload scales badly when nodes are added. What should be investigated first?",
+        "it": "Un workload distribuito scala male aggiungendo nodi. Cosa va verificato per primo?"
+      },
+      "options": [
+        {
+          "en": "Interconnect bandwidth and latency",
+          "it": "Banda e latenza dell'interconnessione"
+        },
+        { "en": "The color of the racks", "it": "Il colore dei rack" },
+        { "en": "The user's browser", "it": "Il browser dell'utente" },
+        { "en": "The DNS suffix", "it": "Il suffisso DNS" }
+      ],
+      "answer": [0],
+      "explanation": {
+        "en": "Communication between nodes is the usual bottleneck.",
+        "it": "La comunicazione tra nodi è di solito il collo di bottiglia."
+      }
+    },
+    {
+      "id": 10,
+      "topic": "scenarios",
+      "type": "scenario",
+      "difficulty": 3,
+      "text": {
+        "en": "Private AI platform scenario",
+        "it": "Scenario piattaforma AI privata"
+      },
+      "context": {
+        "en": "A customer wants RAG over confidential documents, several independent AI teams, and an air-gapped deployment. Expected load: 100 concurrent users.",
+        "it": "Un cliente vuole RAG su documenti riservati, più team AI indipendenti e un deployment air-gapped. Carico atteso: 100 utenti concorrenti."
+      },
+      "parts": [
+        {
+          "text": {
+            "en": "Which mechanism separates the teams?",
+            "it": "Quale meccanismo separa i team?"
+          },
+          "options": [
+            { "en": "Projects with quotas and RBAC", "it": "Progetti con quote e RBAC" },
+            { "en": "One shared namespace", "it": "Un unico namespace condiviso" }
+          ],
+          "answer": [0]
+        },
+        {
+          "text": {
+            "en": "The deployment is air-gapped: true or false — models can be pulled directly from the public registry.",
+            "it": "Il deployment è air-gapped: vero o falso — i modelli si possono scaricare direttamente dal registry pubblico."
+          },
+          "type": "truefalse",
+          "answer": false
+        },
+        {
+          "text": {
+            "en": "How many teams share the platform if each of the 4 projects has one team?",
+            "it": "Quanti team condividono la piattaforma se ognuno dei 4 progetti ha un team?"
+          },
+          "type": "numeric",
+          "answer": 4
+        }
+      ],
+      "explanation": {
+        "en": "All three parts must be right.",
+        "it": "Tutte e tre le parti devono essere corrette."
+      }
+    },
+    {
+      "id": 11,
+      "topic": "scenarios",
+      "type": "single",
+      "difficulty": 2,
+      "text": "Which GPU memory component is shared across a project quota? (plain-string question)",
+      "options": ["None — quotas count GPUs, not memory", "HBM only", "System RAM", "NVLink bandwidth"],
+      "answer": [0],
+      "explanation": "Quotas are expressed in GPUs."
+    },
+    {
+      "id": 12,
+      "topic": "scenarios",
+      "type": "multiple",
+      "difficulty": 3,
+      "text": "Select THREE prerequisites of an air-gapped NIM deployment.",
+      "options": [
+        "Private registry holds the NIM image",
+        "NIM profiles are in a local S3 bucket",
+        "isAirGapped=true",
+        "Direct access to the public registry",
+        "Internet access from the cluster"
+      ],
+      "answer": [0, 1, 2],
+      "explanation": "Image in a private registry, profiles in local S3, isAirGapped=true."
+    }
+  ]
+});

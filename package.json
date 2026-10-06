@@ -1,0 +1,12 @@
+{
+  "name": "exam-simulator",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Exam-agnostic practice engine (single-file HTML build)",
+  "scripts": {
+    "build": "node tools/build.js",
+    "validate": "node tools/validate-exam.js *.exam",
+    "test": "node --test tests/*.test.js",
+    "e2e": "node tests/e2e.js"
+  }
+}
