@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Exam Simulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+
+        :root {
+            --primary: #01a982;
+            --primary-hover: #018566;
+            --primary-light: #e0f5ef;
+            --dark: #111111;
+            --dark-gray: #444444;
+            --gray: #888888;
+            --light-gray: #f4f6f8;
+            --border: #e2e8f0;
+            --white: #ffffff;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --error: #ef4444;
+            --error-light: #fee2e2;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--light-gray);
+            color: var(--dark);
+            line-height: 1.5;
+            padding-bottom: 40px;
+        }
+
+        header {
+            background-color: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hpe-element {
+            width: 40px;
+            height: 16px;
+            border: 4px solid var(--primary);
+            border-radius: 2px;
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text span {
+            color: var(--primary);
+        }
+
+        .main-wrapper {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background-color: var(--white);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.01);
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        p.subtitle {
+            color: var(--gray);
+            font-size: 1rem;
+            margin-bottom: 25px;
+        }
+
+        .grid-dashboard {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 900px) {
+            .grid-dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .topic-list {
+            margin-top: 15px;
+        }
+
+        .topic-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+        }
+
+        .topic-item:last-child {
+            border-bottom: none;
+        }
+
+        .topic-name {
+            font-weight: 500;
+            color: var(--dark-gray);
+            max-width: 75%;
+        }
+
+        .topic-count {
+            background-color: var(--light-gray);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--gray);
+        }
+
+        .setup-box {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+
+        select, input {
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: 0.95rem;
+            outline: none;
+            width: 100%;
+            background-color: var(--white);
+        }
+
+        select:focus, input:focus {
+            border-color: var(--primary);
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Runtime Styles */
+        .runtime-layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 25px;
+        }
+
+        @media (max-width: 900px) {
+            .runtime-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tag-topic {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .q-number {
+            font-weight: 600;
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: var(--dark);
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .option-card {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+
+        .option-card:hover {
+            border-color: var(--primary);
+            background-color: rgba(1, 169, 130, 0.01);
+        }
+
+        .option-card.selected {
+            border-color: var(--primary);
+            background-color: var(--primary-light);
+        }
+
+        .option-marker {
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--gray);
+            background-color: var(--white);
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .option-card.selected .option-marker {
+            border-color: var(--primary);
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .option-text {
+            font-size: 0.95rem;
+            color: var(--dark-gray);
+            font-weight: 400;
+        }
+
+        .option-card.selected .option-text {
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Sidebar Grid Navigation */
+        .sidebar-box {
+            background-color: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .sidebar-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .grid-navigation {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .nav-grid-btn {
+            height: 40px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background-color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-grid-btn:hover {
+            border-color: var(--dark);
+        }
+
+        .nav-grid-btn.active {
+            border-color: var(--primary);
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .nav-grid-btn.answered {
+            background-color: var(--dark);
+            color: var(--white);
+            border-color: var(--dark);
+        }
+
+        .nav-grid-btn.answered.active {
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+
+        .nav-grid-btn.answered-correct {
+            background-color: var(--success);
+            color: var(--white);
+            border-color: var(--success);
+        }
+
+        .nav-grid-btn.answered-wrong {
+            background-color: var(--error);
+            color: var(--white);
+            border-color: var(--error);
+        }
+
+        .nav-grid-btn.answered-correct.active,
+        .nav-grid-btn.answered-wrong.active {
+            box-shadow: 0 0 0 3px rgba(0,0,0,0.25);
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        /* Summary Dashboard Metrics */
+        .metrics-summary-box {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        @media (max-width: 600px) {
+            .metrics-summary-box {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+        }
+
+        .score-circle {
+            width: 100px;
+            height: 100px;
+            border: 8px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .review-item-card {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: var(--white);
+        }
+
+        .review-item-card.is-correct {
+            border-left: 5px solid var(--success);
+        }
+
+        .review-item-card.is-incorrect {
+            border-left: 5px solid var(--error);
+        }
+
+        .review-status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .is-correct .review-status-badge {
+            background-color: var(--success-light);
+            color: var(--success);
+        }
+
+        .is-incorrect .review-status-badge {
+            background-color: var(--error-light);
+            color: var(--error);
+        }
+
+        .explanation-box {
+            background-color: var(--light-gray);
+            border-radius: 4px;
+            padding: 15px;
+            border-left: 3px solid var(--gray);
+        }
+    
+        .option-marker input[type='checkbox']{ width:18px; height:18px; transform:translateY(-1px);}
+
+        #validate-btn {
+            background-color: #111111; color: #ffffff;
+            border: 2px solid #111111; padding: 12px 20px;
+            border-radius: 6px; font-size: 1rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s ease; margin-right: 12px;
+        }
+        #validate-btn:hover { background-color: #333333; border-color: #333333; }
+        .correct-reveal  { background-color: #d1fae5 !important; border: 2px solid #10b981 !important; color: #065f46 !important; }
+        .incorrect-reveal{ background-color: #fee2e2 !important; border: 2px solid #ef4444 !important; color: #991b1b !important; }
+        .dynamic-explanation-box {
+            background-color: #f4f6f8; border-left: 4px solid #01a982;
+            padding: 16px; margin-top: 20px; margin-bottom: 20px;
+            border-radius: 0 8px 8px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+    </style>
+    <script>
+    (function() {
+        var p = new URLSearchParams(window.location.search);
+        var c = p.get('content');
+        if (c) { document.write('<scr' + 'ipt src="' + c + '.js"></scr' + 'ipt>'); }
+    })();
+    </script>
+</head>
+<body>
+<header>
+        <div class="header-container">
+            <div class="logo-area">
+                <div class="hpe-element"></div>
+                <div class="logo-text"><span id="logo-exam-code">EXAM</span> <span>SIMULATOR</span> <span id="logo-version" style="font-size:0.7rem;color:var(--gray);font-weight:400;"></span></div>
+            </div>
+            <div id="runtime-timer-box" class="q-number hidden">Time Remaining: <span id="runtime-clock-string" style="color: var(--dark); font-weight: 600;">--:--</span></div>
+        </div>
+    </header>
+
+    <div class="main-wrapper">
+        <div id="no-content-message" class="card hidden" style="text-align:center; padding:60px 30px;">
+            <h1 style="font-size:1.5rem; margin-bottom:15px; color:var(--dark);">No exam content loaded</h1>
+            <p style="color:var(--gray); font-size:1rem;">Use the URL parameter <code style="background:var(--light-gray);padding:2px 8px;border-radius:4px;font-weight:600;">?content=ExamName</code> to load an exam file.</p>
+            <p style="color:var(--gray); font-size:0.9rem; margin-top:10px;">Example: <code style="background:var(--light-gray);padding:2px 8px;border-radius:4px;">exam.html?content=genAI</code></p>
+        </div>
+
+        
+        <!-- MAIN DASHBOARD -->
+        <div id="main-dashboard" class="card hidden">
+            <h1 id="dashboard-title">Exam Practice Repository</h1>
+            <p id="dashboard-subtitle" class="subtitle"></p>
+            
+            <div class="grid-dashboard">
+                <div>
+                    <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 10px;">Operational Knowledge Distribution</h3>
+                    <div id="distribution-payload-box" class="topic-list">
+                        <!-- Dynamic Distribution Items -->
+                    </div>
+                </div>
+                
+                <div class="sidebar-box" style="margin-top: 15px;">
+                    <h3 class="sidebar-title">Session Configuration</h3>
+                    <div class="setup-box">
+                        <div class="form-group">
+                            <label for="config-selection-mode">Select Target Mode / Scope</label>
+                            <select id="config-selection-mode">
+                                <!-- Populated Dynamically with Options -->
+                            </select>
+                        </div>
+                        <button class="btn" onclick="EngineController.startExam()">Initialize Simulator Session</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RUNTIME ENGINE INTERFACE -->
+        <div id="runtime-interface" class="hidden">
+            <div class="runtime-layout">
+                <div class="card" style="margin-bottom: 0;">
+                    <div class="question-header">
+                        <span id="runtime-topic-tag" class="tag-topic">TOPIC TAG</span>
+                        <span id="runtime-position-string" class="q-number">Question -- of --</span>
+                    </div>
+                    
+                    <div id="runtime-question-text" class="question-text">Loading question scenario metadata...</div>
+                    
+                    <div id="runtime-options-box" class="options-list">
+                        <!-- Dynamic Options List -->
+                    </div>
+                    
+                    <div class="nav-controls">
+                        <button class="btn btn-secondary" onclick="EngineController.prevQuestion()">Previous</button>
+                        <button id="session-action-trigger" class="btn" onclick="EngineController.nextQuestion()">Next Question</button>
+                    </div>
+                </div>
+                
+                <div class="sidebar-box">
+                    <h3 class="sidebar-title">Session Progress Matrix</h3>
+                    <div id="runtime-matrix-grid" class="grid-navigation">
+                        <!-- Dynamic Navigation Matrix Grid Blocks -->
+                    </div>
+                    <button class="btn btn-secondary" style="width: 100%; border-color: var(--error); color: var(--error);" onclick="EngineController.submitExam()">Terminate & Score Session</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUMMARY RESULTS DASHBOARD -->
+        <div id="summary-dashboard" class="card hidden">
+            <h1>Performance Analysis Metric Dashboard</h1>
+            <p class="subtitle">Detailed evaluation breakdown matching baseline compliance configurations.</p>
+            
+            <div class="metrics-summary-box">
+                <div id="metric-percentage" class="score-circle">--%</div>
+                <div>
+                    <h2 id="metric-raw-string" style="font-size: 1.3rem; font-weight: 600; margin-bottom: 4px;">You answered -- out of -- questions correctly.</h2>
+                    <p style="color: var(--gray); font-size: 0.95rem;">Review the comprehensive rationale validation matrix below to evaluate infrastructure constraints.</p>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 25px; display: flex; gap: 15px;">
+                <button class="btn" onclick="EngineController.returnToMainMenu()">Return to Main Repository</button>
+            </div>
+
+            <div id="review-payload-box">
+                <!-- Dynamic Post-Exam Evaluation Cards -->
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+// ENGINE RUNTIME CONTROLLER
+        const EngineController = {
+            sessionItems: [],
+            currentActiveIndex: 0,
+            userSelections: {},
+            timerRef: null,
+            secondsRemaining: 0,
+
+            init: function() {
+                this.renderSelectionDashboard();
+            },
+
+            renderSelectionDashboard: function() {
+                const topicMap = {};
+                window.ExamData.questions.forEach(item => {
+                    topicMap[item.topic] = (topicMap[item.topic] || 0) + 1;
+                });
+
+                const distributionPayloadBox = document.getElementById("distribution-payload-box");
+                const configSelectionMode = document.getElementById("config-selection-mode");
+                
+                distributionPayloadBox.innerHTML = "";
+                
+                // Clear and build layout options matching user requirement specifications
+                configSelectionMode.innerHTML = `
+                    <option value="mock20">Standard Mock Exam (${window.ExamData.config.mockStandardCount} Randomized Questions)</option>
+                    <option value="mock40">Official Exam Simulation (${window.ExamData.config.mockOfficialCount} Questions · ${Math.floor(window.ExamData.config.mockOfficialTimeSec/60)} min · Pass 65%)</option>
+                    <option value="all">Comprehensive Blueprint Evaluation (All ${window.ExamData.questions.length} Items)</option>
+                    <optgroup id="topic-group-wrapper" label="Practice by Target Domain Topic"></optgroup>
+                `;
+
+                const topicGroupWrapper = document.getElementById("topic-group-wrapper");
+
+                // Add flat count aggregate row
+                const totalItemCount = window.ExamData.questions.length;
+                distributionPayloadBox.innerHTML += `
+                    <div class="topic-item" style="background-color: var(--primary-light); border-radius: 6px; border-bottom: none; margin-bottom: 10px;">
+                        <span class="topic-name" style="color: var(--primary); font-weight: 700;">Aggregate Active Question Vault Size</span>
+                        <span class="topic-count" style="background-color: var(--primary); color: var(--white);">${totalItemCount} Questions</span>
+                    </div>
+                `;
+
+                Object.keys(topicMap).forEach(topic => {
+                    distributionPayloadBox.innerHTML += `
+                        <div class="topic-item">
+                            <span class="topic-name">${topic}</span>
+                            <span class="topic-count">${topicMap[topic]} Items</span>
+                        </div>
+                    `;
+                    
+                    const selectOption = document.createElement("option");
+                    selectOption.value = topic;
+                    selectOption.textContent = `${topic} (${topicMap[topic]} Items)`;
+                    topicGroupWrapper.appendChild(selectOption);
+                });
+            },
+
+            startExam: function() {
+                const selectedScope = document.getElementById("config-selection-mode").value;
+                this._examMode = selectedScope;
+
+                const byTopic = {};
+                window.ExamData.questions.forEach(q => {
+                    if (!byTopic[q.topic]) byTopic[q.topic] = [];
+                    byTopic[q.topic].push(q);
+                });
+
+                const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
+                const pickOne = topic => shuffle(byTopic[topic] || []).slice(0, 1);
+
+                if (selectedScope === "mock20") {
+                    this.sessionItems = shuffle(window.ExamData.questions).slice(0, window.ExamData.config.mockStandardCount);
+                } else if (selectedScope === "mock40") {
+                    const pool = [];
+                    const used = new Set();
+
+                    const addWeighted = (topics, total) => {
+                        let remaining = total;
+                        let round = 0;
+                        while (remaining > 0 && round < 50) {
+                            for (const topic of shuffle(topics)) {
+                                if (remaining <= 0) break;
+                                const candidates = shuffle((byTopic[topic] || []).filter(q => !used.has(q.id)));
+                                if (!candidates.length) continue;
+                                const q = candidates[0];
+                                used.add(q.id);
+                                pool.push(q);
+                                remaining--;
+                            }
+                            round++;
+                        }
+                    };
+
+                    window.ExamData.config.macroGroups.forEach(function(group) {
+                        addWeighted(group.topics, group.weight);
+                    });
+
+                    if (pool.length < window.ExamData.config.mockOfficialCount) {
+                        const remaining = shuffle(window.ExamData.questions.filter(q => !used.has(q.id)));
+                        pool.push(...remaining.slice(0, window.ExamData.config.mockOfficialCount - pool.length));
+                    }
+
+                    this.sessionItems = shuffle(pool).slice(0, window.ExamData.config.mockOfficialCount);
+                } else if (selectedScope === "all") {
+                    this.sessionItems = [...window.ExamData.questions];
+                } else {
+                    this.sessionItems = window.ExamData.questions.filter(item => item.topic === selectedScope);
+                }
+
+                this.currentActiveIndex = 0;
+                this.userSelections = {};
+                this.validatedAnswers = {};
+
+                document.getElementById("main-dashboard").classList.add("hidden");
+                document.getElementById("runtime-interface").classList.remove("hidden");
+
+                const allocatedSec = selectedScope === "mock40" ? window.ExamData.config.mockOfficialTimeSec : this.sessionItems.length * window.ExamData.config.timePerQuestionSec;
+                this.initializeClock(allocatedSec);
+                this.renderActiveQuestion();
+                this.buildMatrixGrid();
+            },
+
+            initializeClock: function(allocatedSeconds) {
+                clearInterval(this.timerRef);
+                this.secondsRemaining = allocatedSeconds;
+                const clockDisplayBox = document.getElementById("runtime-timer-box");
+                clockDisplayBox.classList.remove("hidden");
+
+                const updateClockString = () => {
+                    if (this.secondsRemaining <= 0) {
+                        clearInterval(this.timerRef);
+                        this.submitExam();
+                        return;
+                    }
+                    this.secondsRemaining--;
+                    const minutesCount = Math.floor(this.secondsRemaining / 60);
+                    const remSeconds = this.secondsRemaining % 60;
+                    document.getElementById("runtime-clock-string").innerText = 
+                        `${minutesCount.toString().padStart(2, '0')}:${remSeconds.toString().padStart(2, '0')}`;
+                };
+
+                updateClockString();
+                this.timerRef = setInterval(updateClockString, 1000);
+            },
+
+            renderActiveQuestion: function() {
+                const questionObj = this.sessionItems[this.currentActiveIndex];
+                
+                document.getElementById("runtime-topic-tag").innerText = questionObj.topic;
+                document.getElementById("runtime-position-string").innerText = `Question ${this.currentActiveIndex + 1} of ${this.sessionItems.length}`;
+                document.getElementById("runtime-question-text").innerText = questionObj.question;
+
+                const optionsBox = document.getElementById("runtime-options-box");
+                optionsBox.innerHTML = "";
+
+                const letters = ["A", "B", "C", "D", "E"];
+                const stored = this.userSelections[this.currentActiveIndex];
+                const selected = questionObj.type === 'multiple' ? (Array.isArray(stored) ? stored : []) : stored;
+                questionObj.options.forEach((optionText, index) => {
+                    const cardElement = document.createElement("div");
+                    const isSelected = questionObj.type === 'multiple' ? selected.includes(index) : selected === index;
+                    cardElement.className = `option-card ${isSelected ? 'selected' : ''}`;
+                    cardElement.onclick = () => this.selectOption(index);
+
+                    cardElement.innerHTML = `
+                        <div class="option-marker">${questionObj.type === 'multiple' ? '<input type=\"checkbox\" disabled ' + (isSelected ? 'checked' : '') + '/>' : letters[index]}</div><div class="option-text">${optionText}</div>
+                    `;
+                    optionsBox.appendChild(cardElement);
+                });
+
+                const dynamicTrigger = document.getElementById("session-action-trigger");
+                if (this.currentActiveIndex === this.sessionItems.length - 1) {
+                    dynamicTrigger.innerText = "Commit Final Selections";
+                    dynamicTrigger.style.backgroundColor = "var(--dark)";
+                } else {
+                    dynamicTrigger.innerText = "Next Question";
+                    dynamicTrigger.style.backgroundColor = "var(--primary)";
+                }
+            },
+
+            buildMatrixGrid: function() {
+                const matrixBox = document.getElementById("runtime-matrix-grid");
+                matrixBox.innerHTML = "";
+                const validated = this.validatedAnswers || {};
+
+                this.sessionItems.forEach((questionObj, index) => {
+                    const gridButton = document.createElement("div");
+                    const isActive = this.currentActiveIndex === index;
+                    const hasAnswer = this.userSelections[index] !== undefined;
+
+                    let stateClass = '';
+                    if (validated[index] === true) {
+                        stateClass = 'answered-correct';
+                    } else if (validated[index] === false) {
+                        stateClass = 'answered-wrong';
+                    } else if (hasAnswer) {
+                        stateClass = 'answered';
+                    }
+
+                    gridButton.className = `nav-grid-btn ${isActive ? 'active' : ''} ${stateClass}`;
+                    gridButton.innerText = index + 1;
+                    gridButton.onclick = () => this.jumpToQuestion(index);
+                    matrixBox.appendChild(gridButton);
+                });
+            },
+
+            selectOption: function(index) {
+                const q = this.sessionItems[this.currentActiveIndex];
+                if (!q) return;
+                if (q.type === 'multiple') {
+                    const current = Array.isArray(this.userSelections[this.currentActiveIndex]) ? this.userSelections[this.currentActiveIndex] : [];
+                    const next = current.includes(index) ? current.filter(i => i !== index) : [...current, index].sort((a,b)=>a-b);
+                    this.userSelections[this.currentActiveIndex] = next;
+                } else {
+                    this.userSelections[this.currentActiveIndex] = index;
+                }
+                this.renderActiveQuestion();
+                this.buildMatrixGrid();
+            },
+
+            jumpToQuestion: function(targetIndex) {
+                this.currentActiveIndex = targetIndex;
+                this.renderActiveQuestion();
+                this.buildMatrixGrid();
+            },
+
+            nextQuestion: function() {
+                if (this.currentActiveIndex === this.sessionItems.length - 1) {
+                    this.submitExam();
+                } else {
+                    this.currentActiveIndex++;
+                    this.renderActiveQuestion();
+                    this.buildMatrixGrid();
+                }
+            },
+
+            prevQuestion: function() {
+                if (this.currentActiveIndex > 0) {
+                    this.currentActiveIndex--;
+                    this.renderActiveQuestion();
+                    this.buildMatrixGrid();
+                }
+            },
+
+            submitExam: function() {
+                clearInterval(this.timerRef);
+                document.getElementById("runtime-timer-box").classList.add("hidden");
+                document.getElementById("runtime-interface").classList.add("hidden");
+                document.getElementById("summary-dashboard").classList.remove("hidden");
+
+                const reviewPayloadBox = document.getElementById("review-payload-box");
+                reviewPayloadBox.innerHTML = "";
+
+                let calculatedCorrectSum = 0;
+                const totalItemCount = this.sessionItems.length;
+
+                this.sessionItems.forEach((questionObj, index) => {
+                    const chosen = this.userSelections[index];
+                    const correct = Array.isArray(questionObj.answer) ? questionObj.answer.slice().sort((a,b)=>a-b) : [questionObj.answer];
+                    const chosenArr = Array.isArray(chosen) ? chosen.slice().sort((a,b)=>a-b) : [chosen];
+                    const statusIsCorrect = JSON.stringify(chosenArr) === JSON.stringify(correct);
+
+                    if (statusIsCorrect) calculatedCorrectSum++;
+
+                    const itemCard = document.createElement("div");
+                    itemCard.className = `review-item-card ${statusIsCorrect ? 'is-correct' : 'is-incorrect'}`;
+
+                    let optionsListString = "";
+                    const letters = ["A", "B", "C", "D", "E"];
+                    
+                    questionObj.options.forEach((opt, optIdx) => {
+                        let trackingStyle = "";
+                        if (correct.includes(optIdx)) {
+                            trackingStyle = "color: var(--success); font-weight: 600; background-color: var(--success-light); border-radius: 4px; padding: 2px 6px;";
+                        } else if (chosenArr.includes(optIdx) && !statusIsCorrect) {
+                            trackingStyle = "color: var(--error); font-weight: 600; background-color: var(--error-light); border-radius: 4px; padding: 2px 6px;";
+                        }
+
+                        optionsListString += `<p style="margin: 6px 0; ${trackingStyle}"><strong>${letters[optIdx]}:</strong> ${opt}</p>`;
+                    });
+
+                    itemCard.innerHTML = `
+                        <span class="review-status-badge">${statusIsCorrect ? 'Verification Success' : 'Anomaly Flagged'}</span>
+                        <h3 style="font-size:1.05rem; margin-bottom:10px;">Question ${index + 1}: ${questionObj.question}</h3>
+                        <div style="margin-bottom:15px; font-size:0.95rem;">${optionsListString}</div>
+                        <div class="explanation-box" style="margin-top:15px;">
+                            <h4 style="font-size:0.95rem;">Rationale</h4>
+                            <p style="font-size:0.9rem;">${questionObj.explanation}</p>
+                        </div>
+                    `;
+                    reviewPayloadBox.appendChild(itemCard);
+                });
+
+                const metricScorePercentage = Math.round((calculatedCorrectSum / totalItemCount) * 100);
+                document.getElementById("metric-percentage").innerText = `${metricScorePercentage}%`;
+                (() => {
+                        const passThreshold = (EngineController._examMode === "mock40") ? window.ExamData.config.passThresholdMockOfficial : window.ExamData.config.passThresholdDefault;
+                        const passed = metricScorePercentage >= passThreshold;
+                        document.getElementById("metric-percentage").style.borderColor = passed ? "var(--success)" : "var(--error)";
+                        document.getElementById("metric-percentage").style.color = passed ? "var(--success)" : "var(--error)";
+                        // Show pass/fail badge
+                        const existingBadge = document.getElementById("exam-result-badge");
+                        if (existingBadge) existingBadge.remove();
+                        const badge = document.createElement("p");
+                        badge.id = "exam-result-badge";
+                        badge.style.cssText = "font-size:1rem;font-weight:700;margin-top:8px;color:" + (passed ? "var(--success)" : "var(--error)");
+                        badge.textContent = passed
+                            ? "✅ PASS — Soglia " + passThreshold + "% raggiunta"
+                            : "❌ FAIL — Soglia " + passThreshold + "% non raggiunta";
+                        document.getElementById("metric-percentage").parentNode.appendChild(badge);
+                    })();
+                    void 0;
+                document.getElementById("metric-raw-string").innerText = `You correctly answered ${calculatedCorrectSum} out of ${totalItemCount} questions.`;
+            },
+
+            returnToMainMenu: function() {
+                this.validatedAnswers = {};
+                document.getElementById("exam-result-badge") && document.getElementById("exam-result-badge").remove();
+                document.getElementById("summary-dashboard").classList.add("hidden");
+                document.getElementById("runtime-interface").classList.add("hidden");
+                document.getElementById("main-dashboard").classList.remove("hidden");
+                window.scrollTo(0, 0);
+                this.renderSelectionDashboard();
+            }
+        };
+
+        // init() called by dynamic loader
+    
+    </script>
+
+    <script>
+function initExamEnhancements() {
+
+
+    // ── 1. SHUFFLE OPTIONS (con aggiornamento dell'indice corretto) ──────────
+    if (typeof window.ExamData.questions !== 'undefined' && Array.isArray(window.ExamData.questions)) {
+        window.ExamData.questions.forEach(q => {
+            if (!q.options || !Array.isArray(q.answer)) return;
+
+            // Crea array di indici originali
+            const indices = q.options.map((_, i) => i);
+
+            // Fisher-Yates shuffle degli indici
+            for (let i = indices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indices[i], indices[j]] = [indices[j], indices[i]];
+            }
+
+            // Riordina le opzioni secondo il nuovo ordine
+            const shuffledOptions = indices.map(i => q.options[i]);
+
+            // Ricalcola gli indici corretti
+            const newAnswer = q.answer.map(oldIdx => indices.indexOf(oldIdx));
+
+            q.options = shuffledOptions;
+            q.answer  = newAnswer;
+        });
+    }
+
+    // ── 3. STATO ─────────────────────────────────────────────────────────────
+    let isValidated   = false;
+    let lastQIdx      = -1;
+
+    // ── 4. INJECT VALIDATE BUTTON (event-driven, non setInterval) ───────────
+    // Sostituisce il monkey-patching ogni volta che renderActiveQuestion scatta
+    function injectValidateBtn() {
+        if (document.getElementById('validate-btn')) return;
+        const nextBtn = document.getElementById('session-action-trigger');
+        if (!nextBtn) return;
+
+        const btn = document.createElement('button');
+        btn.id        = 'validate-btn';
+        btn.innerText = 'Validate Answer';
+        btn.type      = 'button';
+        btn.addEventListener('click', executeValidation);
+        nextBtn.parentNode.insertBefore(btn, nextBtn);
+    }
+
+    // Intercetta renderActiveQuestion per resettare stato e iniettare bottone
+    function patchEngine() {
+        
+
+        const origRender = EngineController.renderActiveQuestion.bind(EngineController);
+        EngineController.renderActiveQuestion = function() {
+            origRender();
+
+            // Reset stato se domanda cambiata
+            if (EngineController.currentActiveIndex !== lastQIdx) {
+                lastQIdx   = EngineController.currentActiveIndex;
+                isValidated = false;
+                document.querySelector('.dynamic-explanation-box')?.remove();
+            }
+
+            injectValidateBtn();
+        };
+
+        // Inietta anche alla prima render già eseguita
+        injectValidateBtn();
+    }
+
+    // ── 5. LOGICA DI VALIDAZIONE ─────────────────────────────────────────────
+    function executeValidation() {
+        if (isValidated) return;
+
+        const activeIdx     = EngineController.currentActiveIndex;
+        const currentItem   = EngineController.sessionItems[activeIdx];
+        if (!currentItem) return;
+
+        const hasSelection = EngineController.userSelections[activeIdx] !== undefined;
+        if (!hasSelection) { alert("Seleziona un'opzione prima di validare!"); return; }
+
+        isValidated = true;
+
+        const optionCards = Array.from(document.querySelectorAll('.option-card'));
+
+        const chosenRaw = EngineController.userSelections[activeIdx];
+        const chosen = Array.isArray(chosenRaw) ? chosenRaw : (chosenRaw === undefined ? [] : [chosenRaw]);
+        const correct = Array.isArray(currentItem.answer) ? currentItem.answer : [currentItem.answer];
+        const isCorrect = JSON.stringify([...chosen].sort((a,b)=>a-b)) === JSON.stringify([...correct].sort((a,b)=>a-b));
+
+        // Colora verde le risposte corrette
+        correct.forEach(correctIdx => {
+            optionCards[correctIdx]?.classList.add('correct-reveal');
+        });
+
+        // Colora rosso la risposta sbagliata scelta
+        optionCards.forEach((card, idx) => {
+            if (card.classList.contains('selected') && !correct.includes(idx)) {
+                card.classList.add('incorrect-reveal');
+            }
+        });
+
+        // Aggiorna validatedAnswers e ridisegna la matrix con i colori
+        if (!EngineController.validatedAnswers) EngineController.validatedAnswers = {};
+        EngineController.validatedAnswers[activeIdx] = isCorrect;
+        EngineController.buildMatrixGrid();
+
+        // Mostra spiegazione
+        const optionsBox = document.getElementById('runtime-options-box');
+        if (optionsBox && !document.querySelector('.dynamic-explanation-box')) {
+            const expBox = document.createElement('div');
+            expBox.className = 'dynamic-explanation-box';
+            expBox.innerHTML = `
+                <h4 style="font-size:1rem;color:#111;margin-bottom:6px;font-weight:700;">Architectural Rationale</h4>
+                <p style="font-size:0.92rem;color:#444;line-height:1.5;margin:0;">${currentItem.explanation || 'No explanation available.'}</p>
+            `;
+            optionsBox.parentNode.insertBefore(expBox, optionsBox.nextSibling);
+        }
+    }
+
+    // ── 6. STRATIFIED SAMPLING per Mock 20 ──────────────────────────────────
+    // Override startExam per garantire almeno 1 domanda per topic
+    function patchStartExam() {
+        
+
+        const origStart = EngineController.startExam.bind(EngineController);
+        EngineController.startExam = function() {
+            const selectedScope = document.getElementById("config-selection-mode").value;
+
+            if (selectedScope === "mock20") {
+                // Raggruppa per topic
+                const byTopic = {};
+                window.ExamData.questions.forEach(q => {
+                    if (!byTopic[q.topic]) byTopic[q.topic] = [];
+                    byTopic[q.topic].push(q);
+                });
+
+                const topics = Object.keys(byTopic);
+                let pool = [];
+
+                // 1 domanda garantita per topic (shufflata internamente)
+                topics.forEach(t => {
+                    const arr = [...byTopic[t]].sort(() => Math.random() - 0.5);
+                    pool.push(arr[0]);
+                });
+
+                // Riempi fino a 20 con le rimaste, in ordine casuale
+                const used = new Set(pool.map(q => q.id));
+                const remaining = window.ExamData.questions.filter(q => !used.has(q.id))
+                                                    .sort(() => Math.random() - 0.5);
+                const needed = window.ExamData.config.mockStandardCount - pool.length;
+                pool = pool.concat(remaining.slice(0, needed));
+
+                // Shuffle finale del pool
+                pool.sort(() => Math.random() - 0.5);
+
+                this.sessionItems = pool;
+                this.currentActiveIndex = 0;
+                this.userSelections = {};
+
+                document.getElementById("main-dashboard").classList.add("hidden");
+                document.getElementById("runtime-interface").classList.remove("hidden");
+
+                this.initializeClock(pool.length * window.ExamData.config.timePerQuestionSec);
+                this.renderActiveQuestion();
+                this.buildMatrixGrid();
+            } else {
+                origStart();
+            }
+        };
+    }
+
+    // ── 7. SOGLIA DI PASSAGGIO CONFIGURABILE (72% per HPE0-V30) ─────────────
+    // Override submitExam per usare 72 invece di 70
+    function patchSubmitExam() {
+        
+
+        const origSubmit = EngineController.submitExam.bind(EngineController);
+        EngineController.submitExam = function() {
+            origSubmit();
+            // Aggiorna il colore del cerchio con soglia 72%
+            const pct = parseInt(document.getElementById("metric-percentage").innerText);
+            const pass = pct >= window.ExamData.config.passThresholdDefault;
+            document.getElementById("metric-percentage").style.borderColor = pass ? "var(--success)" : "var(--error)";
+            document.getElementById("metric-percentage").style.color        = pass ? "var(--success)" : "var(--error)";
+        };
+    }
+
+    // ── 8. localStorage: salva/ripristina progressione mid-session ───────────
+    function enableSessionPersistence() {
+        
+
+        const STORE_KEY = 'exam_session_' + window.ExamData.config.examCode;
+
+        // Salva dopo ogni selezione
+        const origSelect = EngineController.selectOption.bind(EngineController);
+        EngineController.selectOption = function(index) {
+            origSelect(index);
+            try {
+                localStorage.setItem(STORE_KEY, JSON.stringify({
+                    sessionItems  : this.sessionItems,
+                    currentIndex  : this.currentActiveIndex,
+                    userSelections: this.userSelections
+                }));
+            } catch(e) {}
+        };
+
+        // Tentativo di ripristino all'avvio
+        const origStart = EngineController.startExam.bind(EngineController);
+        EngineController.startExam = function() {
+            localStorage.removeItem(STORE_KEY); // nuova sessione = pulito
+            EngineController.validatedAnswers = {}; // reset colori matrix
+            origStart();
+        };
+
+        // Ripristino se c'è una sessione salvata e la pagina è stata ricaricata a metà
+        try {
+            const saved = JSON.parse(localStorage.getItem(STORE_KEY));
+            if (saved && saved.sessionItems && saved.sessionItems.length > 0) {
+                if (confirm("È stata trovata una sessione precedente non completata. Vuoi riprenderla?")) {
+                    EngineController.sessionItems       = saved.sessionItems;
+                    EngineController.currentActiveIndex = saved.currentIndex;
+                    EngineController.userSelections     = saved.userSelections;
+
+                    document.getElementById("main-dashboard").classList.add("hidden");
+                    document.getElementById("runtime-interface").classList.remove("hidden");
+                    EngineController.initializeClock(saved.sessionItems.length * window.ExamData.config.timePerQuestionSec);
+                    EngineController.renderActiveQuestion();
+                    EngineController.buildMatrixGrid();
+                } else {
+                    localStorage.removeItem(STORE_KEY);
+                }
+            }
+        } catch(e) {}
+
+        // Pulizia al submit
+        const origSubmitP = EngineController.submitExam.bind(EngineController);
+        EngineController.submitExam = function() {
+            localStorage.removeItem(STORE_KEY);
+            origSubmitP();
+        };
+    }
+
+    patchEngine();
+    patchStartExam();
+    patchSubmitExam();
+    enableSessionPersistence();
+
+
+}
+    </script>
+
+    <script>
+    (function() {
+        var params = new URLSearchParams(window.location.search);
+        var contentName = params.get('content');
+
+        if (!contentName) {
+            document.getElementById('no-content-message').classList.remove('hidden');
+            return;
+        }
+
+        if (!window.ExamData || !window.ExamData.config || !window.ExamData.questions) {
+            var msg = document.getElementById('no-content-message');
+            msg.innerHTML =
+                '<h1 style="font-size:1.5rem;margin-bottom:15px;color:var(--error);">Failed to load exam file</h1>' +
+                '<p style="color:var(--gray);">Could not load <strong>' + contentName + '.js</strong>. Make sure the file is in the same directory.</p>';
+            msg.classList.remove('hidden');
+            return;
+        }
+
+        var cfg = window.ExamData.config;
+        document.title = cfg.examTitle || 'Exam Simulator';
+        document.getElementById('logo-exam-code').textContent  = cfg.examCode || 'EXAM';
+        document.getElementById('logo-version').textContent    = cfg.version  || '';
+        document.getElementById('dashboard-title').textContent = (cfg.examCode || 'Exam') + ' Exam Practice Repository';
+        document.getElementById('dashboard-subtitle').textContent = cfg.subtitle || '';
+
+        document.getElementById('no-content-message').classList.add('hidden');
+        document.getElementById('main-dashboard').classList.remove('hidden');
+
+        initExamEnhancements();
+        EngineController.init();
+    })();
+    </script>
+</body>
+</html>
