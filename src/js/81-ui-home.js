@@ -25,6 +25,8 @@
             err.forEach(line => box.appendChild(el('p', { text: line })));
             v.appendChild(box);
         }
+        const banner = App.ui.backupBanner();
+        if (banner) v.appendChild(banner);
         const cat = App.loader.catalog();
         if (!cat.length) v.appendChild(el('p', { class: 'hint', style: 'text-align:center', text: App.t('noCatalog') }));
         const grid = el('div', { class: 'exam-grid', id: 'exam-list' });
@@ -39,12 +41,16 @@
             if (item.questionCount) meta.appendChild(el('span', { class: 'chip', text: App.t('examCardMeta', { n: item.questionCount, t: item.topicCount || '–' }) }));
             if (attempts.length) meta.appendChild(el('span', { class: 'chip primary', text: attempts.length === 1 ? App.t('attemptOne') : App.t('attemptsChip', { n: attempts.length }) }));
             if (sessions) meta.appendChild(el('span', { class: 'chip warn', text: App.t('inProgressChip') }));
+            if (item.local) meta.appendChild(el('span', { class: 'chip', text: App.t('localChip') }));
             grid.appendChild(el('a', { href: '?content=' + encodeURIComponent(item.file), class: 'exam-card' }, top,
                 el('div', { class: 'exam-card-title', text: App.loc(item.title) || item.file }),
                 el('div', { class: 'exam-card-desc', text: App.loc(item.description) }), meta));
         });
         v.appendChild(grid);
-        v.appendChild(el('div', { style: 'margin-top:var(--space)' }, App.ui.toolbarButtons({ stats: false })));
+        v.appendChild(el('div', { style: 'margin-top:var(--space)', class: 'toolbar' },
+            App.ui.btn(App.t('libraryImport'), 'upload', 'btn-sm', () => App.ui.openWizard(), { id: 'picker-wizard' }),
+            App.ui.btn(App.t('libraryNew'), 'star', 'btn-ghost btn-sm', () => App.ui.openEditor(null), { id: 'picker-new' }),
+            App.ui.toolbarButtons({ stats: false })));
     };
 
     // ------------------------------------------------------------- dashboard
@@ -91,8 +97,16 @@
         hero.appendChild(el('div', { class: 'hero-grid' }, heroLeft, heroMasteryRing(mastery, stats)));
         v.appendChild(hero);
 
+        const bn = App.ui.backupBanner(); if (bn) v.appendChild(bn);
+        const cl = App.ui.changelogNotice(exam); if (cl) v.appendChild(cl);
+        if (exam.preview) v.appendChild(el('div', { class: 'banner info', id: 'preview-banner' }, icon('play', 18), el('span', { class: 'banner-text', text: App.t('edPreviewBanner') }), App.ui.btn(App.t('edBackToEditor'), 'back', 'btn-sm', () => { App.state.exam = null; App.ui.renderLibrary(); App.ui.show('library'); }, { id: 'preview-back' })));
         v.appendChild(el('div', { class: 'exam-switcher' }, el('span', { class: 'exam-switcher-label', text: App.t('switchExam') }), examChips()));
-        v.appendChild(el('div', { style: 'margin-bottom:var(--space)' }, App.ui.toolbarButtons({ stats: true, examIds: [exam.id] })));
+        const tb = App.ui.toolbarButtons({ stats: true, examIds: [exam.id] });
+        tb.insertBefore(App.ui.btn(App.t('searchBtn'), 'search', 'btn-ghost btn-sm', () => App.ui.openSearch(), { id: 'dash-search' }), tb.children[1] || null);
+        tb.appendChild(App.ui.btn(App.t('exportExam'), 'download', 'btn-ghost btn-sm', () => App.ui.exportExamDialog(exam.local ? (App.library.get(exam.id) || exam) : exam, { raw: !!exam.local }), { id: 'dash-export-exam' }));
+        if (exam.changelog && exam.changelog.length) tb.appendChild(App.ui.btn(App.t('changelogTitle'), 'book', 'btn-ghost btn-sm', () => App.ui.showChangelog(exam), { id: 'dash-changelog' }));
+        if (exam.local) tb.appendChild(App.ui.btn(App.t('editBtn'), 'note', 'btn-ghost btn-sm', () => App.ui.openEditor(exam.id), { id: 'dash-edit' }));
+        v.appendChild(el('div', { style: 'margin-bottom:var(--space)' }, tb));
 
         const grid = el('div', { class: 'dash-grid' });
         const main = el('div', { class: 'dash-main' });

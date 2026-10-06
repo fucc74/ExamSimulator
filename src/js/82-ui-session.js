@@ -47,6 +47,8 @@
         refs.pace = el('span', { class: 'chip pace-chip hidden', id: 'pace-chip' });
         refs.pause = el('button', { type: 'button', class: 'chip-btn', id: 'pause-btn', onclick: () => doPause() });
         refs.flag = el('button', { type: 'button', class: 'flag-btn', onclick: () => toggleFlag() });
+        refs.report = el('button', { type: 'button', class: 'chip-btn', id: 'report-btn', onclick: () => App.ui.reportQuestion(S().item()) });
+        refs.clear = el('button', { type: 'button', class: 'chip-btn', id: 'clear-btn', onclick: () => clearAnswer() });
         refs.text = el('div', { class: 'question-text', id: 'q-text' });
         refs.body = el('div', { id: 'q-body' });
         refs.expl = el('div', { id: 'q-expl', aria: { live: 'polite' } });
@@ -70,7 +72,7 @@
 
         const main = el('div', { class: 'card q-card' },
             el('div', { class: 'q-bar' }, refs.bar),
-            el('div', { class: 'q-top' }, refs.topic, el('div', { class: 'q-meta' }, refs.pace, refs.pos, refs.pause, refs.flag)),
+            el('div', { class: 'q-top' }, refs.topic, el('div', { class: 'q-meta' }, refs.pace, refs.pos, refs.pause, refs.clear, refs.report, refs.flag)),
             refs.text, refs.body, refs.expl, refs.note,
             el('div', { class: 'actionbar' }, refs.prev, refs.check, el('span', { class: 'spacer' }), refs.next),
             refs.help);
@@ -192,6 +194,17 @@
         refs.flag.textContent = ''; refs.flag.appendChild(icon('flag', 14)); refs.flag.appendChild(el('span', { text: st.flag ? App.t('unflag') : App.t('flag') }));
         refs.noteArea.value = st.note || '';
         refs.note.open = !!st.note;
+        refs.clear.disabled = !!checked || !s.hasAnswer(i);
+        refs.clear.textContent = ''; refs.clear.appendChild(icon('x', 14)); refs.clear.appendChild(el('span', { text: App.t('clearBtn') }));
+        refs.report.textContent = ''; refs.report.appendChild(icon('flag', 14)); refs.report.appendChild(el('span', { text: App.t('reportBtn') }));
+    }
+
+    function clearAnswer() {
+        const s = S(), i = s.index;
+        if (s.isChecked(i) || !s.hasAnswer(i)) return;
+        s.setValue(i, undefined);
+        App.events.emit('answer', { session: s, index: i, value: undefined });
+        renderQuestion(); renderGrid(); App.ui.persist();
     }
 
     function renderGrid() {
@@ -294,6 +307,8 @@
         else if (key === 'arrowright') { if (s.index < s.length - 1) go(s.index + 1); e.preventDefault(); }
         else if (key === 'arrowleft') { go(s.index - 1); e.preventDefault(); }
         else if (key === 'm') { toggleFlag(); e.preventDefault(); }
+        else if (key === 'r') { App.ui.reportQuestion(s.item()); e.preventDefault(); }
+        else if (key === 'x') { clearAnswer(); e.preventDefault(); }
         else if (key === 'p') { if (s.paused) doUnpause(); else doPause(); e.preventDefault(); }
         else if (key === 'enter' && t.tagName !== 'BUTTON' && t.tagName !== 'A' && t.tagName !== 'SUMMARY') {
             if (s.studyMode && !s.isChecked(s.index) && s.hasAnswer(s.index)) checkAnswer(); else nextQuestion();

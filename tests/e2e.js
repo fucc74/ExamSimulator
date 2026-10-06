@@ -1,7 +1,10 @@
 // End-to-end checks in a real browser (Playwright, Chromium). Run: node tests/e2e.js
 // Requires `playwright` to be resolvable (e.g. NODE_PATH=$(npm root -g)).
 const path = require('path');
-const { chromium } = require('playwright');
+const pw = require('playwright');
+const BROWSER = process.env.E2E_BROWSER || 'chromium';          // chromium | firefox | webkit
+const DEVICE = process.env.E2E_DEVICE ? pw.devices[process.env.E2E_DEVICE] : null;   // e.g. "Pixel 7", "iPhone 14"
+if (process.env.E2E_DEVICE && !DEVICE) { console.error('unknown device ' + process.env.E2E_DEVICE); process.exit(2); }
 const { start } = require('./server.js');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -66,15 +69,16 @@ async function runAll(p, mode) {
 async function main() {
     const { server, port } = await start(ROOT, 0);
     const HTTP_BASE = 'http://127.0.0.1:' + port;
-    const browser = await chromium.launch();
-    const ctx = await browser.newContext({ colorScheme: 'light', viewport: { width: 1280, height: 800 } });
+    const browser = await pw[BROWSER].launch();
+    console.log('browser: ' + BROWSER + (DEVICE ? ' (' + process.env.E2E_DEVICE + ')' : ''));
+    const ctx = await browser.newContext(DEVICE ? Object.assign({ colorScheme: 'light' }, DEVICE) : { colorScheme: 'light', viewport: { width: 1280, height: 800 } });
     const p = await ctx.newPage();
     const errors = [];
     p.on('pageerror', e => errors.push(e.message));
     p.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errors.push(m.text()); });
     p.on('dialog', d => d.accept());
 
-    const suites = require('./e2e-suites.js');
+    const suites = Object.assign({}, require('./e2e-suites.js'), require('./e2e-v3.js'));
     const only = (process.env.E2E_ONLY || '').split(',').map(x => x.trim().toLowerCase()).filter(Boolean);
     for (const [name, fn] of Object.entries(suites)) {
         if (only.length && !only.some(o => name.toLowerCase().includes(o))) continue;

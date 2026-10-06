@@ -530,6 +530,135 @@ math { font-size: 1.1em; }
     .rich-pre { background: #f3f3f3; color: #111; border: 1px solid #ccc; white-space: pre-wrap; }
 }
 
+/* ===== Engine v3: modal, banners, options, editor, search, palette, quality ===== */
+.hidden { display: none !important; }
+
+/* Modal */
+.modal-backdrop { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 16px; background: rgba(8, 12, 20, 0.55); backdrop-filter: blur(3px); animation: fadeIn .15s both; }
+.modal-card { width: min(520px, 100%); max-height: min(88vh, 900px); display: flex; flex-direction: column; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-lg); overflow: hidden; }
+.modal-card.wide { width: min(760px, 100%); }
+.modal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px 10px 20px; border-bottom: 1px solid var(--border); }
+.modal-head h2 { font-size: 1.1rem; }
+.modal-body { padding: 16px 20px; overflow-y: auto; }
+.modal-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; padding: 12px 20px 16px; border-top: 1px solid var(--border); }
+
+/* Banners */
+.banner { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 16px; margin-bottom: var(--space); border-radius: var(--r-md); border: 1px solid var(--warning); background: var(--warning-soft); color: var(--text); }
+.banner.info { border-color: var(--primary); background: var(--primary-soft); }
+.banner > svg { flex-shrink: 0; color: var(--warning); }
+.banner.info > svg { color: var(--primary); }
+.banner-text { flex: 1 1 260px; font-size: 0.92rem; }
+.banner-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.cl-entry { margin-top: 6px; } .cl-entry ul { margin: 4px 0 0 18px; font-size: 0.9rem; }
+.update-banner { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 70; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 24px); padding: 10px 14px; border-radius: 14px; background: var(--text); color: var(--surface); box-shadow: var(--shadow-lg); font-size: 0.9rem; font-weight: 600; }
+.update-banner .btn { padding: 6px 12px; }
+.update-banner .btn-ghost { color: var(--surface); border-color: transparent; }
+
+/* Options */
+.opt-head { margin-bottom: var(--space); gap: 12px; flex-wrap: wrap; }
+.opt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: var(--space); align-items: start; }
+.opt-section { margin-bottom: 0; }
+.opt-title { display: flex; align-items: center; gap: 10px; font-size: 1.1rem; margin-bottom: 12px; }
+.opt-title svg { color: var(--primary); }
+.opt-sub { font-size: 0.95rem; margin: 16px 0 6px; }
+.opt-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.opt-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 10px 12px; border: 1px solid var(--border); border-radius: 11px; background: var(--surface-2); }
+.opt-name { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; overflow-wrap: anywhere; }
+.opt-name.stack { flex-direction: column; align-items: flex-start; gap: 2px; }
+.opt-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.opt-actions a.btn { text-decoration: none; }
+.opt-add { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+.opt-add input { flex: 1 1 200px; width: auto; }
+.check-inline { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; cursor: pointer; margin: 6px 0; }
+.check-inline input { width: 18px; height: 18px; accent-color: var(--primary); }
+.opt-section textarea { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem; word-break: break-all; }
+
+/* Editor */
+.ed-meta { margin-bottom: var(--space); }
+.ed-meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0 14px; }
+.ed-wide { grid-column: 1 / -1; }
+.ed-topics { margin-bottom: var(--space); }
+.ed-topics-sum { cursor: pointer; display: flex; align-items: center; gap: 8px; }
+.ed-topic-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.ed-topic-row { display: grid; grid-template-columns: minmax(70px, 140px) minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.ed-topic-row code { font-size: 0.8rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
+.ed-validation { position: sticky; top: 70px; z-index: 5; margin-bottom: var(--space); padding: 10px 14px; border-radius: var(--r-md); border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-sm); }
+.ed-validation.ok { border-color: var(--success); background: var(--success-soft); }
+.ed-validation.bad { border-color: var(--error); background: var(--error-soft); }
+.ed-val-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ed-val-line { font-size: 0.82rem; margin-top: 4px; overflow-wrap: anywhere; color: var(--text-2); }
+.ed-val-line.warn { color: var(--warning); }
+.ed-questions { display: flex; flex-direction: column; gap: 8px; }
+.ed-q { border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); }
+.ed-q.has-problem { border-color: var(--error); }
+.ed-q.open { box-shadow: var(--shadow-md); }
+.ed-q-head { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 14px; text-align: left; background: none; border: 0; cursor: pointer; color: var(--text); }
+.ed-q-num { min-width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px; background: var(--surface-3); font-weight: 800; font-size: 0.8rem; }
+.ed-q-text { flex: 1; min-width: 0; font-weight: 600; font-size: 0.93rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ed-q.open .ed-q-head svg { transform: rotate(180deg); }
+.ed-q-body { padding: 4px 16px 16px; border-top: 1px solid var(--border); }
+.ed-q-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0 12px; margin-top: 12px; }
+.ed-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.ed-option { display: flex; align-items: center; gap: 8px; }
+.ed-option input[type="text"] { flex: 1; }
+.ed-correct { display: inline-flex; align-items: center; gap: 6px; min-width: 52px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--surface-2); cursor: pointer; font-weight: 800; }
+.ed-correct input { accent-color: var(--success); width: 16px; height: 16px; }
+.ed-tf { display: flex; gap: 18px; }
+.ed-json { min-height: 220px; }
+.ed-q-tools { margin-top: 10px; }
+.ed-q-tools .flip svg { transform: rotate(180deg); }
+.ed-footer { display: flex; flex-wrap: wrap; gap: 10px; position: sticky; bottom: 12px; z-index: 6; padding: 12px 16px; margin-top: var(--space); box-shadow: var(--shadow-lg); }
+.exp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 12px 0; }
+.wiz-formats { margin: 8px 0 12px 18px; font-size: 0.9rem; }
+.wiz-example { margin: 8px 0; font-size: 0.85rem; }
+.wiz-example summary { cursor: pointer; color: var(--primary); font-weight: 600; }
+
+/* Search */
+.search-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0 12px; }
+.search-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin: 4px 0 12px; }
+.search-results { display: flex; flex-direction: column; gap: 10px; }
+.search-card { display: flex; gap: 12px; padding: 14px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); }
+.search-pick { display: flex; align-items: flex-start; padding-top: 3px; }
+.search-pick input { width: 18px; height: 18px; accent-color: var(--primary); }
+.search-main { flex: 1; min-width: 0; }
+.search-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.search-text { font-size: 0.95rem; margin-bottom: 8px; overflow-wrap: anywhere; }
+.search-text mark { background: var(--warning-soft); color: var(--text); padding: 0 2px; border-radius: 3px; box-shadow: 0 0 0 1px var(--warning); }
+.search-details { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-strong); }
+.btn.on { background: var(--warning-soft); border-color: var(--warning); color: var(--warning); }
+
+/* Palette + shortcuts */
+.modal-card.palette-card { width: min(560px, 100%); align-self: start; margin-top: 10vh; }
+.palette input { width: 100%; font-size: 1rem; margin-bottom: 8px; }
+.palette-list { list-style: none; margin: 0; padding: 0; max-height: 50vh; overflow-y: auto; }
+.palette-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; cursor: pointer; }
+.palette-item.active, .palette-item:hover { background: var(--primary-soft); color: var(--primary); }
+.palette-label { flex: 1; font-weight: 600; font-size: 0.93rem; }
+.palette-empty { padding: 14px; color: var(--muted); text-align: center; }
+kbd { display: inline-block; min-width: 22px; padding: 2px 7px; border-radius: 6px; border: 1px solid var(--border-strong); border-bottom-width: 2px; background: var(--surface-2); font: 600 0.78rem ui-monospace, SFMono-Regular, Menlo, monospace; text-align: center; color: var(--text-2); }
+.kbd-table { width: 100%; border-collapse: collapse; }
+.kbd-table td { padding: 7px 4px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+.kbd-table td:first-child { white-space: nowrap; width: 1%; padding-right: 16px; }
+
+/* Quality + reports */
+#quality-panel { margin-top: var(--space); }
+.quality-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.quality-row { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); }
+.quality-row .hint { grid-column: 2; }
+.quality-text { overflow-wrap: anywhere; font-size: 0.92rem; }
+.review-tools { margin-top: 10px; display: flex; justify-content: flex-end; }
+.report-q { font-weight: 600; margin-bottom: 12px; overflow-wrap: anywhere; }
+
+@media (max-width: 600px) {
+    .ed-topic-row { grid-template-columns: 1fr; }
+    .ed-footer { bottom: 8px; }
+    .search-card { padding: 12px; gap: 10px; }
+    .modal-card { max-height: 92vh; }
+    .modal-card.palette-card { margin-top: 4vh; }
+    .app-header-inner .icon-btn { min-width: 36px; }
+}
+@media print { .banner, .update-banner, .modal-backdrop, .review-tools { display: none !important; } }
+
     </style>
     <script>
     // Apply the saved theme before first paint (avoids a flash)
@@ -558,6 +687,8 @@ math { font-size: 1.1em; }
         </a>
         <div class="header-actions">
             <div id="runtime-timer-box" class="timer-pill hidden" role="timer"><span id="timer-icon"></span><span id="timer-label" class="timer-label"></span><span id="runtime-clock-string">--:--</span></div>
+            <button type="button" id="palette-btn" class="icon-btn"></button>
+            <button type="button" id="options-btn" class="icon-btn"></button>
             <button type="button" id="lang-btn" class="icon-btn"></button>
             <button type="button" id="theme-btn" class="icon-btn"></button>
         </div>
@@ -571,6 +702,9 @@ math { font-size: 1.1em; }
     <section id="view-review" class="view hidden"></section>
     <section id="view-summary" class="view hidden"></section>
     <section id="view-stats" class="view hidden"></section>
+    <section id="view-options" class="view hidden"></section>
+    <section id="view-library" class="view hidden"></section>
+    <section id="view-search" class="view hidden"></section>
 </main>
 <div id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="import-file" accept=".json,application/json" class="hidden">
@@ -583,7 +717,7 @@ window.ExamCatalogDefault = [{"file":"demo","id":"demo","title":{"en":"Engine De
 'use strict';
 /* Core: namespace, utilities, event bus, extension points */
 const App = {
-    version: '2.0.0',
+    version: '3.0.0',
     FORMAT_VERSION: 2,
     types: {},        // question type handlers (see 20-types.js)
     modeBuilders: {}, // extra study modes registered by plugins
@@ -671,7 +805,9 @@ App.util.ICONS = {
     star: ['M12 2l3 7 7 .6-5.3 4.7 1.6 7.2L12 17.8 5.7 21.5l1.6-7.2L2 9.6 9 9l3-7z'],
     menu: ['M3 6h18M3 12h18M3 18h18'],
     chevron: ['M6 9l6 6 6-6'],
-    home: ['M3 10.5L12 3l9 7.5', 'M5 9.5V21h14V9.5']
+    home: ['M3 10.5L12 3l9 7.5', 'M5 9.5V21h14V9.5'],
+    settings: ['c', 12, 12, 3, 'M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z'],
+    search: ['c', 11, 11, 7, 'M21 21l-4.3-4.3']
 };
 App.util.icon = function (name, size) {
     const NS = 'http://www.w3.org/2000/svg';
@@ -857,6 +993,133 @@ App.loc = function (v) {
     if (typeof v === 'string' || typeof v === 'number') return String(v);
     return v[App.lang] || v.en || Object.values(v)[0] || '';
 };
+
+/* UI translations added in engine v3 (options, backup/sync, library, editor, search, reports, quality). */
+Object.assign(App.I18N.en, {
+    closeBtn: "Close", cancelBtn: "Cancel", openBtn: "Open", editBtn: "Edit", renameBtn: "Rename", clearBtn: "Clear", localChip: "My exam",
+    optionsTitle: "Options", optionsSub: "Profile: {name}", themeLight: "Light", themeDark: "Dark",
+    optGeneral: "General", optLanguage: "Language", optTheme: "Theme",
+    optScoring: "Scoring", optScoringHint: "Applies to practice sessions. Exam modes that define their own rules keep them.",
+    optPartial: "Partial credit on multiple-answer, ordering and matching questions", optWrongPenalty: "Penalty for a wrong answer (fraction of the question points)", optUnansweredPenalty: "Penalty for an unanswered question (fraction)",
+    optPenaltyHint: "0 = no penalty, 0.25 = a wrong answer removes a quarter of the question points. The total never goes below zero.",
+    optRules: "Exam rules", optRulesHint: "For exam modes (timed simulations). You can always move freely between questions.", optPauses: "Pauses allowed", pausesUnlimited: "Unlimited", pausesNone: "None",
+    optStrict: "Strict clock: time keeps running while the page is closed", optFreeNav: "Free navigation between questions is never restricted.",
+    optProfiles: "Profiles", optProfilesHint: "Separate progress for different people or goals on this device.", profileCurrent: "current", profileUse: "Use", profileAdd: "Add profile", profileNamePlaceholder: "New profile name",
+    profileRenamePrompt: "New name for this profile:", profileDeleteConfirm: "Delete profile \"{name}\" and all of its progress?", profileSwitched: "Profile changed.",
+    optBackup: "Backup", backupNever: "No backup made yet.", backupLast: "Last backup: {when}", backupDownload: "Download full backup", backupRestore: "Restore from file", backupRemind: "Remind me to back up", remindOff: "Never", remindDays: "every {n} days",
+    backupDue: "Your last backup was {n} days ago. Back up your progress to avoid losing it.", backupDueNever: "You have progress but no backup yet. Download one to keep your results safe.", backupNow: "Back up now", remindLater: "Remind me later",
+    autoBackupHint: "Pick a file (for example in a synced folder): the backup is rewritten after every finished session.", autoBackupChoose: "Choose backup file", autoBackupStop: "Stop", autoBackupOn: "Auto-backup: {name}", autoBackupOff: "Auto-backup off",
+    autoBackupUnsupported: "Automatic backup to a file is not available in this browser; use the download button or the sync options.",
+    optSync: "Sync between devices", syncHint: "Nothing leaves this device unless you press a button here. Progress is merged, never overwritten.",
+    syncCodeTitle: "Transfer code", syncWithLibrary: "Include my exams (can make the code much longer)", syncMakeCode: "Create code", syncCopy: "Copy", syncCopied: "Code copied.", syncCopyManual: "Select the text and copy it manually.",
+    syncCodeOutPlaceholder: "Press \"Create code\", then paste the code on the other device.", syncCodeInPlaceholder: "Paste a code made on another device here", syncImportCode: "Import code",
+    syncCodeInfo: "Code size: about {kb} KB.", syncCodeBig: "This is long: for big libraries prefer a backup file or Gist sync.",
+    gistTitle: "GitHub Gist sync", gistHint: "Uses a private gist in your GitHub account. Create a token with only the \"gist\" permission. The token stays on this device and is never part of backups.",
+    gistToken: "GitHub token", gistId: "Gist id (filled in after the first sync)", gistIdPlaceholder: "leave empty to create a new private gist", gistSync: "Sync now", gistDisconnect: "Disconnect",
+    gistSyncing: "Syncing…", gistDone: "Synced: {a} new attempts merged.", gistFail: "Sync failed: {detail}", gistLast: "Last sync: {when}",
+    optStorage: "Storage", storageKind: "Data is stored in: {kind}", storageUsage: "Used {used} of about {quota} available.", storageMemory: "memory only", storageMemoryWarn: "This browser blocks storage: your progress will be lost when you close the page. Use backups.",
+    storageWipe: "Delete all data", storageWipeConfirm: "Delete ALL progress, profiles and local exams on this device? This cannot be undone.", storageWiped: "All data deleted.",
+    optLibrary: "My exams", libraryHint: "Exams you created or imported live in this browser. They appear next to the bundled exams.", libraryEmpty: "No exams yet.", libraryImport: "Import or create from a file", libraryNew: "New empty exam", libraryDeleteConfirm: "Delete exam \"{name}\"? Your progress on it is kept.",
+    exportExam: "Export exam", importLibrary: "{n} exam(s) added to your library.",
+    optReports: "Question reports", reportsHint: "Problems you reported while studying. Export them to send to the exam author.", reportsEmpty: "No reports.", reportsExport: "Export reports",
+    optAbout: "About", shortcutsBtn: "Keyboard shortcuts", checkUpdate: "Check for updates", updateChecking: "Checking…", updateLatest: "You have the latest version.", updateAvailable: "A new version is ready: use the Reload button in the banner.", updateNoSw: "Updates are checked automatically when the app is opened from a web address.", updateFailed: "Could not check for updates.",
+    updateBanner: "A new version is available.", updateReload: "Reload",
+    // report dialog
+    reportBtn: "Report", reportTitle: "Report a problem with this question", reportKind: "What is wrong?", reportNote: "Details (optional)", reportPlaceholder: "For example: the correct answer should be C because…", reportSend: "Save report", reportSaved: "Report saved. You can find it in Options.", reportWhere: "Reports stay on this device until you export them.",
+    reportKind_wrongAnswer: "Wrong answer key", reportKind_unclear: "Unclear question", reportKind_typo: "Typo", reportKind_outdated: "Outdated", reportKind_other: "Other",
+    // what's new
+    whatsNew: "What's new in version {v}", gotIt: "Got it", changelogTitle: "Change log",
+    // quality
+    qualityTitle: "Question quality", qualityHint: "Based on your own answers (at least {n} per question) and on the question text.", qualityNone: "Nothing suspicious found.",
+    quality_tooEasy: "Too easy", quality_tooHard: "Too hard", quality_dubiousKey: "Check the answer key", quality_weakDistractor: "Weak distractors", quality_slow: "Slow to answer", quality_difficultyMismatch: "Difficulty label", quality_duplicateOptions: "Duplicate options", quality_allOfAbove: "\"All of the above\"", quality_correctMuchLonger: "Correct answer stands out",
+    qualityDetail_tooEasy: "{pct}% correct over {n} answers", qualityDetail_tooHard: "{pct}% correct over {n} answers", qualityDetail_dubiousKey: "Almost nobody is right ({pct}%) and most wrong answers pick option {opt}: the key may be wrong.", qualityDetail_weakDistractor: "Option(s) {opts} were never chosen in {n} answers.",
+    qualityDetail_slow: "{avg}s on average vs {est}s estimated", qualityDetail_difficultyMismatch: "Marked difficulty {d} but {pct}% correct", qualityDetail_duplicateOptions: "Two options have the same text.", qualityDetail_allOfAbove: "Such options are easy to guess.", qualityDetail_correctMuchLonger: "The correct option is much longer than the others.",
+    // search
+    searchBtn: "Search", searchTitle: "Search questions", searchPlaceholder: "Search text, options, explanations, tags…", searchAny: "Any", searchStatus: "Status", searchMastered: "Mastered", searchWithNotes: "With notes",
+    searchResults: "{n} of {t} questions", searchEmpty: "No question matches.", searchMore: "…and {n} more. Refine the search to see them.", searchSelect: "Select question", searchSelectAll: "Select all", searchNone: "Clear selection",
+    searchShow: "Show answer", searchHide: "Hide", searchPracticeAll: "Practice these {n}", searchPracticePicked: "Practice selected ({n})", searchSessionLabel: "Search results", searchNeedExam: "Open an exam first to search its questions.",
+    // palette / shortcuts
+    cmdTitle: "Command palette", cmdPlaceholder: "Type a command…", cmdNone: "No matching command.", cmdHome: "All exams", cmdOpenExam: "Open exam: {name}", cmdSearch: "Search questions", cmdDashboard: "Exam dashboard", cmdStart: "Start: {name}", cmdExportExam: "Export this exam…",
+    shortcutsTitle: "Keyboard shortcuts", scPalette: "Open the command palette", scHelp: "Show this help", scSearch: "Search questions", scSelect: "Select an option", scNav: "Previous / next question", scEnter: "Check answer / next", scFlag: "Flag the question", scClear: "Clear the answer", scReport: "Report a problem", scPause: "Pause / resume", scClose: "Close dialogs",
+    // wizard / editor
+    wizTitle: "Import or create an exam", wizIntro: "Choose a file or paste text. You will review everything and fix problems before saving.", wizFmtExam: "an exam file (also the older format)", wizFmtCsv: "a spreadsheet with a header row (question, options, answer…)", wizFmtText: "numbered questions with A) B) C) options and an \"Answer:\" line",
+    wizChooseFile: "File", wizOrPaste: "…or paste text", wizPastePlaceholder: "1. Question text?\nA) First option\nB) Second option\nAnswer: B\nExplanation: Why B is right.", wizContinue: "Continue", wizEmpty: "Choose a file or paste some text first.",
+    wizExampleTitle: "Show a text example", wizExample: "# My exam\n\n## Networking\n\n1. Which protocol resolves names?\nA) FTP\nB) DNS\nC) SMTP\nAnswer: B\nExplanation: DNS maps names to addresses.\n\n2. Select two private ranges.\n- [x] 10.0.0.0/8\n- [ ] 8.8.8.0/24\n- [x] 192.168.0.0/16",
+    wizLoaded: "{name} loaded ({kb} KB).", wizBadExam: "This file is not a readable exam: {detail}", wizNoQuestions: "No questions were found. Number them (1. 2. 3.) and put the options on separate lines (A) B) C)).", wizNoTextColumn: "The spreadsheet needs a column named \"question\" or \"text\".", wizDefaultTitle: "My exam",
+    wizNoteExam: "Exam file loaded.", wizNoteText: "{n} questions were found in the text. Check the ones marked with a problem.", wizNoteCsv: "{n} rows were read from the spreadsheet. Check the ones marked with a problem.",
+    edTitleNew: "New exam", edTitleEdit: "Edit exam", edSub: "Changes are validated as you type.", edDiscardConfirm: "Leave without saving your changes?",
+    edExamTitle: "Title", edExamId: "Identifier", edIdHint: "Fixed after the first save.", edVersion: "Version", edPass: "Pass mark (%)", edDescription: "Description",
+    edTopics: "Topics", edNewTopic: "New topic name", edAddTopic: "Add topic", edQuestions: "Questions ({n})", edExpandAll: "Expand all", edCollapseAll: "Collapse all", edAddQuestion: "Add question", edEmptyText: "(empty question)",
+    edTopic: "Topic", edType: "Type", edDifficulty: "Difficulty", edText: "Question text", edRichHint: "Supports **bold**, `code`, lists, tables, $x^2$ formulas and images.", edAddImage: "Add image", edImageFail: "Could not read that image.",
+    edOption: "Option {n}", edCorrect: "Option {n} is correct", edOptionsSingle: "Options (select the correct one)", edOptionsMulti: "Options (select all the correct ones)", edAddOption: "Add option", edCorrectAnswer: "Correct answer", edValue: "Value", edTolerance: "Tolerance (±)",
+    edExplanation: "Explanation", edDuplicate: "Duplicate", edJsonHint: "This question uses a feature the form cannot show (ordering, matching, scenario or translations), so it is edited as JSON.",
+    edValid: "Valid: ready to save.", edProblems: "{n} problems to fix before saving", edWarnings: "{n} warnings",
+    edSave: "Save changes", edSaveNew: "Add to my exams", edSaved: "Saved in your exams.", edSaveFail: "Could not save (storage full?).", edDownload: "Download…", edPreview: "Try it", edNotValid: "Fix the {n} problems first.", edPreviewNote: "Preview: progress goes to a temporary record.", edPreviewBanner: "You are trying an unsaved draft.", edBackToEditor: "Back to the editor",
+    issue_noAnswer: "no answer found", issue_fewOptions: "needs 2+ options", issue_noOptions: "no options found", issue_noText: "no text", issue_badType: "unknown type",
+    type_single: "Single choice", type_multiple: "Multiple choice", type_truefalse: "True / False", type_ordering: "Ordering", type_matching: "Matching", type_numeric: "Numeric", type_scenario: "Scenario",
+    tfTrue: "True", tfFalse: "False",
+    expTitle: "Export exam", expIntro: "Download this exam in another format. Progress is not included.", expLanguage: "Language of the export", expLangHint: "Formats other than .exam keep one language only.", expDone: "File downloaded.", expSkipped: "{n} question(s) were skipped because the format cannot hold them (ordering, matching or scenario)."
+});
+
+Object.assign(App.I18N.it, {
+    closeBtn: "Chiudi", cancelBtn: "Annulla", openBtn: "Apri", editBtn: "Modifica", renameBtn: "Rinomina", clearBtn: "Cancella", localChip: "Mio esame",
+    optionsTitle: "Opzioni", optionsSub: "Profilo: {name}", themeLight: "Chiaro", themeDark: "Scuro",
+    optGeneral: "Generale", optLanguage: "Lingua", optTheme: "Tema",
+    optScoring: "Punteggio", optScoringHint: "Vale per le esercitazioni. Le modalità esame che definiscono regole proprie le mantengono.",
+    optPartial: "Credito parziale nelle domande a risposta multipla, ordinamento e abbinamento", optWrongPenalty: "Penalità per risposta errata (frazione dei punti della domanda)", optUnansweredPenalty: "Penalità per domanda senza risposta (frazione)",
+    optPenaltyHint: "0 = nessuna penalità, 0,25 = una risposta errata toglie un quarto dei punti. Il totale non scende mai sotto zero.",
+    optRules: "Regole d'esame", optRulesHint: "Per le modalità esame (simulazioni a tempo). Puoi sempre muoverti liberamente tra le domande.", optPauses: "Pause consentite", pausesUnlimited: "Illimitate", pausesNone: "Nessuna",
+    optStrict: "Orologio rigido: il tempo scorre anche a pagina chiusa", optFreeNav: "La navigazione libera tra le domande non viene mai limitata.",
+    optProfiles: "Profili", optProfilesHint: "Progressi separati per persone o obiettivi diversi su questo dispositivo.", profileCurrent: "attuale", profileUse: "Usa", profileAdd: "Aggiungi profilo", profileNamePlaceholder: "Nome del nuovo profilo",
+    profileRenamePrompt: "Nuovo nome per questo profilo:", profileDeleteConfirm: "Eliminare il profilo \"{name}\" e tutti i suoi progressi?", profileSwitched: "Profilo cambiato.",
+    optBackup: "Backup", backupNever: "Nessun backup ancora.", backupLast: "Ultimo backup: {when}", backupDownload: "Scarica backup completo", backupRestore: "Ripristina da file", backupRemind: "Ricordami di fare il backup", remindOff: "Mai", remindDays: "ogni {n} giorni",
+    backupDue: "L'ultimo backup risale a {n} giorni fa. Salva i progressi per non perderli.", backupDueNever: "Hai dei progressi ma nessun backup. Scaricane uno per mettere al sicuro i risultati.", backupNow: "Fai il backup", remindLater: "Ricordamelo più tardi",
+    autoBackupHint: "Scegli un file (per esempio in una cartella sincronizzata): il backup viene riscritto dopo ogni sessione conclusa.", autoBackupChoose: "Scegli il file di backup", autoBackupStop: "Interrompi", autoBackupOn: "Backup automatico: {name}", autoBackupOff: "Backup automatico spento",
+    autoBackupUnsupported: "Il backup automatico su file non è disponibile in questo browser; usa il pulsante di download o la sincronizzazione.",
+    optSync: "Sincronizzazione tra dispositivi", syncHint: "Nulla lascia questo dispositivo finché non premi un pulsante qui. I progressi vengono uniti, mai sovrascritti.",
+    syncCodeTitle: "Codice di trasferimento", syncWithLibrary: "Includi i miei esami (può allungare molto il codice)", syncMakeCode: "Crea codice", syncCopy: "Copia", syncCopied: "Codice copiato.", syncCopyManual: "Seleziona il testo e copialo a mano.",
+    syncCodeOutPlaceholder: "Premi \"Crea codice\", poi incolla il codice sull'altro dispositivo.", syncCodeInPlaceholder: "Incolla qui un codice creato su un altro dispositivo", syncImportCode: "Importa codice",
+    syncCodeInfo: "Dimensione del codice: circa {kb} KB.", syncCodeBig: "È lungo: con librerie grandi meglio un file di backup o la sincronizzazione Gist.",
+    gistTitle: "Sincronizzazione con GitHub Gist", gistHint: "Usa un gist privato nel tuo account GitHub. Crea un token con il solo permesso \"gist\". Il token resta su questo dispositivo e non fa mai parte dei backup.",
+    gistToken: "Token GitHub", gistId: "Id del gist (compilato dopo la prima sincronizzazione)", gistIdPlaceholder: "lascia vuoto per creare un nuovo gist privato", gistSync: "Sincronizza ora", gistDisconnect: "Scollega",
+    gistSyncing: "Sincronizzazione…", gistDone: "Sincronizzato: {a} nuovi tentativi uniti.", gistFail: "Sincronizzazione non riuscita: {detail}", gistLast: "Ultima sincronizzazione: {when}",
+    optStorage: "Archiviazione", storageKind: "I dati sono salvati in: {kind}", storageUsage: "Usati {used} su circa {quota} disponibili.", storageMemory: "solo memoria", storageMemoryWarn: "Questo browser blocca l'archiviazione: i progressi andranno persi alla chiusura. Usa i backup.",
+    storageWipe: "Elimina tutti i dati", storageWipeConfirm: "Eliminare TUTTI i progressi, i profili e gli esami locali su questo dispositivo? Non si può annullare.", storageWiped: "Tutti i dati eliminati.",
+    optLibrary: "I miei esami", libraryHint: "Gli esami che crei o importi restano in questo browser e compaiono accanto a quelli inclusi.", libraryEmpty: "Ancora nessun esame.", libraryImport: "Importa o crea da file", libraryNew: "Nuovo esame vuoto", libraryDeleteConfirm: "Eliminare l'esame \"{name}\"? I tuoi progressi restano.",
+    exportExam: "Esporta esame", importLibrary: "{n} esame/i aggiunti alla tua libreria.",
+    optReports: "Segnalazioni sulle domande", reportsHint: "I problemi che hai segnalato mentre studiavi. Esportali per inviarli all'autore dell'esame.", reportsEmpty: "Nessuna segnalazione.", reportsExport: "Esporta segnalazioni",
+    optAbout: "Informazioni", shortcutsBtn: "Scorciatoie da tastiera", checkUpdate: "Cerca aggiornamenti", updateChecking: "Controllo in corso…", updateLatest: "Hai l'ultima versione.", updateAvailable: "Una nuova versione è pronta: usa il pulsante Ricarica nel banner.", updateNoSw: "Gli aggiornamenti vengono controllati automaticamente quando l'app è aperta da un indirizzo web.", updateFailed: "Impossibile cercare aggiornamenti.",
+    updateBanner: "È disponibile una nuova versione.", updateReload: "Ricarica",
+    reportBtn: "Segnala", reportTitle: "Segnala un problema con questa domanda", reportKind: "Cosa non va?", reportNote: "Dettagli (facoltativo)", reportPlaceholder: "Per esempio: la risposta corretta dovrebbe essere C perché…", reportSend: "Salva segnalazione", reportSaved: "Segnalazione salvata. La trovi nelle Opzioni.", reportWhere: "Le segnalazioni restano su questo dispositivo finché non le esporti.",
+    reportKind_wrongAnswer: "Risposta corretta sbagliata", reportKind_unclear: "Domanda poco chiara", reportKind_typo: "Errore di battitura", reportKind_outdated: "Superata", reportKind_other: "Altro",
+    whatsNew: "Novità della versione {v}", gotIt: "Ho capito", changelogTitle: "Registro delle modifiche",
+    qualityTitle: "Qualità delle domande", qualityHint: "In base alle tue risposte (almeno {n} per domanda) e al testo delle domande.", qualityNone: "Nulla di sospetto.",
+    quality_tooEasy: "Troppo facile", quality_tooHard: "Troppo difficile", quality_dubiousKey: "Controlla la risposta corretta", quality_weakDistractor: "Distrattori deboli", quality_slow: "Risposta lenta", quality_difficultyMismatch: "Etichetta di difficoltà", quality_duplicateOptions: "Opzioni duplicate", quality_allOfAbove: "\"Tutte le precedenti\"", quality_correctMuchLonger: "La risposta corretta si nota",
+    qualityDetail_tooEasy: "{pct}% corrette su {n} risposte", qualityDetail_tooHard: "{pct}% corrette su {n} risposte", qualityDetail_dubiousKey: "Quasi nessuno risponde bene ({pct}%) e la maggior parte degli errori sceglie l'opzione {opt}: la risposta indicata potrebbe essere sbagliata.", qualityDetail_weakDistractor: "Le opzioni {opts} non sono mai state scelte in {n} risposte.",
+    qualityDetail_slow: "{avg} s in media contro {est} s stimati", qualityDetail_difficultyMismatch: "Difficoltà indicata {d} ma {pct}% corrette", qualityDetail_duplicateOptions: "Due opzioni hanno lo stesso testo.", qualityDetail_allOfAbove: "Opzioni così sono facili da indovinare.", qualityDetail_correctMuchLonger: "L'opzione corretta è molto più lunga delle altre.",
+    searchBtn: "Cerca", searchTitle: "Cerca nelle domande", searchPlaceholder: "Cerca in testo, opzioni, spiegazioni, tag…", searchAny: "Qualsiasi", searchStatus: "Stato", searchMastered: "Padroneggiate", searchWithNotes: "Con note",
+    searchResults: "{n} domande su {t}", searchEmpty: "Nessuna domanda corrisponde.", searchMore: "…e altre {n}. Affina la ricerca per vederle.", searchSelect: "Seleziona la domanda", searchSelectAll: "Seleziona tutte", searchNone: "Deseleziona",
+    searchShow: "Mostra risposta", searchHide: "Nascondi", searchPracticeAll: "Esercitati su queste {n}", searchPracticePicked: "Esercitati sulle selezionate ({n})", searchSessionLabel: "Risultati della ricerca", searchNeedExam: "Apri prima un esame per cercare nelle sue domande.",
+    cmdTitle: "Palette comandi", cmdPlaceholder: "Scrivi un comando…", cmdNone: "Nessun comando corrisponde.", cmdHome: "Tutti gli esami", cmdOpenExam: "Apri esame: {name}", cmdSearch: "Cerca nelle domande", cmdDashboard: "Pannello dell'esame", cmdStart: "Avvia: {name}", cmdExportExam: "Esporta questo esame…",
+    shortcutsTitle: "Scorciatoie da tastiera", scPalette: "Apri la palette comandi", scHelp: "Mostra questo aiuto", scSearch: "Cerca nelle domande", scSelect: "Seleziona un'opzione", scNav: "Domanda precedente / successiva", scEnter: "Verifica la risposta / avanti", scFlag: "Segna la domanda", scClear: "Cancella la risposta", scReport: "Segnala un problema", scPause: "Pausa / riprendi", scClose: "Chiudi le finestre",
+    wizTitle: "Importa o crea un esame", wizIntro: "Scegli un file o incolla del testo. Rivedrai tutto e correggerai i problemi prima di salvare.", wizFmtExam: "un file d'esame (anche il vecchio formato)", wizFmtCsv: "un foglio di calcolo con riga d'intestazione (domanda, opzioni, risposta…)", wizFmtText: "domande numerate con opzioni A) B) C) e una riga \"Risposta:\"",
+    wizChooseFile: "File", wizOrPaste: "…oppure incolla il testo", wizPastePlaceholder: "1. Testo della domanda?\nA) Prima opzione\nB) Seconda opzione\nRisposta: B\nSpiegazione: Perché B è giusta.", wizContinue: "Continua", wizEmpty: "Scegli prima un file o incolla del testo.",
+    wizExampleTitle: "Mostra un esempio di testo", wizExample: "# Il mio esame\n\n## Reti\n\n1. Quale protocollo risolve i nomi?\nA) FTP\nB) DNS\nC) SMTP\nRisposta: B\nSpiegazione: DNS associa i nomi agli indirizzi.\n\n2. Seleziona due intervalli privati.\n- [x] 10.0.0.0/8\n- [ ] 8.8.8.0/24\n- [x] 192.168.0.0/16",
+    wizLoaded: "{name} caricato ({kb} KB).", wizBadExam: "Questo file non è un esame leggibile: {detail}", wizNoQuestions: "Nessuna domanda trovata. Numerale (1. 2. 3.) e metti le opzioni su righe separate (A) B) C)).", wizNoTextColumn: "Il foglio deve avere una colonna chiamata \"domanda\" o \"question\".", wizDefaultTitle: "Il mio esame",
+    wizNoteExam: "File d'esame caricato.", wizNoteText: "Nel testo sono state trovate {n} domande. Controlla quelle con un problema.", wizNoteCsv: "Dal foglio sono state lette {n} righe. Controlla quelle con un problema.",
+    edTitleNew: "Nuovo esame", edTitleEdit: "Modifica esame", edSub: "Le modifiche vengono validate mentre scrivi.", edDiscardConfirm: "Uscire senza salvare le modifiche?",
+    edExamTitle: "Titolo", edExamId: "Identificatore", edIdHint: "Non cambia dopo il primo salvataggio.", edVersion: "Versione", edPass: "Soglia di superamento (%)", edDescription: "Descrizione",
+    edTopics: "Argomenti", edNewTopic: "Nome del nuovo argomento", edAddTopic: "Aggiungi argomento", edQuestions: "Domande ({n})", edExpandAll: "Espandi tutte", edCollapseAll: "Comprimi tutte", edAddQuestion: "Aggiungi domanda", edEmptyText: "(domanda vuota)",
+    edTopic: "Argomento", edType: "Tipo", edDifficulty: "Difficoltà", edText: "Testo della domanda", edRichHint: "Supporta **grassetto**, `codice`, elenchi, tabelle, formule $x^2$ e immagini.", edAddImage: "Aggiungi immagine", edImageFail: "Impossibile leggere l'immagine.",
+    edOption: "Opzione {n}", edCorrect: "L'opzione {n} è corretta", edOptionsSingle: "Opzioni (seleziona quella corretta)", edOptionsMulti: "Opzioni (seleziona tutte le corrette)", edAddOption: "Aggiungi opzione", edCorrectAnswer: "Risposta corretta", edValue: "Valore", edTolerance: "Tolleranza (±)",
+    edExplanation: "Spiegazione", edDuplicate: "Duplica", edJsonHint: "Questa domanda usa una funzione che il modulo non sa mostrare (ordinamento, abbinamento, scenario o traduzioni), quindi si modifica come JSON.",
+    edValid: "Valido: pronto per il salvataggio.", edProblems: "{n} problemi da correggere prima di salvare", edWarnings: "{n} avvisi",
+    edSave: "Salva le modifiche", edSaveNew: "Aggiungi ai miei esami", edSaved: "Salvato nei tuoi esami.", edSaveFail: "Impossibile salvare (spazio esaurito?).", edDownload: "Scarica…", edPreview: "Provalo", edNotValid: "Correggi prima i {n} problemi.", edPreviewNote: "Anteprima: i progressi vanno in un record temporaneo.", edPreviewBanner: "Stai provando una bozza non salvata.", edBackToEditor: "Torna all'editor",
+    issue_noAnswer: "risposta non trovata", issue_fewOptions: "servono 2+ opzioni", issue_noOptions: "nessuna opzione trovata", issue_noText: "senza testo", issue_badType: "tipo sconosciuto",
+    type_single: "Scelta singola", type_multiple: "Scelta multipla", type_truefalse: "Vero / Falso", type_ordering: "Ordinamento", type_matching: "Abbinamento", type_numeric: "Numerica", type_scenario: "Scenario",
+    tfTrue: "Vero", tfFalse: "Falso",
+    expTitle: "Esporta esame", expIntro: "Scarica questo esame in un altro formato. I progressi non sono inclusi.", expLanguage: "Lingua dell'esportazione", expLangHint: "I formati diversi da .exam mantengono una sola lingua.", expDone: "File scaricato.", expSkipped: "{n} domanda/e saltate perché il formato non le può contenere (ordinamento, abbinamento o scenario)."
+});
 
 /* Rich text for exam content: a small, SAFE markdown subset rendered with DOM APIs (never innerHTML).
    Supported: paragraphs/line breaks, **bold**, *italic*, `code`, ```fenced code```, lists, > quotes, tables,
@@ -2226,7 +2489,7 @@ App.backup = (function () {
         let bytes = fromB64(m[2]);
         if (m[1] === 'ES1') {
             if (!canGzip()) throw new Error('this browser cannot read compressed codes');
-            bytes = await pipe(bytes, new DecompressionStream('gzip'));
+            try { bytes = await pipe(bytes, new DecompressionStream('gzip')); } catch (e) { throw new Error('the code is damaged or incomplete'); }
         }
         let obj;
         try { obj = JSON.parse(new TextDecoder().decode(bytes)); } catch (e) { throw new Error('the code is damaged or incomplete'); }
@@ -2415,7 +2678,7 @@ App.convert = (function () {
         checkbox: /^\s*[-*+]\s*\[( |x|X)\]\s*(?:\(?([A-Ha-h])[.)]\s+)?(.+)$/,
         letter: /^\s*\(?([A-Ha-h])[.)]\s+(.+)$/,
         bullet: /^\s*[-*•]\s+(.+)$/,
-        answer: /^\s*(?:\*\*)?(?:Correct\s+answers?|Right\s+answers?|Answers?|Ans|Risposte?(?:\s+corrette?|\s+esatta)?|Soluzione|Correct|Corretta|Giusta)(?:\*\*)?\s*[:=\-]\s*(?:\*\*)?(.+?)\s*$/i,
+        answer: /^\s*(?:\*\*)?(?:Correct\s+answers?|Right\s+answers?|Answers?|Ans|Rispost[ae](?:\s+corrett[ae]|\s+esatta)?|Soluzione|Correct|Corretta|Giusta)(?:\*\*)?\s*[:=\-]\s*(?:\*\*)?(.+?)\s*$/i,
         expl: /^\s*(?:\*\*)?(?:Explanation|Spiegazione|Rationale|Motivazione|Why|Commento)(?:\*\*)?\s*[:\-]\s*(?:\*\*)?(.*)$/i,
         header: /^\s*(?:(#{1,6})\s+(.+?)\s*#*|(?:Topic|Section|Sezione|Argomento|Domain|Dominio|Chapter|Capitolo)\s*[:\-]\s*(.+)|={3,}\s*(.+?)\s*=*|-{3,}\s*(.+?)\s*-{3,})\s*$/i,
         mark: /\s*(?:✓|✔|\(correct\)|\(corretta\)|\[correct\]|\[corretta\])\s*$/i
@@ -2487,7 +2750,7 @@ App.convert = (function () {
             if (qm && (!cur || cur.options.length >= 2 || cur.answerRaw !== undefined || Number(m[1]) === lastNum + 1) && !(cur && field === 'expl' && Number(m[1]) !== lastNum + 1)) { open(Number(m[1]), m[2]); continue; }
             if (cur) {
                 if ((m = line.match(RE.expl))) { cur.explanation = m[1]; field = 'expl'; continue; }
-                if ((m = line.match(RE.answer)) && field !== 'expl') { cur.answerRaw = m[1]; field = 'answer'; continue; }
+                if ((m = line.match(RE.answer))) { cur.answerRaw = m[1]; field = 'answer'; continue; }
                 if (field !== 'expl' && field !== 'answer') {
                     let om;
                     if ((om = line.match(RE.checkbox))) { cur.options.push(om[3].replace(RE.mark, '')); if (om[1].toLowerCase() === 'x') cur.marked.push(cur.options.length - 1); field = 'opt'; continue; }
@@ -2755,7 +3018,7 @@ App.quality = (function () {
                 // a distractor nobody ever picks does not distract
                 if (total >= 10) {
                     const dead = q.options.map((_, i) => i).filter(i => !ans.includes(i) && !(s.picks[i] > 0));
-                    if (dead.length && dead.length < q.options.length - ans.length + 0 && q.options.length - ans.length >= 2) add('weakDistractor', 1, { opts: dead.map(i => 'ABCDEF'[i]).join(', '), n: total });
+                    if (dead.length && q.options.length - ans.length >= 2) add('weakDistractor', 1, { opts: dead.map(i => 'ABCDEF'[i]).join(', '), n: total });
                 }
             }
         });
@@ -2774,7 +3037,7 @@ App.quality = (function () {
             if (texts.some(t => /^(all|none) of the above|^(tutte|nessuna) (le precedenti|delle precedenti)/i.test(t))) add('allOfAbove');
             const ans = Array.isArray(q.answer) ? q.answer : [q.answer];
             const lens = texts.map(t => t.length);
-            if (type === 'single' && lens.length >= 3 && lens[ans[0]] > 1.8 * Math.max(...lens.filter((_, i) => i !== ans[0]))) add('correctMuchLonger');
+            if (type === "single" && lens.length >= 3 && lens[ans[0]] >= 12 && lens[ans[0]] > 1.8 * Math.max(...lens.filter((_, i) => i !== ans[0]))) add('correctMuchLonger');
         });
         return out;
     }
@@ -3233,7 +3496,7 @@ App.ui = {};
     const $ = id => document.getElementById(id);
     App.ui.$ = $;
 
-    const VIEWS = ['picker', 'dashboard', 'runtime', 'review', 'summary', 'stats'];
+    const VIEWS = ['picker', 'dashboard', 'runtime', 'review', 'summary', 'stats', 'options', 'library', 'search'];
     App.ui.show = function (view) {
         App.state.screen = view;
         VIEWS.forEach(v => $('view-' + v).classList.toggle('hidden', v !== view));
@@ -3291,6 +3554,81 @@ App.ui = {};
         return svg;
     };
 
+    // ---- language / theme are per device: stored outside the profile data ----
+    const UI_KEY = 'examsim:ui';
+    const rawBackend = () => App.backend || App.defaultBackend();
+    App.ui.getGlobal = function (k) {
+        try { const o = JSON.parse(rawBackend().getItem(UI_KEY)) || {}; if (o[k] !== undefined) return o[k]; } catch (e) { /* fall through */ }
+        return App.storage.getPref(k);
+    };
+    App.ui.setGlobal = function (k, v) {
+        let o = {};
+        try { o = JSON.parse(rawBackend().getItem(UI_KEY)) || {}; } catch (e) { o = {}; }
+        o[k] = v;
+        try { rawBackend().setItem(UI_KEY, JSON.stringify(o)); if (rawBackend().flush) rawBackend().flush(); } catch (e) { App.events.emit('storageError', e); }
+    };
+
+    // ---- modal dialog ----
+    // App.ui.modal({title, body: Node, actions: [{label, cls, onclick, close:true}], wide}) -> {close, root}
+    App.ui.modal = function (opts) {
+        const prev = document.activeElement;
+        const titleId = 'modal-title-' + App.util.uid();
+        const root = el('div', { class: 'modal-backdrop', onclick: e => { if (e.target === root) close(); } });
+        const card = el('div', { class: 'modal-card' + (opts.wide ? ' wide' : ''), role: 'dialog', aria: { modal: 'true', labelledby: titleId } });
+        card.appendChild(el('div', { class: 'modal-head' }, el('h2', { id: titleId, text: opts.title || '' }),
+            el('button', { type: 'button', class: 'icon-btn', 'aria-label': App.t('closeBtn'), onclick: () => close() }, icon('x', 18))));
+        const body = el('div', { class: 'modal-body' }, opts.body);
+        card.appendChild(body);
+        if (opts.actions && opts.actions.length) {
+            const bar = el('div', { class: 'modal-actions' });
+            opts.actions.forEach(a => bar.appendChild(App.ui.btn(a.label, a.icon, a.cls || '', () => { if (a.onclick) { if (a.onclick() === false) return; } if (a.close !== false) close(); })));
+            card.appendChild(bar);
+        }
+        root.appendChild(card);
+        document.body.appendChild(root);
+        function onKey(e) {
+            if (e.key === 'Escape') { e.stopPropagation(); close(); return; }
+            if (e.key === 'Tab') {      // keep focus inside the dialog
+                const f = Array.from(card.querySelectorAll('button:not(:disabled), input:not(:disabled), select, textarea, a[href], [tabindex]:not([tabindex="-1"])')).filter(n => n.offsetParent !== null);
+                if (!f.length) return;
+                const first = f[0], last = f[f.length - 1];
+                if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
+                else if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault(); }
+            }
+        }
+        document.addEventListener('keydown', onKey, true);
+        function close() {
+            document.removeEventListener('keydown', onKey, true);
+            root.remove();
+            if (prev && prev.focus) { try { prev.focus(); } catch (e) { /* element gone */ } }
+            if (opts.onclose) opts.onclose();
+        }
+        const firstField = card.querySelector('input, textarea, select') || card.querySelector('.modal-actions button, .modal-head button');
+        if (firstField) setTimeout(() => firstField.focus(), 0);
+        return { close, root, card };
+    };
+    App.ui.modalOpen = () => !!document.querySelector('.modal-backdrop');
+
+    // Downloads text as a file
+    App.ui.download = function (name, text, mime) {
+        const blob = new Blob([text], { type: mime || 'text/plain' });
+        const a = el('a', { href: URL.createObjectURL(blob), download: name });
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    };
+
+    // ---- backup reminder banner (picker and dashboard) ----
+    App.ui.backupBanner = function () {
+        if (!App.backup || !App.backup.due()) return null;
+        const days = App.backup.lastBackup() ? Math.round((Date.now() - App.backup.lastBackup()) / 86400000) : null;
+        return el('div', { class: 'banner', id: 'backup-banner', role: 'status' },
+            icon('download', 18),
+            el('span', { class: 'banner-text', text: days === null ? App.t('backupDueNever') : App.t('backupDue', { n: days }) }),
+            el('span', { class: 'banner-actions' },
+                App.ui.btn(App.t('backupNow'), 'download', 'btn-sm', () => { App.ui.exportBackup(); App.ui.rerender(); }),
+                App.ui.btn(App.t('remindLater'), '', 'btn-ghost btn-sm', () => { App.backup.snooze(3); App.ui.rerender(); })));
+    };
+
     // ---- theme / language ----
     App.ui.theme = () => document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
     function paintHeader() {
@@ -3304,7 +3642,7 @@ App.ui = {};
         document.documentElement.setAttribute('data-theme', theme);
         const meta = document.querySelector('meta[name="theme-color"]');
         if (meta) meta.setAttribute('content', theme === 'dark' ? '#0a0e14' : '#00a67e');
-        App.storage.setPref('theme', theme);
+        App.ui.setGlobal('theme', theme);
         try { localStorage.setItem('examsim:theme', theme); } catch (e) { /* optional mirror for the pre-paint script */ }
         paintHeader();
     };
@@ -3321,7 +3659,7 @@ App.ui = {};
     };
     App.ui.setLang = function (lang) {
         App.setLang(lang);
-        App.storage.setPref('lang', App.lang);
+        App.ui.setGlobal('lang', App.lang);
         App.ui.applyStatic();
         App.ui.rerender();
     };
@@ -3334,24 +3672,26 @@ App.ui = {};
         else if (s === 'review') App.ui.renderReview();
         else if (s === 'summary') App.ui.renderSummary();
         else if (s === 'stats') App.ui.renderStats();
+        else if (s === 'options' && App.ui.renderOptions) App.ui.renderOptions();
+        else if (s === 'library' && App.ui.renderLibrary) App.ui.renderLibrary();
+        else if (s === 'search' && App.ui.renderSearch) App.ui.renderSearch();
     };
 
     // ---- export / import of progress ----
     App.ui.exportProgress = function (examIds) {
-        const data = App.storage.exportData(examIds);
-        const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
-        const a = el('a', { href: URL.createObjectURL(blob), download: 'examsim-progress-' + new Date().toISOString().slice(0, 10) + '.json' });
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+        const data = App.backup.snapshot({ examIds, library: !examIds });
+        App.ui.download('examsim-progress-' + new Date().toISOString().slice(0, 10) + '.json', JSON.stringify(data, null, 1), 'application/json');
+        if (!examIds) App.backup.markBackup();
         App.ui.toast(App.t('exportDone'));
     };
+    App.ui.exportBackup = function () { App.ui.exportProgress(null); };
     App.ui.importProgress = function () { $('import-file').click(); };
     App.ui.handleImportFile = function (file) {
         const reader = new FileReader();
         reader.onload = () => {
             try {
-                const r = App.storage.importData(JSON.parse(reader.result));
-                App.ui.toast(App.t('importDone', { a: r.attempts, q: r.qstats }));
+                const r = App.backup.apply(JSON.parse(reader.result));
+                App.ui.toast(App.t('importDone', { a: r.attempts, q: r.qstats }) + (r.library ? ' ' + App.t('importLibrary', { n: r.library }) : ''));
                 App.ui.rerender();
             } catch (e) { App.ui.toast(App.t('importFail', { detail: e.message }), 6000); }
         };
@@ -3395,6 +3735,8 @@ App.ui = {};
             err.forEach(line => box.appendChild(el('p', { text: line })));
             v.appendChild(box);
         }
+        const banner = App.ui.backupBanner();
+        if (banner) v.appendChild(banner);
         const cat = App.loader.catalog();
         if (!cat.length) v.appendChild(el('p', { class: 'hint', style: 'text-align:center', text: App.t('noCatalog') }));
         const grid = el('div', { class: 'exam-grid', id: 'exam-list' });
@@ -3409,12 +3751,16 @@ App.ui = {};
             if (item.questionCount) meta.appendChild(el('span', { class: 'chip', text: App.t('examCardMeta', { n: item.questionCount, t: item.topicCount || '–' }) }));
             if (attempts.length) meta.appendChild(el('span', { class: 'chip primary', text: attempts.length === 1 ? App.t('attemptOne') : App.t('attemptsChip', { n: attempts.length }) }));
             if (sessions) meta.appendChild(el('span', { class: 'chip warn', text: App.t('inProgressChip') }));
+            if (item.local) meta.appendChild(el('span', { class: 'chip', text: App.t('localChip') }));
             grid.appendChild(el('a', { href: '?content=' + encodeURIComponent(item.file), class: 'exam-card' }, top,
                 el('div', { class: 'exam-card-title', text: App.loc(item.title) || item.file }),
                 el('div', { class: 'exam-card-desc', text: App.loc(item.description) }), meta));
         });
         v.appendChild(grid);
-        v.appendChild(el('div', { style: 'margin-top:var(--space)' }, App.ui.toolbarButtons({ stats: false })));
+        v.appendChild(el('div', { style: 'margin-top:var(--space)', class: 'toolbar' },
+            App.ui.btn(App.t('libraryImport'), 'upload', 'btn-sm', () => App.ui.openWizard(), { id: 'picker-wizard' }),
+            App.ui.btn(App.t('libraryNew'), 'star', 'btn-ghost btn-sm', () => App.ui.openEditor(null), { id: 'picker-new' }),
+            App.ui.toolbarButtons({ stats: false })));
     };
 
     // ------------------------------------------------------------- dashboard
@@ -3461,8 +3807,16 @@ App.ui = {};
         hero.appendChild(el('div', { class: 'hero-grid' }, heroLeft, heroMasteryRing(mastery, stats)));
         v.appendChild(hero);
 
+        const bn = App.ui.backupBanner(); if (bn) v.appendChild(bn);
+        const cl = App.ui.changelogNotice(exam); if (cl) v.appendChild(cl);
+        if (exam.preview) v.appendChild(el('div', { class: 'banner info', id: 'preview-banner' }, icon('play', 18), el('span', { class: 'banner-text', text: App.t('edPreviewBanner') }), App.ui.btn(App.t('edBackToEditor'), 'back', 'btn-sm', () => { App.state.exam = null; App.ui.renderLibrary(); App.ui.show('library'); }, { id: 'preview-back' })));
         v.appendChild(el('div', { class: 'exam-switcher' }, el('span', { class: 'exam-switcher-label', text: App.t('switchExam') }), examChips()));
-        v.appendChild(el('div', { style: 'margin-bottom:var(--space)' }, App.ui.toolbarButtons({ stats: true, examIds: [exam.id] })));
+        const tb = App.ui.toolbarButtons({ stats: true, examIds: [exam.id] });
+        tb.insertBefore(App.ui.btn(App.t('searchBtn'), 'search', 'btn-ghost btn-sm', () => App.ui.openSearch(), { id: 'dash-search' }), tb.children[1] || null);
+        tb.appendChild(App.ui.btn(App.t('exportExam'), 'download', 'btn-ghost btn-sm', () => App.ui.exportExamDialog(exam.local ? (App.library.get(exam.id) || exam) : exam, { raw: !!exam.local }), { id: 'dash-export-exam' }));
+        if (exam.changelog && exam.changelog.length) tb.appendChild(App.ui.btn(App.t('changelogTitle'), 'book', 'btn-ghost btn-sm', () => App.ui.showChangelog(exam), { id: 'dash-changelog' }));
+        if (exam.local) tb.appendChild(App.ui.btn(App.t('editBtn'), 'note', 'btn-ghost btn-sm', () => App.ui.openEditor(exam.id), { id: 'dash-edit' }));
+        v.appendChild(el('div', { style: 'margin-bottom:var(--space)' }, tb));
 
         const grid = el('div', { class: 'dash-grid' });
         const main = el('div', { class: 'dash-main' });
@@ -3664,6 +4018,8 @@ App.ui = {};
         refs.pace = el('span', { class: 'chip pace-chip hidden', id: 'pace-chip' });
         refs.pause = el('button', { type: 'button', class: 'chip-btn', id: 'pause-btn', onclick: () => doPause() });
         refs.flag = el('button', { type: 'button', class: 'flag-btn', onclick: () => toggleFlag() });
+        refs.report = el('button', { type: 'button', class: 'chip-btn', id: 'report-btn', onclick: () => App.ui.reportQuestion(S().item()) });
+        refs.clear = el('button', { type: 'button', class: 'chip-btn', id: 'clear-btn', onclick: () => clearAnswer() });
         refs.text = el('div', { class: 'question-text', id: 'q-text' });
         refs.body = el('div', { id: 'q-body' });
         refs.expl = el('div', { id: 'q-expl', aria: { live: 'polite' } });
@@ -3687,7 +4043,7 @@ App.ui = {};
 
         const main = el('div', { class: 'card q-card' },
             el('div', { class: 'q-bar' }, refs.bar),
-            el('div', { class: 'q-top' }, refs.topic, el('div', { class: 'q-meta' }, refs.pace, refs.pos, refs.pause, refs.flag)),
+            el('div', { class: 'q-top' }, refs.topic, el('div', { class: 'q-meta' }, refs.pace, refs.pos, refs.pause, refs.clear, refs.report, refs.flag)),
             refs.text, refs.body, refs.expl, refs.note,
             el('div', { class: 'actionbar' }, refs.prev, refs.check, el('span', { class: 'spacer' }), refs.next),
             refs.help);
@@ -3809,6 +4165,17 @@ App.ui = {};
         refs.flag.textContent = ''; refs.flag.appendChild(icon('flag', 14)); refs.flag.appendChild(el('span', { text: st.flag ? App.t('unflag') : App.t('flag') }));
         refs.noteArea.value = st.note || '';
         refs.note.open = !!st.note;
+        refs.clear.disabled = !!checked || !s.hasAnswer(i);
+        refs.clear.textContent = ''; refs.clear.appendChild(icon('x', 14)); refs.clear.appendChild(el('span', { text: App.t('clearBtn') }));
+        refs.report.textContent = ''; refs.report.appendChild(icon('flag', 14)); refs.report.appendChild(el('span', { text: App.t('reportBtn') }));
+    }
+
+    function clearAnswer() {
+        const s = S(), i = s.index;
+        if (s.isChecked(i) || !s.hasAnswer(i)) return;
+        s.setValue(i, undefined);
+        App.events.emit('answer', { session: s, index: i, value: undefined });
+        renderQuestion(); renderGrid(); App.ui.persist();
     }
 
     function renderGrid() {
@@ -3911,6 +4278,8 @@ App.ui = {};
         else if (key === 'arrowright') { if (s.index < s.length - 1) go(s.index + 1); e.preventDefault(); }
         else if (key === 'arrowleft') { go(s.index - 1); e.preventDefault(); }
         else if (key === 'm') { toggleFlag(); e.preventDefault(); }
+        else if (key === 'r') { App.ui.reportQuestion(s.item()); e.preventDefault(); }
+        else if (key === 'x') { clearAnswer(); e.preventDefault(); }
         else if (key === 'p') { if (s.paused) doUnpause(); else doPause(); e.preventDefault(); }
         else if (key === 'enter' && t.tagName !== 'BUTTON' && t.tagName !== 'A' && t.tagName !== 'SUMMARY') {
             if (s.studyMode && !s.isChecked(s.index) && s.hasAnswer(s.index)) checkAnswer(); else nextQuestion();
@@ -4078,7 +4447,8 @@ App.ui = {};
                 el('div', { class: 'meta', text: meta }),
                 el('div', { class: 'review-q', role: 'heading', aria: { level: '3' } }, el('strong', { text: App.t('questionN', { n: i + 1, q: '' }) }), App.rich.node(App.loc(item.text))),
                 App.types[item.kind].renderReview(item, s.value(i)),
-                item.explanation ? el('div', { class: 'explanation-box' }, el('h4', { text: App.t('explanation') }), App.rich.node(App.loc(item.explanation))) : null);
+                item.explanation ? el('div', { class: 'explanation-box' }, el('h4', { text: App.t('explanation') }), App.rich.node(App.loc(item.explanation))) : null,
+                el('div', { class: 'review-tools' }, App.ui.btn(App.t('reportBtn'), 'flag', 'btn-ghost btn-sm report-btn', () => App.ui.reportQuestion(item))));
             cards.push({ node: c, ok, answered, flagged: !!(st && st.flag) });
             box.appendChild(c);
         }
@@ -4187,6 +4557,1054 @@ App.ui = {};
             el('div', { text: App.rich.plain(App.loc(h.text)).slice(0, 220) }),
             el('div', { class: 'hard-meta', text: h.topic + ' · ' + App.t('statsErrRate', { p: Math.round(h.rate * 100), w: h.wrong, n: h.seen }) }))));
         card.appendChild(hard);
+        v.appendChild(App.ui.qualityPanel(exam));
+    };
+})();
+
+/* UI: options page (preferences, scoring defaults, exam rules, profiles, backup, sync, storage, library, reports, about). */
+(function () {
+    const { el, icon } = App.util;
+    const $ = App.ui.$;
+    let origin = null;       // screen to return to
+
+    App.ui.openOptions = function () {
+        if (App.state.screen !== 'options') origin = App.state.screen === 'library' || App.state.screen === 'search' ? 'back' : App.state.screen;
+        App.ui.show('options');
+        App.ui.renderOptions();
+        if (location.hash !== '#options') { try { history.pushState(null, '', '#options'); } catch (e) { /* file:// restrictions */ } }
+    };
+    App.ui.closeOptions = function () {
+        if (location.hash === '#options') { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ignore */ } }
+        if (App.state.exam) { App.ui.renderDashboard(); App.ui.show('dashboard'); }
+        else { App.ui.renderPicker(); App.ui.show('picker'); }
+    };
+    window.addEventListener('popstate', () => { if (App.state.screen === 'options' && location.hash !== '#options') App.ui.closeOptions(); });
+
+    function section(id, title, iconName, ...children) {
+        return el('section', { class: 'card opt-section', id: 'opt-' + id },
+            el('h2', { class: 'opt-title' }, icon(iconName, 19), el('span', { text: title })), ...children);
+    }
+    const row = (...c) => el('div', { class: 'opt-row' }, ...c);
+    const field = (label, control, hint, id) => el('div', { class: 'field' }, el('label', { for: id, text: label }), control, hint ? el('p', { class: 'hint', text: hint }) : null);
+    function toggle(id, label, checked, onchange) {
+        const input = el('input', { type: 'checkbox', id, checked: !!checked });
+        input.addEventListener('change', () => onchange(input.checked));
+        return el('label', { class: 'switch-row', for: id }, input, el('span', { class: 'switch' }), el('span', { class: 'switch-label', text: label }));
+    }
+    function selectOf(id, options, value, onchange) {
+        const s = el('select', { id });
+        options.forEach(([v, label]) => s.appendChild(el('option', { value: String(v), text: label })));
+        s.value = String(value);
+        s.addEventListener('change', () => onchange(s.value));
+        return s;
+    }
+
+    // ---------------------------------------------------------------- sections
+    function general() {
+        return section('general', App.t('optGeneral'), 'globe',
+            field(App.t('optLanguage'), selectOf('opt-lang', [['en', 'English'], ['it', 'Italiano']], App.lang, v => App.ui.setLang(v)), null, 'opt-lang'),
+            field(App.t('optTheme'), selectOf('opt-theme', [['light', App.t('themeLight')], ['dark', App.t('themeDark')]], App.ui.theme(), v => { App.ui.setTheme(v); }), null, 'opt-theme'));
+    }
+
+    function scoring() {
+        const cur = App.scoring.clean(App.storage.getPref('scoring'));
+        const save = patch => {
+            const next = Object.assign({}, App.scoring.clean(App.storage.getPref('scoring')), patch);
+            App.storage.setPref('scoring', next);
+        };
+        const num = (id, key, label) => {
+            const input = el('input', { type: 'number', id, min: 0, max: 1, step: 0.05, value: cur[key] !== undefined ? cur[key] : 0 });
+            input.addEventListener('change', () => { const v = Math.max(0, Math.min(1, Number(input.value) || 0)); input.value = v; save({ [key]: v }); });
+            return field(label, input, null, id);
+        };
+        return section('scoring', App.t('optScoring'), 'target',
+            el('p', { class: 'hint', text: App.t('optScoringHint') }),
+            toggle('opt-partial', App.t('optPartial'), cur.partialCredit, v => save({ partialCredit: v })),
+            num('opt-wrong', 'wrongPenalty', App.t('optWrongPenalty')),
+            num('opt-unans', 'unansweredPenalty', App.t('optUnansweredPenalty')),
+            el('p', { class: 'hint', text: App.t('optPenaltyHint') }));
+    }
+
+    function examRules() {
+        const cur = App.storage.getPref('examRules') || {};
+        const save = patch => App.storage.setPref('examRules', Object.assign({}, App.storage.getPref('examRules') || {}, patch));
+        const pauses = cur.pauses === undefined || cur.pauses === null || cur.pauses === '' ? '' : cur.pauses;
+        return section('rules', App.t('optRules'), 'clock',
+            el('p', { class: 'hint', text: App.t('optRulesHint') }),
+            field(App.t('optPauses'), selectOf('opt-pauses', [['', App.t('pausesUnlimited')], [0, App.t('pausesNone')], [1, '1'], [2, '2'], [3, '3']], pauses, v => save({ pauses: v === '' ? '' : Number(v) })), null, 'opt-pauses'),
+            toggle('opt-strict', App.t('optStrict'), cur.strictTime, v => save({ strictTime: v })),
+            el('p', { class: 'hint', text: App.t('optFreeNav') }));
+    }
+
+    function profiles() {
+        const cur = App.profiles.current();
+        const box = section('profiles', App.t('optProfiles'), 'star', el('p', { class: 'hint', text: App.t('optProfilesHint') }));
+        const switchTo = id => { App.profiles.use(id); if (App.backend && App.backend.flush) App.backend.flush(); App.ui.toast(App.t('profileSwitched')); setTimeout(() => location.reload(), 150); };
+        const list = el('div', { class: 'opt-list' });
+        App.profiles.list().forEach(p => {
+            list.appendChild(row(
+                el('span', { class: 'opt-name' }, el('b', { text: p.name }), p.id === cur ? el('span', { class: 'chip primary', text: App.t('profileCurrent') }) : null),
+                el('span', { class: 'opt-actions' },
+                    p.id !== cur ? App.ui.btn(App.t('profileUse'), 'play', 'btn-sm', () => switchTo(p.id)) : null,
+                    App.ui.btn('', 'note', 'btn-ghost btn-sm', () => { const n = prompt(App.t('profileRenamePrompt'), p.name); if (n) { App.profiles.rename(p.id, n); App.ui.renderOptions(); } }, { title: App.t('renameBtn'), 'aria-label': App.t('renameBtn') }),
+                    App.profiles.list().length > 1 ? App.ui.btn('', 'trash', 'btn-ghost btn-sm', () => { if (confirm(App.t('profileDeleteConfirm', { name: p.name }))) { const wasCur = p.id === cur; App.profiles.remove(p.id); if (wasCur) switchTo(App.profiles.current()); else App.ui.renderOptions(); } }, { title: App.t('deleteBtn'), 'aria-label': App.t('deleteBtn') }) : null)));
+        });
+        box.appendChild(list);
+        const name = el('input', { type: 'text', id: 'opt-new-profile', maxLength: 40, placeholder: App.t('profileNamePlaceholder') });
+        box.appendChild(el('div', { class: 'opt-add' }, name, App.ui.btn(App.t('profileAdd'), 'star', 'btn-sm', () => { if (!name.value.trim()) { name.focus(); return; } const id = App.profiles.create(name.value); switchTo(id); }, { id: 'opt-add-profile' })));
+        return box;
+    }
+
+    function backup() {
+        const last = App.backup.lastBackup();
+        const box = section('backup', App.t('optBackup'), 'download',
+            el('p', { class: 'hint', id: 'opt-last-backup', text: last ? App.t('backupLast', { when: new Date(last).toLocaleString() }) : App.t('backupNever') }),
+            el('div', { class: 'toolbar' },
+                App.ui.btn(App.t('backupDownload'), 'download', 'btn-sm', () => { App.ui.exportBackup(); App.ui.renderOptions(); }, { id: 'opt-backup-dl' }),
+                App.ui.btn(App.t('backupRestore'), 'upload', 'btn-ghost btn-sm', () => App.ui.importProgress(), { id: 'opt-backup-restore' })),
+            field(App.t('backupRemind'), selectOf('opt-remind', [[0, App.t('remindOff')], [7, App.t('remindDays', { n: 7 })], [14, App.t('remindDays', { n: 14 })], [30, App.t('remindDays', { n: 30 })], [60, App.t('remindDays', { n: 60 })]], App.backup.remindDays(), v => App.storage.setPref('backupRemindDays', Number(v))), null, 'opt-remind'));
+        if (App.backup.fsSupported()) {
+            const status = el('span', { class: 'chip', id: 'opt-auto-status', text: '…' });
+            App.backup.autoFileName().then(n => { status.textContent = n ? App.t('autoBackupOn', { name: n }) : App.t('autoBackupOff'); status.classList.toggle('ok', !!n); });
+            box.appendChild(el('div', { class: 'opt-auto' },
+                el('p', { class: 'hint', text: App.t('autoBackupHint') }),
+                el('div', { class: 'toolbar' }, status,
+                    App.ui.btn(App.t('autoBackupChoose'), 'download', 'btn-ghost btn-sm', async () => { try { const n = await App.backup.chooseAutoFile(); App.ui.toast(App.t('autoBackupOn', { name: n })); App.ui.renderOptions(); } catch (e) { if (e && e.name !== 'AbortError') App.ui.toast(String(e.message || e), 5000); } }),
+                    App.ui.btn(App.t('autoBackupStop'), 'x', 'btn-ghost btn-sm', async () => { await App.backup.disableAutoFile(); App.ui.renderOptions(); }))));
+        } else box.appendChild(el('p', { class: 'hint', text: App.t('autoBackupUnsupported') }));
+        return box;
+    }
+
+    function sync() {
+        const box = section('sync', App.t('optSync'), 'refresh', el('p', { class: 'hint', text: App.t('syncHint') }));
+        // transfer code
+        const withLib = el('input', { type: 'checkbox', id: 'sync-lib' });
+        const out = el('textarea', { id: 'sync-code-out', readOnly: true, rows: 3, placeholder: App.t('syncCodeOutPlaceholder') });
+        const info = el('p', { class: 'hint', id: 'sync-code-info' });
+        const gen = App.ui.btn(App.t('syncMakeCode'), 'upload', 'btn-sm', async () => {
+            try {
+                const code = await App.backup.encode(App.backup.snapshot({ library: withLib.checked, sessions: false }));
+                out.value = code;
+                info.textContent = App.t('syncCodeInfo', { kb: Math.max(1, Math.round(code.length / 1024)) }) + (code.length > 200000 ? ' ' + App.t('syncCodeBig') : '');
+                App.backup.markBackup();
+            } catch (e) { info.textContent = String(e.message || e); }
+        }, { id: 'sync-make' });
+        const copy = App.ui.btn(App.t('syncCopy'), 'note', 'btn-ghost btn-sm', async () => {
+            if (!out.value) return;
+            try { await navigator.clipboard.writeText(out.value); App.ui.toast(App.t('syncCopied')); } catch (e) { out.select(); App.ui.toast(App.t('syncCopyManual')); }
+        });
+        const inp = el('textarea', { id: 'sync-code-in', rows: 3, placeholder: App.t('syncCodeInPlaceholder') });
+        const imp = App.ui.btn(App.t('syncImportCode'), 'download', 'btn-sm', async () => {
+            try {
+                const r = App.backup.apply(await App.backup.decode(inp.value));
+                App.ui.toast(App.t('importDone', { a: r.attempts, q: r.qstats }) + (r.library ? ' ' + App.t('importLibrary', { n: r.library }) : ''));
+                inp.value = '';
+            } catch (e) { App.ui.toast(App.t('importFail', { detail: e.message }), 6000); }
+        }, { id: 'sync-import' });
+        box.appendChild(el('h3', { class: 'opt-sub', text: App.t('syncCodeTitle') }));
+        box.appendChild(el('label', { class: 'check-inline', for: 'sync-lib' }, withLib, el('span', { text: App.t('syncWithLibrary') })));
+        box.appendChild(el('div', { class: 'toolbar' }, gen, copy));
+        box.appendChild(out); box.appendChild(info);
+        box.appendChild(el('div', { style: 'margin-top:10px' }, inp, el('div', { class: 'toolbar', style: 'margin-top:8px' }, imp)));
+
+        // gist
+        const cfg = App.backup.gistConfig();
+        const token = el('input', { type: 'password', id: 'gist-token', autocomplete: 'off', placeholder: 'ghp_… / github_pat_…', value: cfg.token || '' });
+        const gid = el('input', { type: 'text', id: 'gist-id', placeholder: App.t('gistIdPlaceholder'), value: cfg.id || '' });
+        const status = el('p', { class: 'hint', id: 'gist-status', text: cfg.last ? App.t('gistLast', { when: new Date(cfg.last).toLocaleString() }) : '' });
+        const run = App.ui.btn(App.t('gistSync'), 'refresh', 'btn-sm', async () => {
+            const c = Object.assign({}, App.backup.gistConfig(), { token: token.value.trim(), id: gid.value.trim() || undefined });
+            if (!c.token) { token.focus(); return; }
+            App.backup.setGistConfig(c);
+            run.disabled = true; status.textContent = App.t('gistSyncing');
+            try {
+                const r = await App.backup.syncGist();
+                status.textContent = App.t('gistDone', { a: r.pulled ? r.pulled.attempts : 0 });
+                gid.value = r.id;
+                App.ui.toast(App.t('gistDone', { a: r.pulled ? r.pulled.attempts : 0 }));
+            } catch (e) { status.textContent = App.t('gistFail', { detail: e.message }); }
+            run.disabled = false;
+        }, { id: 'gist-sync' });
+        const off = App.ui.btn(App.t('gistDisconnect'), 'x', 'btn-ghost btn-sm', () => { App.backup.setGistConfig({}); App.ui.renderOptions(); });
+        box.appendChild(el('h3', { class: 'opt-sub', text: App.t('gistTitle') }));
+        box.appendChild(el('p', { class: 'hint', text: App.t('gistHint') }));
+        box.appendChild(field(App.t('gistToken'), token, null, 'gist-token'));
+        box.appendChild(field(App.t('gistId'), gid, null, 'gist-id'));
+        box.appendChild(el('div', { class: 'toolbar' }, run, off));
+        box.appendChild(status);
+        return box;
+    }
+
+    function storage() {
+        const kindName = { indexeddb: 'IndexedDB', localStorage: 'localStorage', memory: App.t('storageMemory') }[App.storageKind] || App.storageKind;
+        const usage = el('p', { class: 'hint', id: 'opt-usage', text: '…' });
+        App.storageUsage().then(u => { usage.textContent = u ? App.t('storageUsage', { used: fmtBytes(u.used), quota: fmtBytes(u.quota) }) : ''; });
+        return section('storage', App.t('optStorage'), 'layers',
+            el('p', { text: App.t('storageKind', { kind: kindName }) }), usage,
+            App.storageKind === 'memory' ? el('p', { class: 'hint', style: 'color:var(--error)', text: App.t('storageMemoryWarn') }) : null,
+            el('div', { class: 'toolbar' }, App.ui.btn(App.t('storageWipe'), 'trash', 'btn-danger btn-sm', async () => {
+                if (!confirm(App.t('storageWipeConfirm'))) return;
+                await App.wipeAll(); App.ui.toast(App.t('storageWiped')); setTimeout(() => location.reload(), 200);
+            }, { id: 'opt-wipe' })));
+    }
+    function fmtBytes(n) { return n > 1e9 ? (n / 1e9).toFixed(1) + ' GB' : n > 1e6 ? (n / 1e6).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1e3)) + ' KB'; }
+
+    function library() {
+        const box = section('library', App.t('optLibrary'), 'book', el('p', { class: 'hint', text: App.t('libraryHint') }));
+        const list = el('div', { class: 'opt-list', id: 'opt-library-list' });
+        const items = App.library.list();
+        if (!items.length) list.appendChild(el('p', { class: 'hint', text: App.t('libraryEmpty') }));
+        items.forEach(it => list.appendChild(row(
+            el('span', { class: 'opt-name' }, el('b', { text: App.loc(it.title) }), el('span', { class: 'chip', text: App.t('nQuestions', { n: it.questionCount }) })),
+            el('span', { class: 'opt-actions' },
+                el('a', { class: 'btn btn-sm', href: '?content=' + encodeURIComponent(it.file) }, icon('play', 15), el('span', { text: App.t('openBtn') })),
+                App.ui.btn(App.t('editBtn'), 'note', 'btn-ghost btn-sm', () => App.ui.openEditor(it.id)),
+                App.ui.btn('', 'download', 'btn-ghost btn-sm', () => App.ui.exportExamDialog(App.library.get(it.id)), { title: App.t('exportExam'), 'aria-label': App.t('exportExam') }),
+                App.ui.btn('', 'trash', 'btn-ghost btn-sm', () => { if (confirm(App.t('libraryDeleteConfirm', { name: App.loc(it.title) }))) { App.library.remove(it.id); App.ui.renderOptions(); } }, { title: App.t('deleteBtn'), 'aria-label': App.t('deleteBtn') })))));
+        box.appendChild(list);
+        box.appendChild(el('div', { class: 'toolbar', style: 'margin-top:10px' },
+            App.ui.btn(App.t('libraryImport'), 'upload', 'btn-sm', () => App.ui.openWizard(), { id: 'opt-wizard' }),
+            App.ui.btn(App.t('libraryNew'), 'star', 'btn-ghost btn-sm', () => App.ui.openEditor(null), { id: 'opt-new-exam' })));
+        return box;
+    }
+
+    function reports() {
+        const box = section('reports', App.t('optReports'), 'flag', el('p', { class: 'hint', text: App.t('reportsHint') }));
+        const all = [];
+        App.storage.examIds().forEach(id => App.storage.listReports(id).forEach(r => all.push(Object.assign({ examId: id }, r))));
+        all.sort((a, b) => b.ts - a.ts);
+        const list = el('div', { class: 'opt-list', id: 'opt-reports-list' });
+        if (!all.length) list.appendChild(el('p', { class: 'hint', text: App.t('reportsEmpty') }));
+        all.forEach(r => list.appendChild(row(
+            el('span', { class: 'opt-name stack' },
+                el('b', { text: r.examId + ' · #' + (r.qid !== undefined ? r.qid : r.uid) + ' · ' + App.t('reportKind_' + (r.kind || 'other')) }),
+                r.note ? el('span', { class: 'hint', text: r.note }) : null,
+                el('span', { class: 'hint', text: new Date(r.ts).toLocaleString() })),
+            el('span', { class: 'opt-actions' }, App.ui.btn('', 'trash', 'btn-ghost btn-sm', () => { App.storage.removeReport(r.examId, r.id); App.ui.renderOptions(); }, { title: App.t('deleteBtn'), 'aria-label': App.t('deleteBtn') })))));
+        box.appendChild(list);
+        if (all.length) box.appendChild(el('div', { class: 'toolbar', style: 'margin-top:10px' },
+            App.ui.btn(App.t('reportsExport'), 'download', 'btn-sm', () => App.ui.download('examsim-reports.json', JSON.stringify(all, null, 1), 'application/json'))));
+        return box;
+    }
+
+    function about() {
+        const upd = el('p', { class: 'hint', id: 'opt-update-status' });
+        return section('about', App.t('optAbout'), 'bolt',
+            el('p', { text: 'Exam Simulator ' + App.version }),
+            el('div', { class: 'toolbar' },
+                App.ui.btn(App.t('shortcutsBtn'), 'grid', 'btn-ghost btn-sm', () => App.ui.showShortcuts()),
+                App.ui.btn(App.t('checkUpdate'), 'refresh', 'btn-ghost btn-sm', async () => { upd.textContent = App.t('updateChecking'); upd.textContent = await App.ui.checkForUpdate(); }, { id: 'opt-check-update' })),
+            upd);
+    }
+
+    App.ui.renderOptions = function () {
+        const v = $('view-options');
+        const keepScroll = window.scrollY;
+        v.textContent = '';
+        v.appendChild(el('div', { class: 'row between opt-head' },
+            el('div', {}, el('h1', { text: App.t('optionsTitle') }), el('p', { class: 'subtitle', text: App.t('optionsSub', { name: App.profiles.currentProfile().name }) })),
+            App.ui.btn(App.t('backBtn'), 'back', 'btn-secondary btn-sm', () => App.ui.closeOptions(), { id: 'opt-back' })));
+        const grid = el('div', { class: 'opt-grid' });
+        [general, scoring, examRules, profiles, backup, sync, library, reports, storage, about].forEach(f => grid.appendChild(f()));
+        v.appendChild(grid);
+        window.scrollTo(0, keepScroll);
+    };
+})();
+
+/* UI: import wizard, exam editor and export dialog.
+   Wizard = read a file/pasted text (.exam/.json/.csv/.md/.txt) into a draft exam → editor shows what was understood,
+   lets the author fix every question, validates live and saves into the local library (or downloads a .exam file). */
+(function () {
+    const { el, icon } = App.util;
+    const $ = App.ui.$;
+    const SIMPLE = ['single', 'multiple', 'truefalse', 'numeric'];
+    const LETTERS = 'ABCDEF';
+
+    let E = null;      // editor state: {draft, isNew, issues:{qid:[codes]}, open:Set, images:Map, dirty, validateTimer}
+
+    // ---------------------------------------------------------------- image helpers (data URIs hidden behind @imgN in text boxes)
+    function hideImages(str) {
+        return String(str || '').replace(/\((data:image\/[^)\s]+)\)/g, (m, uri) => {
+            let key = null;
+            E.images.forEach((v, k) => { if (v === uri) key = k; });
+            if (!key) { key = '@img' + (E.images.size + 1); E.images.set(key, uri); }
+            return '(' + key + ')';
+        });
+    }
+    function showImages(str) { return String(str || '').replace(/\((@img\d+)\)/g, (m, k) => E.images.has(k) ? '(' + E.images.get(k) + ')' : m); }
+
+    // Downscales an image file to at most 900 px wide and returns a data URI.
+    function imageToDataUri(file, maxW) {
+        return new Promise((resolve, reject) => {
+            const url = URL.createObjectURL(file);
+            const img = new Image();
+            img.onload = () => {
+                URL.revokeObjectURL(url);
+                if (/svg/.test(file.type)) { const r = new FileReader(); r.onload = () => resolve(r.result); r.onerror = reject; r.readAsDataURL(file); return; }
+                const scale = Math.min(1, (maxW || 900) / img.width);
+                const c = document.createElement('canvas');
+                c.width = Math.max(1, Math.round(img.width * scale)); c.height = Math.max(1, Math.round(img.height * scale));
+                c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                const png = file.type === 'image/png' && c.width * c.height < 250000;
+                resolve(c.toDataURL(png ? 'image/png' : 'image/jpeg', 0.82));
+            };
+            img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('not an image')); };
+            img.src = url;
+        });
+    }
+
+    // ---------------------------------------------------------------- reading sources
+    function detectKind(name, text) {
+        const n = String(name || '').toLowerCase();
+        if (/\.(exam|json|js)$/.test(n)) return 'exam';
+        if (/\.csv$|\.tsv$/.test(n)) return 'csv';
+        if (/\.(md|markdown|txt)$/.test(n)) return 'text';
+        const t = String(text || '').trim();
+        if (/^ExamSim\.register\(|^\s*[{[]/.test(t) || /^\/\*[\s\S]*?\*\/\s*ExamSim\.register\(/.test(t)) return 'exam';
+        const first = t.split(/\r?\n/, 1)[0] || '';
+        if (/(^|[,;\t])\s*"?(text|question|domanda)"?\s*([,;\t]|$)/i.test(first) && /[,;\t]/.test(first)) return 'csv';
+        return 'text';
+    }
+
+    // Returns {draft, issues:{id:[codes]}, notes:[strings]} or throws Error(message)
+    function readSource(name, text) {
+        const kind = detectKind(name, text);
+        const fileTitle = String(name || '').replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim();
+        if (kind === 'exam') {
+            let data;
+            try { data = App.loader.parseText(text); } catch (e) { throw new Error(App.t('wizBadExam', { detail: e.detail || e.message })); }
+            if (!data) { try { data = JSON.parse(text); } catch (e) { throw new Error(App.t('wizBadExam', { detail: e.message })); } }
+            if (data && data.format === undefined && (data.config || data.questions)) data = App.schema.fromLegacy(data, App.convert.slug(fileTitle || 'imported'));
+            if (!data || typeof data !== 'object' || !Array.isArray(data.questions)) throw new Error(App.t('wizBadExam', { detail: 'questions' }));
+            return { draft: data, issues: {}, notes: [App.t('wizNoteExam')] };
+        }
+        const parsed = kind === 'csv' ? App.convert.fromCSV(text) : App.convert.parseText(text);
+        if (!parsed.questions.length) throw new Error(App.t(parsed.warnings.includes('noTextColumn') ? 'wizNoTextColumn' : 'wizNoQuestions'));
+        const issues = {};
+        parsed.questions.forEach(q => { if (q._issues && q._issues.length) issues[q.id] = q._issues.slice(); });
+        const draft = App.convert.buildExam({ title: parsed.meta.title || fileTitle || App.t('wizDefaultTitle'), description: parsed.meta.description, questions: parsed.questions, topics: parsed.topics });
+        return { draft, issues, notes: [App.t(kind === 'csv' ? 'wizNoteCsv' : 'wizNoteText', { n: parsed.questions.length })] };
+    }
+
+    // ---------------------------------------------------------------- wizard
+    App.ui.openWizard = function () {
+        const file = el('input', { type: 'file', id: 'wiz-file', accept: '.exam,.json,.js,.csv,.tsv,.md,.markdown,.txt,text/plain,text/csv,application/json' });
+        const area = el('textarea', { id: 'wiz-text', rows: 9, placeholder: App.t('wizPastePlaceholder') });
+        const msg = el('p', { class: 'hint', id: 'wiz-msg', role: 'alert' });
+        let fileName = '';
+        file.addEventListener('change', () => {
+            const f = file.files[0]; if (!f) return;
+            fileName = f.name;
+            const r = new FileReader();
+            r.onload = () => { area.value = String(r.result); msg.textContent = App.t('wizLoaded', { name: f.name, kb: Math.max(1, Math.round(f.size / 1024)) }); };
+            r.readAsText(f);
+        });
+        const body = el('div', { class: 'wizard' },
+            el('p', { text: App.t('wizIntro') }),
+            el('ul', { class: 'wiz-formats' },
+                el('li', {}, el('b', { text: '.exam / .json' }), el('span', { text: ' — ' + App.t('wizFmtExam') })),
+                el('li', {}, el('b', { text: '.csv' }), el('span', { text: ' — ' + App.t('wizFmtCsv') })),
+                el('li', {}, el('b', { text: '.md / .txt' }), el('span', { text: ' — ' + App.t('wizFmtText') }))),
+            el('div', { class: 'field' }, el('label', { for: 'wiz-file', text: App.t('wizChooseFile') }), file),
+            el('div', { class: 'field' }, el('label', { for: 'wiz-text', text: App.t('wizOrPaste') }), area),
+            el('details', { class: 'wiz-example' }, el('summary', { text: App.t('wizExampleTitle') }), el('pre', { class: 'rich-pre', text: App.t('wizExample') })),
+            msg);
+        const m = App.ui.modal({
+            title: App.t('wizTitle'), body, wide: true,
+            actions: [{ label: App.t('wizContinue'), icon: 'next', onclick: () => {
+                try {
+                    if (!area.value.trim()) { msg.textContent = App.t('wizEmpty'); return false; }
+                    const r = readSource(fileName, area.value);
+                    openEditorWith(r.draft, { isNew: true, issues: r.issues, notes: r.notes });
+                } catch (e) { msg.textContent = e.message; msg.style.color = 'var(--error)'; return false; }
+            } }, { label: App.t('cancelBtn'), cls: 'btn-ghost' }]
+        });
+        return m;
+    };
+
+    // ---------------------------------------------------------------- editor
+    const catalogIds = () => (App.loader.catalog() || []).filter(c => !c.local).map(c => c.id || c.file);
+
+    App.ui.openEditor = function (id) {
+        if (id) {
+            const raw = App.library.get(id);
+            if (!raw) { App.ui.toast(App.t('errNotFound', { name: id })); return; }
+            openEditorWith(App.util.clone(raw), { isNew: false, issues: {}, notes: [] });
+        } else {
+            openEditorWith({
+                format: 2, id: 'my-exam', title: App.t('wizDefaultTitle'), version: '1.0',
+                settings: { passThreshold: 70, timePerQuestionSec: 90, shuffleOptions: true },
+                topics: { general: 'General' },
+                questions: [{ id: 1, topic: 'general', type: 'single', text: '', options: ['', ''], answer: [0] }]
+            }, { isNew: true, issues: {}, notes: [] });
+        }
+    };
+
+    function openEditorWith(draft, opts) {
+        draft.format = 2;
+        if (!draft.topics) { draft.topics = {}; }
+        draft.questions.forEach(q => { if (q.topic && draft.topics[q.topic] === undefined) draft.topics[q.topic] = q.topic; });
+        if (opts.isNew) draft.id = App.library.freeId(draft.id || App.convert.slug(App.loc(draft.title)), catalogIds());
+        E = { draft, isNew: opts.isNew, origId: draft.id, issues: opts.issues || {}, notes: opts.notes || [], open: new Set(), images: new Map(), dirty: !!opts.isNew, cards: {}, validateTimer: null };
+        // first questions with problems start open
+        draft.questions.forEach(q => { if ((E.issues[q.id] || []).length && E.open.size < 3) E.open.add(q.id); });
+        App.ui.show('library');
+        App.ui.renderLibrary();
+    }
+
+    const qIndexById = id => E.draft.questions.findIndex(q => q.id === id);
+    const nextId = () => E.draft.questions.reduce((m, q) => Math.max(m, typeof q.id === 'number' ? q.id : 0), 0) + 1;
+    const isSimple = q => SIMPLE.includes(App.questionType(q)) && ['text', 'explanation'].every(k => q[k] === undefined || typeof q[k] === 'string') && (!q.options || q.options.every(o => typeof o === 'string'));
+    const touch = () => { E.dirty = true; clearTimeout(E.validateTimer); E.validateTimer = setTimeout(refreshValidation, 250); };
+
+    function exportDraft() {
+        const d = App.util.clone(E.draft);
+        const unhide = v => typeof v === 'string' ? showImages(v) : Array.isArray(v) ? v.map(unhide) : (v && typeof v === 'object') ? Object.keys(v).reduce((o, k) => { o[k] = unhide(v[k]); return o; }, {}) : v;
+        d.questions = d.questions.map(q => {
+            const c = unhide(q);
+            Object.keys(c).forEach(k => { if (c[k] === '' || c[k] === undefined) delete c[k]; });
+            return c;
+        });
+        if (!d.description) delete d.description;
+        if (!d.code) delete d.code;
+        return d;
+    }
+
+    function validation() {
+        const raw = exportDraft();
+        const rep = App.schema.validate(raw);
+        return rep;
+    }
+
+    function refreshValidation() {
+        const panel = $('ed-validation');
+        if (!panel) return;
+        const rep = validation();
+        panel.textContent = '';
+        panel.className = 'ed-validation ' + (rep.ok() ? 'ok' : 'bad');
+        panel.appendChild(el('div', { class: 'ed-val-head' }, icon(rep.ok() ? 'check' : 'flag', 16),
+            el('b', { text: rep.ok() ? App.t('edValid') : App.t('edProblems', { n: rep.errors.length }) }),
+            rep.warnings.length ? el('span', { class: 'chip warn', text: App.t('edWarnings', { n: rep.warnings.length }) }) : null));
+        const bad = new Set();
+        rep.errors.slice(0, 8).forEach(e => panel.appendChild(el('p', { class: 'ed-val-line', text: '• ' + e.path + ': ' + e.message })));
+        rep.errors.concat(rep.warnings).forEach(e => { const m = String(e.path).match(/^questions\[(\d+)\]/); if (m) bad.add(Number(m[1])); });
+        rep.warnings.slice(0, 4).forEach(w => panel.appendChild(el('p', { class: 'ed-val-line warn', text: '! ' + w.path + ': ' + w.message })));
+        E.draft.questions.forEach((q, i) => {
+            const card = E.cards[q.id];
+            if (card) card.classList.toggle('has-problem', rep.errors.some(e => e.path.startsWith('questions[' + i + ']')));
+        });
+        const save = $('ed-save'); if (save) save.disabled = !rep.ok();
+        const dl = $('ed-download'); if (dl) dl.disabled = !rep.ok();
+    }
+
+    App.ui.renderLibrary = function () {
+        if (!E) { App.ui.closeOptions(); return; }
+        const v = $('view-library');
+        v.textContent = '';
+        const d = E.draft;
+        const head = el('div', { class: 'row between opt-head' },
+            el('div', {}, el('h1', { text: E.isNew ? App.t('edTitleNew') : App.t('edTitleEdit') }), el('p', { class: 'subtitle', text: App.t('edSub') })),
+            App.ui.btn(App.t('backBtn'), 'back', 'btn-secondary btn-sm', () => { if (!E.dirty || confirm(App.t('edDiscardConfirm'))) { E = null; App.ui.openOptions(); } }, { id: 'ed-back' }));
+        v.appendChild(head);
+        if (E.notes.length) v.appendChild(el('div', { class: 'banner info', id: 'ed-notes' }, icon('book', 18), el('span', { class: 'banner-text', text: E.notes.join(' ') })));
+
+        // metadata
+        const bind = (input, setter) => { input.addEventListener('input', () => { setter(input.value); touch(); }); return input; };
+        const meta = el('div', { class: 'card ed-meta' },
+            el('div', { class: 'ed-meta-grid' },
+                el('div', { class: 'field' }, el('label', { for: 'ed-title', text: App.t('edExamTitle') }), bind(el('input', { type: 'text', id: 'ed-title', value: typeof d.title === 'string' ? d.title : App.loc(d.title), disabled: typeof d.title !== 'string' }), x => { d.title = x; })),
+                el('div', { class: 'field' }, el('label', { for: 'ed-id', text: App.t('edExamId') }), bind(el('input', { type: 'text', id: 'ed-id', value: d.id, disabled: !E.isNew }), x => { d.id = x.trim(); }), el('p', { class: 'hint', text: App.t('edIdHint') })),
+                el('div', { class: 'field' }, el('label', { for: 'ed-version', text: App.t('edVersion') }), bind(el('input', { type: 'text', id: 'ed-version', value: d.version || '' }), x => { d.version = x; })),
+                el('div', { class: 'field' }, el('label', { for: 'ed-pass', text: App.t('edPass') }), bind(el('input', { type: 'number', id: 'ed-pass', min: 0, max: 100, value: (d.settings && d.settings.passThreshold) || 70 }), x => { d.settings = Object.assign({}, d.settings, { passThreshold: Number(x) || 70 }); })),
+                el('div', { class: 'field ed-wide' }, el('label', { for: 'ed-desc', text: App.t('edDescription') }), bind(el('input', { type: 'text', id: 'ed-desc', value: typeof d.description === 'string' ? d.description : '', disabled: d.description !== undefined && typeof d.description !== 'string' }), x => { d.description = x; }))));
+        v.appendChild(meta);
+
+        // topics
+        const topicBox = el('details', { class: 'card ed-topics' }, el('summary', { class: 'ed-topics-sum' }, icon('grid', 16), el('b', { text: App.t('edTopics') }), el('span', { class: 'chip', text: String(Object.keys(d.topics).length) })));
+        const topicList = el('div', { class: 'ed-topic-list' });
+        Object.keys(d.topics).forEach(k => {
+            const used = d.questions.filter(q => q.topic === k).length;
+            topicList.appendChild(el('div', { class: 'ed-topic-row' },
+                el('code', { text: k }),
+                bind(el('input', { type: 'text', value: typeof d.topics[k] === 'string' ? d.topics[k] : App.loc(d.topics[k]), disabled: typeof d.topics[k] !== 'string', 'aria-label': k }), x => { d.topics[k] = x || k; }),
+                el('span', { class: 'chip', text: App.t('nQuestions', { n: used }) })));
+        });
+        const newTopic = el('input', { type: 'text', id: 'ed-new-topic', placeholder: App.t('edNewTopic'), maxLength: 40 });
+        topicBox.appendChild(topicList);
+        topicBox.appendChild(el('div', { class: 'opt-add' }, newTopic, App.ui.btn(App.t('edAddTopic'), 'star', 'btn-sm', () => {
+            const name = newTopic.value.trim(); if (!name) return;
+            let key = App.convert.slug(name), n = 2; while (d.topics[key] !== undefined) key = App.convert.slug(name) + '-' + (n++);
+            d.topics[key] = name; touch(); App.ui.renderLibrary();
+        })));
+        v.appendChild(topicBox);
+
+        // validation + questions
+        v.appendChild(el('div', { id: 'ed-validation', class: 'ed-validation', role: 'status' }));
+        const list = el('div', { id: 'ed-questions', class: 'ed-questions' });
+        E.cards = {};
+        d.questions.forEach((q, i) => { const c = questionCard(q, i); E.cards[q.id] = c; list.appendChild(c); });
+        v.appendChild(el('div', { class: 'section-title' }, el('h2', { text: App.t('edQuestions', { n: d.questions.length }) }),
+            el('span', { class: 'toolbar' },
+                App.ui.btn(App.t('edExpandAll'), 'chevron', 'btn-ghost btn-sm', () => { d.questions.forEach(q => E.open.add(q.id)); App.ui.renderLibrary(); }),
+                App.ui.btn(App.t('edCollapseAll'), 'chevron', 'btn-ghost btn-sm', () => { E.open.clear(); App.ui.renderLibrary(); }))));
+        v.appendChild(list);
+        v.appendChild(el('div', { class: 'toolbar', style: 'margin:12px 0' }, App.ui.btn(App.t('edAddQuestion'), 'star', 'btn-sm', () => {
+            const id = nextId();
+            d.questions.push({ id, topic: Object.keys(d.topics)[0] || 'general', type: 'single', text: '', options: ['', ''], answer: [0] });
+            if (!Object.keys(d.topics).length) d.topics.general = 'General';
+            E.open.add(id); touch(); App.ui.renderLibrary();
+            const c = E.cards[id]; if (c) c.scrollIntoView({ block: 'center' });
+        }, { id: 'ed-add' })));
+
+        // footer
+        v.appendChild(el('div', { class: 'ed-footer card' },
+            App.ui.btn(E.isNew ? App.t('edSaveNew') : App.t('edSave'), 'check', '', () => saveDraft(), { id: 'ed-save' }),
+            App.ui.btn(App.t('edDownload'), 'download', 'btn-secondary', () => App.ui.exportExamDialog(exportDraft(), { raw: true }), { id: 'ed-download' }),
+            App.ui.btn(App.t('edPreview'), 'play', 'btn-ghost', () => previewDraft(), { id: 'ed-preview' })));
+        refreshValidation();
+    };
+
+    function saveDraft() {
+        const raw = exportDraft();
+        if (E.isNew) raw.id = App.library.freeId(raw.id, catalogIds().concat(App.library.has(raw.id) ? [] : []));
+        const r = App.library.save(raw);
+        if (!r.ok) { App.ui.toast(App.t('edSaveFail'), 5000); return; }
+        E.isNew = false; E.dirty = false; E.origId = r.id; E.draft.id = r.id;
+        App.ui.toast(App.t('edSaved'));
+        App.ui.renderLibrary();
+        window.__lastSavedExamId = r.id;
+    }
+
+    // Opens the draft as a temporary exam (not saved) so it can be tried right away
+    function previewDraft() {
+        const raw = exportDraft();
+        const { exam, report } = App.schema.prepare(raw, raw.id);
+        if (!exam) { App.ui.toast(App.t('edNotValid', { n: report.errors.length }), 5000); return; }
+        exam.sourceFile = 'preview'; exam.preview = true; exam.id = 'preview-' + exam.id;
+        const ret = E;
+        App.ui.openExam(exam);
+        App.ui.toast(App.t('edPreviewNote'), 6000);
+        App.state.editorReturn = ret;
+    }
+
+    // ---------------------------------------------------------------- question card
+    function questionCard(q, i) {
+        const d = E.draft;
+        const open = E.open.has(q.id);
+        const type = App.questionType(q);
+        const problems = E.issues[q.id] || [];
+        const card = el('div', { class: 'ed-q' + (open ? ' open' : '') + (problems.length ? ' has-problem' : ''), dataset: { qid: String(q.id) } });
+        const excerpt = App.rich.plain(typeof q.text === 'string' ? q.text : App.loc(q.text)).replace(/\s+/g, ' ').slice(0, 90) || App.t('edEmptyText');
+        const summary = el('button', { type: 'button', class: 'ed-q-head', aria: { expanded: open ? 'true' : 'false' }, onclick: () => { if (E.open.has(q.id)) E.open.delete(q.id); else E.open.add(q.id); replaceCard(q.id); } },
+            el('span', { class: 'ed-q-num', text: String(i + 1) }),
+            el('span', { class: 'ed-q-text', text: excerpt }),
+            el('span', { class: 'chip', text: App.t('type_' + type) }),
+            problems.length ? el('span', { class: 'chip warn', text: problems.map(p => App.t('issue_' + p)).join(' · ') }) : null,
+            icon('chevron', 16));
+        card.appendChild(summary);
+        if (!open) return card;
+        const body = el('div', { class: 'ed-q-body' });
+        const simple = isSimple(q);
+
+        if (!simple) {
+            body.appendChild(el('p', { class: 'hint', text: App.t('edJsonHint') }));
+            const ta = el('textarea', { class: 'ed-json', rows: 12, spellcheck: false, 'aria-label': 'JSON' });
+            ta.value = hideImages(JSON.stringify(q, null, 1));
+            const msg = el('p', { class: 'hint', role: 'alert' });
+            ta.addEventListener('input', () => {
+                try {
+                    const parsed = JSON.parse(showImages(ta.value));
+                    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('object expected');
+                    const idx = qIndexById(q.id);
+                    if (parsed.id === undefined) parsed.id = q.id;
+                    d.questions[idx] = parsed; msg.textContent = ''; touch();
+                } catch (e) { msg.textContent = 'JSON: ' + e.message; msg.style.color = 'var(--error)'; }
+            });
+            body.appendChild(ta); body.appendChild(msg);
+        } else {
+            const upd = fn => { fn(); touch(); };
+            // topic + type + difficulty + points
+            const topicSel = el('select', { id: 'edq-topic-' + q.id });
+            Object.keys(d.topics).forEach(k => topicSel.appendChild(el('option', { value: k, text: typeof d.topics[k] === 'string' ? d.topics[k] : App.loc(d.topics[k]) })));
+            topicSel.value = q.topic;
+            topicSel.addEventListener('change', () => upd(() => { q.topic = topicSel.value; }));
+            const typeSel = el('select', { id: 'edq-type-' + q.id });
+            SIMPLE.forEach(t => typeSel.appendChild(el('option', { value: t, text: App.t('type_' + t) })));
+            typeSel.value = type;
+            typeSel.addEventListener('change', () => { changeType(q, typeSel.value); touch(); replaceCard(q.id); });
+            const diff = el('select', { id: 'edq-diff-' + q.id });
+            [['', '—'], [1, App.t('diffEasy')], [2, App.t('diffMedium')], [3, App.t('diffHard')]].forEach(([v, l]) => diff.appendChild(el('option', { value: String(v), text: l })));
+            diff.value = q.difficulty ? String(q.difficulty) : '';
+            diff.addEventListener('change', () => upd(() => { if (diff.value) q.difficulty = Number(diff.value); else delete q.difficulty; }));
+            body.appendChild(el('div', { class: 'ed-q-row' },
+                el('div', { class: 'field' }, el('label', { for: topicSel.id, text: App.t('edTopic') }), topicSel),
+                el('div', { class: 'field' }, el('label', { for: typeSel.id, text: App.t('edType') }), typeSel),
+                el('div', { class: 'field' }, el('label', { for: diff.id, text: App.t('edDifficulty') }), diff)));
+
+            // text with image button
+            const text = el('textarea', { id: 'edq-text-' + q.id, rows: 3 });
+            text.value = hideImages(q.text || '');
+            text.addEventListener('input', () => upd(() => { q.text = showImages(text.value); card.querySelector('.ed-q-text').textContent = App.rich.plain(text.value).replace(/\s+/g, ' ').slice(0, 90) || App.t('edEmptyText'); }));
+            const imgInput = el('input', { type: 'file', accept: 'image/*', class: 'hidden', 'aria-label': App.t('edAddImage') });
+            imgInput.addEventListener('change', async () => {
+                const f = imgInput.files[0]; if (!f) return;
+                try {
+                    const uri = await imageToDataUri(f);
+                    const key = hideImages('(' + uri + ')').slice(1, -1);
+                    const pos = text.selectionStart === undefined ? text.value.length : text.selectionStart;
+                    text.value = text.value.slice(0, pos) + '\n![' + (f.name || 'image').replace(/[\[\]()]/g, '') + '](' + key + ')\n' + text.value.slice(pos);
+                    text.dispatchEvent(new Event('input'));
+                } catch (e) { App.ui.toast(App.t('edImageFail'), 4000); }
+                imgInput.value = '';
+            });
+            body.appendChild(el('div', { class: 'field' },
+                el('label', { for: text.id, text: App.t('edText') }), text,
+                el('div', { class: 'toolbar' }, App.ui.btn(App.t('edAddImage'), 'upload', 'btn-ghost btn-sm', () => imgInput.click()), imgInput),
+                el('p', { class: 'hint', text: App.t('edRichHint') })));
+
+            // answers
+            if (type === 'single' || type === 'multiple') {
+                const multi = type === 'multiple';
+                const ans = Array.isArray(q.answer) ? q.answer : [q.answer];
+                const list = el('div', { class: 'ed-options' });
+                q.options.forEach((o, k) => {
+                    const inp = el('input', { type: 'text', value: hideImages(o), 'aria-label': App.t('edOption', { n: LETTERS[k] }) });
+                    inp.addEventListener('input', () => upd(() => { q.options[k] = showImages(inp.value); }));
+                    const mark = el('input', { type: multi ? 'checkbox' : 'radio', name: 'edq-ans-' + q.id, checked: ans.includes(k), 'aria-label': App.t('edCorrect', { n: LETTERS[k] }) });
+                    mark.addEventListener('change', () => upd(() => {
+                        const cur = Array.isArray(q.answer) ? q.answer.slice() : [q.answer];
+                        q.answer = multi ? (mark.checked ? cur.concat(k).filter((x, p, a) => a.indexOf(x) === p).sort((a, b) => a - b) : cur.filter(x => x !== k)) : [k];
+                    }));
+                    list.appendChild(el('div', { class: 'ed-option' },
+                        el('label', { class: 'ed-correct', title: App.t('edCorrect', { n: LETTERS[k] }) }, mark, el('span', { text: LETTERS[k] })),
+                        inp,
+                        App.ui.btn('', 'x', 'btn-ghost btn-sm', () => {
+                            if (q.options.length <= 2) return;
+                            q.options.splice(k, 1);
+                            q.answer = (Array.isArray(q.answer) ? q.answer : [q.answer]).filter(x => x !== k).map(x => x > k ? x - 1 : x);
+                            touch(); replaceCard(q.id);
+                        }, { title: App.t('deleteBtn'), 'aria-label': App.t('deleteBtn') })));
+                });
+                body.appendChild(el('div', { class: 'field' }, el('label', { text: App.t(multi ? 'edOptionsMulti' : 'edOptionsSingle') }), list,
+                    q.options.length < 6 ? App.ui.btn(App.t('edAddOption'), 'star', 'btn-ghost btn-sm', () => { q.options.push(''); touch(); replaceCard(q.id); }) : null));
+            } else if (type === 'truefalse') {
+                const wrap = el('div', { class: 'ed-tf' });
+                [[true, App.t('tfTrue')], [false, App.t('tfFalse')]].forEach(([val, label]) => {
+                    const r = el('input', { type: 'radio', name: 'edq-tf-' + q.id, checked: q.answer === val });
+                    r.addEventListener('change', () => upd(() => { q.answer = val; }));
+                    wrap.appendChild(el('label', { class: 'check-inline' }, r, el('span', { text: label })));
+                });
+                body.appendChild(el('div', { class: 'field' }, el('label', { text: App.t('edCorrectAnswer') }), wrap));
+            } else {
+                const a = typeof q.answer === 'object' && q.answer !== null ? q.answer : { value: q.answer };
+                const setA = patch => upd(() => { const cur = typeof q.answer === 'object' && q.answer !== null ? q.answer : { value: q.answer }; const n = Object.assign({}, cur, patch); Object.keys(n).forEach(k => { if (n[k] === '' || n[k] === undefined || (k === 'tolerance' && !n[k])) delete n[k]; }); q.answer = (Object.keys(n).length === 1 && 'value' in n) ? n.value : n; });
+                const val = el('input', { type: 'number', step: 'any', value: a.value === undefined ? '' : a.value, id: 'edq-val-' + q.id }); val.addEventListener('input', () => setA({ value: val.value === '' ? 0 : Number(val.value) }));
+                const tol = el('input', { type: 'number', step: 'any', min: 0, value: a.tolerance || '' }); tol.addEventListener('input', () => setA({ tolerance: Number(tol.value) || 0 }));
+                const unit = el('input', { type: 'text', value: a.unit || '', maxLength: 20 }); unit.addEventListener('input', () => setA({ unit: unit.value }));
+                body.appendChild(el('div', { class: 'ed-q-row' },
+                    el('div', { class: 'field' }, el('label', { for: val.id, text: App.t('edValue') }), val),
+                    el('div', { class: 'field' }, el('label', { text: App.t('edTolerance') }), tol),
+                    el('div', { class: 'field' }, el('label', { text: App.t('unit') }), unit)));
+            }
+
+            const expl = el('textarea', { id: 'edq-expl-' + q.id, rows: 2 });
+            expl.value = hideImages(q.explanation || '');
+            expl.addEventListener('input', () => upd(() => { q.explanation = showImages(expl.value); }));
+            body.appendChild(el('div', { class: 'field' }, el('label', { for: expl.id, text: App.t('edExplanation') }), expl));
+        }
+
+        body.appendChild(el('div', { class: 'toolbar ed-q-tools' },
+            App.ui.btn('', 'chevron', 'btn-ghost btn-sm', () => moveQ(q.id, -1), { title: App.t('moveUp'), 'aria-label': App.t('moveUp'), disabled: i === 0 }),
+            App.ui.btn('', 'chevron', 'btn-ghost btn-sm flip', () => moveQ(q.id, 1), { title: App.t('moveDown'), 'aria-label': App.t('moveDown'), disabled: i === d.questions.length - 1 }),
+            App.ui.btn(App.t('edDuplicate'), 'layers', 'btn-ghost btn-sm', () => { const c = App.util.clone(q); c.id = nextId(); d.questions.splice(i + 1, 0, c); E.open.add(c.id); touch(); App.ui.renderLibrary(); }),
+            App.ui.btn(App.t('deleteBtn'), 'trash', 'btn-danger btn-sm', () => { if (d.questions.length <= 1) return; d.questions.splice(i, 1); E.open.delete(q.id); touch(); App.ui.renderLibrary(); })));
+        card.appendChild(body);
+        return card;
+    }
+
+    function replaceCard(id) {
+        const idx = qIndexById(id);
+        const old = E.cards[id];
+        if (idx < 0 || !old) return;
+        const fresh = questionCard(E.draft.questions[idx], idx);
+        old.replaceWith(fresh);
+        E.cards[id] = fresh;
+        refreshValidation();
+    }
+    function moveQ(id, delta) {
+        const arr = E.draft.questions, i = qIndexById(id), j = i + delta;
+        if (j < 0 || j >= arr.length) return;
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+        touch(); App.ui.renderLibrary();
+    }
+    function changeType(q, type) {
+        const prev = App.questionType(q);
+        if (type === 'single' || type === 'multiple') {
+            if (!Array.isArray(q.options) || q.options.length < 2) q.options = ['', ''];
+            let a = Array.isArray(q.answer) ? q.answer.filter(x => Number.isInteger(x) && x < q.options.length) : [];
+            if (!a.length) a = [0];
+            if (type === 'single') a = [a[0]];
+            q.answer = a;
+        } else if (type === 'truefalse') { delete q.options; q.answer = true; }
+        else { delete q.options; q.answer = 0; }
+        q.type = type;
+        if (prev === type) return;
+    }
+
+    // ---------------------------------------------------------------- export dialog
+    // exam: raw (or normalized) exam object. opts.raw: it can be written as a .exam file.
+    App.ui.exportExamDialog = function (exam, opts) {
+        opts = opts || {};
+        const multiLang = JSON.stringify(exam).includes('"it":') && JSON.stringify(exam).includes('"en":');
+        const langSel = el('select', { id: 'exp-lang' });
+        [['en', 'English'], ['it', 'Italiano']].forEach(([v, l]) => langSel.appendChild(el('option', { value: v, text: l })));
+        langSel.value = App.lang;
+        const note = el('p', { class: 'hint', id: 'exp-note' });
+        const fname = ext => (exam.id || 'exam') + ext;
+        const run = (kind) => {
+            const lang = langSel.value;
+            let r;
+            if (kind === 'exam') { App.ui.download(fname('.exam'), App.library.toFileText(exam), 'application/octet-stream'); note.textContent = App.t('expDone'); return; }
+            if (kind === 'csv') { r = App.convert.toCSV(exam, lang); App.ui.download(fname('.csv'), r.text, 'text/csv'); }
+            else if (kind === 'md') { r = App.convert.toMarkdown(exam, lang); App.ui.download(fname('.md'), r.text, 'text/markdown'); }
+            else { App.ui.download(fname('-anki.txt'), App.convert.toAnki(exam, lang), 'text/plain'); r = { skipped: [] }; }
+            note.textContent = App.t('expDone') + (r.skipped.length ? ' ' + App.t('expSkipped', { n: r.skipped.length }) : '');
+        };
+        const body = el('div', {},
+            el('p', { class: 'hint', text: App.t('expIntro') }),
+            multiLang ? el('div', { class: 'field' }, el('label', { for: 'exp-lang', text: App.t('expLanguage') }), langSel, el('p', { class: 'hint', text: App.t('expLangHint') })) : null,
+            el('div', { class: 'exp-grid' },
+                opts.raw ? App.ui.btn('.exam', 'download', 'btn-block', () => run('exam'), { id: 'exp-exam' }) : null,
+                App.ui.btn('CSV', 'download', 'btn-secondary btn-block', () => run('csv'), { id: 'exp-csv' }),
+                App.ui.btn('Markdown', 'download', 'btn-secondary btn-block', () => run('md'), { id: 'exp-md' }),
+                App.ui.btn('Anki (TSV)', 'download', 'btn-secondary btn-block', () => run('anki'), { id: 'exp-anki' })),
+            note);
+        return App.ui.modal({ title: App.t('expTitle'), body, actions: [{ label: App.t('closeBtn'), cls: 'btn-ghost' }] });
+    };
+})();
+
+/* UI: question-bank search, command palette, shortcuts help, wrong-question reports, "what's new" notice, quality panel. */
+(function () {
+    const { el, icon } = App.util;
+    const $ = App.ui.$;
+
+    const LETTERS = 'ABCDEF';
+    const isTyping = t => t && (t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable || (t.tagName === 'INPUT' && !/^(checkbox|radio|button)$/.test(t.type)));
+
+    // ---------------------------------------------------------------- custom practice session (from search results)
+    App.ui.startCustomSession = function (questions, label) {
+        const exam = App.state.exam;
+        if (!questions.length) { App.ui.toast(App.t('modeEmpty')); return; }
+        const session = App.Session.create(questions, {
+            examId: exam.id, modeId: 'custom', modeLabel: label, studyMode: true, timerMode: 'none', totalSec: 0,
+            perQuestionSec: exam.settings.timePerQuestionSec, threshold: exam.settings.passThreshold,
+            scoring: App.scoring.resolve(exam, null, App.storage.getPref('scoring')), shuffleOptions: exam.settings.shuffleOptions
+        });
+        App.ui.beginSession(session);
+    };
+
+    // ---------------------------------------------------------------- search
+    let S = { q: '', topic: '', type: '', diff: '', status: '', picked: new Set(), index: null, examId: null };
+
+    function haystack(exam, q) {
+        const parts = [String(q.id), q.topic, q.type, (q.tags || []).join(' ')];
+        const topicName = exam.topics && exam.topics[q.topic];
+        if (topicName) parts.push(typeof topicName === 'string' ? topicName : Object.values(topicName).join(' '));
+        const add = v => { if (v === undefined || v === null) return; if (typeof v === 'string' || typeof v === 'number') parts.push(String(v)); else if (Array.isArray(v)) v.forEach(add); else if (typeof v === 'object') Object.values(v).forEach(add); };
+        ['text', 'options', 'explanation', 'items', 'pairs', 'context', 'parts', 'source'].forEach(k => add(q[k]));
+        return App.rich.plain(parts.join(' \n ')).toLowerCase();
+    }
+    function buildIndex(exam) {
+        if (S.index && S.examId === exam.id && S.index.length === exam.questions.length) return S.index;
+        S.examId = exam.id;
+        S.index = exam.questions.map(q => ({ q, h: haystack(exam, q) }));
+        return S.index;
+    }
+
+    App.ui.search = function (exam, f, stats) {
+        stats = stats || App.storage.allQStats(exam.id);
+        const terms = String(f.q || '').toLowerCase().split(/\s+/).filter(Boolean);
+        return buildIndex(exam).filter(({ q, h }) => {
+            if (f.topic && q.topic !== f.topic) return false;
+            if (f.type && (q.type || App.questionType(q)) !== f.type) return false;
+            if (f.diff && String(q.difficulty || '') !== String(f.diff)) return false;
+            const st = stats[q.uid];
+            if (f.status === 'flagged' && !(st && st.flag)) return false;
+            if (f.status === 'mistakes' && !(st && st.seen && st.lastOk === false)) return false;
+            if (f.status === 'unseen' && st && st.seen) return false;
+            if (f.status === 'mastered' && !(st && App.srs.isMastered(st))) return false;
+            if (f.status === 'notes' && !(st && st.note)) return false;
+            return terms.every(t => h.includes(t));
+        }).map(x => x.q);
+    };
+
+    function highlight(text, terms) {
+        const out = document.createDocumentFragment();
+        if (!terms.length) { out.appendChild(document.createTextNode(text)); return out; }
+        const lower = text.toLowerCase();
+        const marks = [];
+        terms.forEach(t => { let i = 0; while ((i = lower.indexOf(t, i)) >= 0) { marks.push([i, i + t.length]); i += t.length; } });
+        marks.sort((a, b) => a[0] - b[0]);
+        let pos = 0;
+        marks.forEach(([s, e]) => { if (s < pos) { if (e > pos) { out.lastChild.textContent += text.slice(pos, e); pos = e; } return; } if (s > pos) out.appendChild(document.createTextNode(text.slice(pos, s))); out.appendChild(el('mark', { text: text.slice(s, e) })); pos = e; });
+        if (pos < text.length) out.appendChild(document.createTextNode(text.slice(pos)));
+        return out;
+    }
+
+    App.ui.openSearch = function (query) {
+        if (!App.state.exam) { App.ui.toast(App.t('searchNeedExam')); return; }
+        if (query !== undefined) S.q = query;
+        App.ui.show('search');
+        App.ui.renderSearch();
+        const box = $('search-q'); if (box) box.focus();
+    };
+
+    App.ui.renderSearch = function () {
+        const exam = App.state.exam;
+        const v = $('view-search');
+        if (!exam) { App.ui.closeOptions(); return; }
+        v.textContent = '';
+        const stats = App.storage.allQStats(exam.id);
+        v.appendChild(el('div', { class: 'row between opt-head' },
+            el('div', {}, el('h1', { text: App.t('searchTitle') }), el('p', { class: 'subtitle', text: App.loc(exam.title) })),
+            App.ui.btn(App.t('backBtn'), 'back', 'btn-secondary btn-sm', () => { App.ui.renderDashboard(); App.ui.show('dashboard'); }, { id: 'search-back' })));
+
+        const q = el('input', { type: 'text', id: 'search-q', placeholder: App.t('searchPlaceholder'), value: S.q, autocomplete: 'off', 'aria-label': App.t('searchPlaceholder') });
+        const sel = (id, label, opts, val, key) => {
+            const s = el('select', { id }); opts.forEach(([value, text]) => s.appendChild(el('option', { value: String(value), text })));
+            s.value = String(val); s.addEventListener('change', () => { S[key] = s.value; S.picked.clear(); paint(); });
+            return el('div', { class: 'field' }, el('label', { for: id, text: label }), s);
+        };
+        const types = [['', App.t('searchAny')]].concat(['single', 'multiple', 'truefalse', 'ordering', 'matching', 'numeric', 'scenario'].filter(t => exam.questions.some(x => x.type === t)).map(t => [t, App.t('type_' + t)]));
+        const topics = [['', App.t('searchAny')]].concat(exam.topicList.map(t => [t, exam.topics && exam.topics[t] ? App.loc(exam.topics[t]) : t]));
+        const diffs = [['', App.t('searchAny')], [1, App.t('diffEasy')], [2, App.t('diffMedium')], [3, App.t('diffHard')]];
+        const statuses = [['', App.t('searchAny')], ['mistakes', App.t('modeMistakes')], ['flagged', App.t('modeFlagged')], ['unseen', App.t('modeUnseen')], ['mastered', App.t('searchMastered')], ['notes', App.t('searchWithNotes')]];
+        v.appendChild(el('div', { class: 'card search-form' },
+            el('div', { class: 'field' }, q),
+            el('div', { class: 'search-filters' },
+                sel('search-topic', App.t('edTopic'), topics, S.topic, 'topic'),
+                sel('search-type', App.t('edType'), types, S.type, 'type'),
+                exam.hasDifficulty ? sel('search-diff', App.t('edDifficulty'), diffs, S.diff, 'diff') : null,
+                sel('search-status', App.t('searchStatus'), statuses, S.status, 'status'))));
+        const bar = el('div', { class: 'search-bar', id: 'search-bar' });
+        const list = el('div', { class: 'search-results', id: 'search-results' });
+        v.appendChild(bar); v.appendChild(list);
+
+        function paint() {
+            const res = App.ui.search(exam, S, stats);
+            const terms = S.q.toLowerCase().split(/\s+/).filter(Boolean);
+            bar.textContent = '';
+            const picked = res.filter(r => S.picked.has(r.uid));
+            const target = picked.length ? picked : res;
+            bar.appendChild(el('span', { class: 'chip primary', id: 'search-count', text: App.t('searchResults', { n: res.length, t: exam.questions.length }) }));
+            bar.appendChild(el('span', { class: 'toolbar' },
+                App.ui.btn(picked.length ? App.t('searchPracticePicked', { n: picked.length }) : App.t('searchPracticeAll', { n: res.length }), 'play', 'btn-sm', () => App.ui.startCustomSession(target, App.t('searchSessionLabel')), { id: 'search-practice', disabled: !res.length }),
+                res.length ? App.ui.btn(picked.length === res.length ? App.t('searchNone') : App.t('searchSelectAll'), 'check', 'btn-ghost btn-sm', () => { if (picked.length === res.length) S.picked.clear(); else res.forEach(r => S.picked.add(r.uid)); paint(); }) : null));
+            list.textContent = '';
+            if (!res.length) list.appendChild(el('p', { class: 'hint', style: 'text-align:center;padding:24px', text: App.t('searchEmpty') }));
+            res.slice(0, 100).forEach(r => list.appendChild(resultCard(exam, r, terms, stats, paint)));
+            if (res.length > 100) list.appendChild(el('p', { class: 'hint', style: 'text-align:center', text: App.t('searchMore', { n: res.length - 100 }) }));
+        }
+        let timer = null;
+        q.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(() => { S.q = q.value; S.picked.clear(); paint(); }, 120); });
+        paint();
+    }
+
+    function resultCard(exam, q, terms, stats, repaint) {
+        const st = stats[q.uid] || {};
+        const text = App.rich.plain(App.loc(q.text)).replace(/\s+/g, ' ');
+        const pick = el('input', { type: 'checkbox', checked: S.picked.has(q.uid), 'aria-label': App.t('searchSelect') });
+        pick.addEventListener('change', () => { if (pick.checked) S.picked.add(q.uid); else S.picked.delete(q.uid); repaint(); });
+        const details = el('div', { class: 'search-details hidden' });
+        const toggle = App.ui.btn(App.t('searchShow'), 'chevron', 'btn-ghost btn-sm', () => {
+            if (!details.firstChild) {
+                try {
+                    const item = App.prepareQuestion(q, { shuffleOptions: false });
+                    details.appendChild(App.rich.node(App.loc(q.text)));
+                    details.appendChild(App.types[item.kind].renderReview(item, undefined));
+                    if (q.explanation) details.appendChild(el('div', { class: 'explanation-box' }, el('h4', { text: App.t('explanation') }), App.rich.node(App.loc(q.explanation))));
+                } catch (e) { details.appendChild(el('p', { class: 'hint', text: String(e.message || e) })); }
+            }
+            const open = details.classList.toggle('hidden') === false;
+            toggle.querySelector('span').textContent = open ? App.t('searchHide') : App.t('searchShow');
+        });
+        const flag = App.ui.btn('', 'flag', 'btn-ghost btn-sm' + (st.flag ? ' on' : ''), () => { App.storage.patchQStat(exam.id, q.uid, s => { s.flag = !s.flag; return s; }); repaint(); }, { title: App.t('flag'), 'aria-pressed': st.flag ? 'true' : 'false', 'aria-label': App.t('flag') });
+        return el('article', { class: 'search-card', dataset: { uid: q.uid } },
+            el('label', { class: 'search-pick' }, pick),
+            el('div', { class: 'search-main' },
+                el('div', { class: 'search-meta' },
+                    el('span', { class: 'chip', text: '#' + q.id }),
+                    el('span', { class: 'chip primary', text: exam.topics && exam.topics[q.topic] ? App.loc(exam.topics[q.topic]) : q.topic }),
+                    el('span', { class: 'chip', text: App.t('type_' + (q.type || App.questionType(q))) }),
+                    st.seen ? el('span', { class: 'chip ' + (st.lastOk ? 'ok' : 'bad'), text: st.correct + '/' + st.seen }) : el('span', { class: 'chip', text: App.t('modeUnseen') }),
+                    st.note ? el('span', { class: 'chip warn', text: App.t('note') }) : null),
+                el('p', { class: 'search-text' }, highlight(text.length > 280 ? text.slice(0, 280) + '…' : text, terms)),
+                el('div', { class: 'toolbar' }, toggle, flag),
+                details));
+    }
+
+    // ---------------------------------------------------------------- shortcuts help
+    App.ui.showShortcuts = function () {
+        const rows = [
+            ['Ctrl/⌘ + K', App.t('scPalette')], ['?', App.t('scHelp')], ['/', App.t('scSearch')],
+            ['1–6 · A–F', App.t('scSelect')], ['← →', App.t('scNav')], ['Enter', App.t('scEnter')],
+            ['M', App.t('scFlag')], ['X', App.t('scClear')], ['R', App.t('scReport')], ['P', App.t('scPause')], ['Esc', App.t('scClose')]];
+        const tbl = el('table', { class: 'kbd-table' });
+        rows.forEach(([k, d]) => tbl.appendChild(el('tr', {}, el('td', {}, ...k.split(' + ').map((p, i, a) => [el('kbd', { text: p }), i < a.length - 1 ? ' + ' : null])), el('td', { text: d }))));
+        return App.ui.modal({ title: App.t('shortcutsTitle'), body: tbl, actions: [{ label: App.t('closeBtn'), cls: 'btn-ghost' }] });
+    };
+
+    // ---------------------------------------------------------------- command palette
+    function commands() {
+        const out = [];
+        const add = (label, hint, iconName, run) => out.push({ label, hint, iconName, run });
+        const exam = App.state.exam;
+        add(App.t('cmdHome'), '', 'home', () => { location.href = location.pathname; });
+        App.loader.catalog().forEach(c => { if (!exam || c.file !== exam.sourceFile) add(App.t('cmdOpenExam', { name: App.loc(c.title) || c.file }), '', 'book', () => { location.href = '?content=' + encodeURIComponent(c.file); }); });
+        if (exam) {
+            add(App.t('cmdSearch'), '/', 'grid', () => App.ui.openSearch());
+            add(App.t('statsBtn'), '', 'chart', () => App.ui.openStats());
+            add(App.t('cmdDashboard'), '', 'layers', () => { App.ui.renderDashboard(); App.ui.show('dashboard'); });
+            App.modes.list(exam, App.storage.allQStats(exam.id)).filter(m => m.available > 0 && (m.group === 'exam' || ['review', 'mistakes', 'flagged', 'unseen'].includes(m.id))).forEach(m => {
+                add(App.t('cmdStart', { name: App.ui.modeTitle(m) }), '', 'play', () => {
+                    const n = Math.min(m.count || m.defaultCount || m.available, m.available);
+                    App.ui.startFromDashboard(m, n, m.studyDefault, 'default');
+                });
+            });
+            add(App.t('cmdExportExam'), '', 'download', () => App.ui.exportExamDialog(exam.local ? App.library.get(exam.id) || exam : exam, { raw: !!exam.local }));
+        }
+        add(App.t('optionsTitle'), '', 'menu', () => App.ui.openOptions());
+        add(App.t('themeTitle'), '', App.ui.theme() === 'dark' ? 'sun' : 'moon', () => App.ui.setTheme(App.ui.theme() === 'dark' ? 'light' : 'dark'));
+        add(App.t('langTitle'), '', 'globe', () => App.ui.setLang(App.lang === 'en' ? 'it' : 'en'));
+        add(App.t('backupDownload'), '', 'download', () => App.ui.exportBackup());
+        add(App.t('libraryImport'), '', 'upload', () => App.ui.openWizard());
+        add(App.t('libraryNew'), '', 'star', () => App.ui.openEditor(null));
+        add(App.t('shortcutsBtn'), '?', 'grid', () => App.ui.showShortcuts());
+        return out;
+    }
+
+    App.ui.openPalette = function () {
+        if (App.ui.modalOpen()) return;
+        const input = el('input', { type: 'text', id: 'palette-input', placeholder: App.t('cmdPlaceholder'), autocomplete: 'off', role: 'combobox', aria: { expanded: 'true', controls: 'palette-list', autocomplete: 'list' } });
+        const list = el('ul', { id: 'palette-list', class: 'palette-list', role: 'listbox' });
+        const cmds = commands();
+        let shown = [], active = 0;
+        let m;
+        function paint() {
+            const terms = input.value.toLowerCase().split(/\s+/).filter(Boolean);
+            shown = cmds.filter(c => terms.every(t => c.label.toLowerCase().includes(t))).slice(0, 12);
+            active = Math.min(active, Math.max(0, shown.length - 1));
+            list.textContent = '';
+            if (!shown.length) list.appendChild(el('li', { class: 'palette-empty', text: App.t('cmdNone') }));
+            shown.forEach((c, i) => {
+                const li = el('li', { class: 'palette-item' + (i === active ? ' active' : ''), role: 'option', id: 'palette-opt-' + i, aria: { selected: i === active ? 'true' : 'false' }, onclick: () => run(i) },
+                    icon(c.iconName, 16), el('span', { class: 'palette-label', text: c.label }), c.hint ? el('kbd', { text: c.hint }) : null);
+                list.appendChild(li);
+            });
+            input.setAttribute('aria-activedescendant', shown.length ? 'palette-opt-' + active : '');
+            const a = list.querySelector('.active'); if (a && a.scrollIntoView) a.scrollIntoView({ block: 'nearest' });
+        }
+        function run(i) { const c = shown[i]; if (!c) return; m.close(); setTimeout(c.run, 0); }
+        input.addEventListener('input', () => { active = 0; paint(); });
+        input.addEventListener('keydown', e => {
+            if (e.key === 'ArrowDown') { active = Math.min(shown.length - 1, active + 1); paint(); e.preventDefault(); }
+            else if (e.key === 'ArrowUp') { active = Math.max(0, active - 1); paint(); e.preventDefault(); }
+            else if (e.key === 'Enter') { run(active); e.preventDefault(); }
+        });
+        m = App.ui.modal({ title: App.t('cmdTitle'), body: el('div', { class: 'palette' }, input, list) });
+        m.card.classList.add('palette-card');
+        paint();
+    };
+
+    // ---------------------------------------------------------------- reports
+    const REPORT_KINDS = ['wrongAnswer', 'unclear', 'typo', 'outdated', 'other'];
+    App.ui.reportQuestion = function (item) {
+        const exam = App.state.exam;
+        if (!exam || !item) return;
+        const kind = el('select', { id: 'report-kind' });
+        REPORT_KINDS.forEach(k => kind.appendChild(el('option', { value: k, text: App.t('reportKind_' + k) })));
+        const note = el('textarea', { id: 'report-note', rows: 4, maxLength: 1000, placeholder: App.t('reportPlaceholder') });
+        const body = el('div', {},
+            el('p', { class: 'report-q', text: '#' + item.id + ' — ' + App.rich.plain(App.loc(item.text)).slice(0, 160) }),
+            el('div', { class: 'field' }, el('label', { for: 'report-kind', text: App.t('reportKind') }), kind),
+            el('div', { class: 'field' }, el('label', { for: 'report-note', text: App.t('reportNote') }), note),
+            el('p', { class: 'hint', text: App.t('reportWhere') }));
+        return App.ui.modal({ title: App.t('reportTitle'), body, actions: [
+            { label: App.t('reportSend'), icon: 'flag', onclick: () => { App.storage.addReport(exam.id, { uid: item.uid, qid: item.id, kind: kind.value, note: note.value.trim(), ver: exam.version || '' }); App.ui.toast(App.t('reportSaved')); } },
+            { label: App.t('cancelBtn'), cls: 'btn-ghost' }] });
+    };
+
+    // ---------------------------------------------------------------- "what's new" notice
+    function notesOf(entry) { return (Array.isArray(entry.notes) ? entry.notes : (entry.notes ? [entry.notes] : [])); }
+    App.ui.changelogNotice = function (exam) {
+        if (!exam.changelog || !exam.changelog.length || !exam.version || exam.preview) return null;
+        const seen = App.storage.getMeta(exam.id, 'seenVersion');
+        if (seen === undefined) { App.storage.setMeta(exam.id, 'seenVersion', exam.version); return null; }
+        if (seen === exam.version) return null;
+        const fresh = [];
+        for (const c of exam.changelog) { if (c.version === seen) break; fresh.push(c); }
+        const list = fresh.length ? fresh : exam.changelog.slice(0, 1);
+        const box = el('div', { class: 'banner info', id: 'changelog-notice', role: 'status' }, icon('star', 18),
+            el('div', { class: 'banner-text' }, el('b', { text: App.t('whatsNew', { v: exam.version }) }),
+                ...list.map(c => el('div', { class: 'cl-entry' }, el('span', { class: 'chip', text: c.version + (c.date ? ' · ' + c.date : '') }), el('ul', {}, ...notesOf(c).map(n => el('li', { text: App.loc(n) })))))),
+            el('span', { class: 'banner-actions' }, App.ui.btn(App.t('gotIt'), 'check', 'btn-sm', () => { App.storage.setMeta(exam.id, 'seenVersion', exam.version); box.remove(); }, { id: 'changelog-dismiss' })));
+        return box;
+    };
+    App.ui.showChangelog = function (exam) {
+        const body = el('div', {});
+        (exam.changelog || []).forEach(c => body.appendChild(el('div', { class: 'cl-entry' }, el('span', { class: 'chip primary', text: c.version + (c.date ? ' · ' + c.date : '') }), el('ul', {}, ...notesOf(c).map(n => el('li', { text: App.loc(n) }))))));
+        return App.ui.modal({ title: App.t('changelogTitle'), body, actions: [{ label: App.t('closeBtn'), cls: 'btn-ghost' }] });
+    };
+
+    // ---------------------------------------------------------------- quality panel (statistics screen)
+    App.ui.qualityPanel = function (exam) {
+        const findings = App.quality.analyze(exam, App.storage.allQStats(exam.id)).concat(App.quality.structural(exam));
+        const box = el('div', { class: 'card', id: 'quality-panel' }, el('h2', { text: App.t('qualityTitle') }), el('p', { class: 'hint', text: App.t('qualityHint', { n: App.quality.MIN_SEEN }) }));
+        if (!findings.length) { box.appendChild(el('p', { text: App.t('qualityNone') })); return box; }
+        const byId = new Map(exam.questions.map(q => [q.uid, q]));
+        const list = el('div', { class: 'quality-list' });
+        findings.slice(0, 25).forEach(f => {
+            const q = byId.get(f.uid);
+            list.appendChild(el('div', { class: 'quality-row sev' + f.severity },
+                el('span', { class: 'chip ' + (f.severity >= 3 ? 'bad' : f.severity === 2 ? 'warn' : ''), text: App.t('quality_' + f.kind) }),
+                el('span', { class: 'quality-text' }, el('b', { text: '#' + f.id + ' ' }), el('span', { text: App.rich.plain(App.loc(q.text)).replace(/\s+/g, ' ').slice(0, 110) })),
+                el('span', { class: 'hint', text: App.t('qualityDetail_' + f.kind, f.params) })));
+        });
+        box.appendChild(list);
+        if (findings.length > 25) box.appendChild(el('p', { class: 'hint', text: App.t('searchMore', { n: findings.length - 25 }) }));
+        return box;
+    };
+
+    // ---------------------------------------------------------------- global keyboard
+    document.addEventListener('keydown', e => {
+        const k = e.key;
+        if ((e.ctrlKey || e.metaKey) && k.toLowerCase() === 'k') { e.preventDefault(); App.ui.openPalette(); return; }
+        if (e.ctrlKey || e.metaKey || e.altKey || App.ui.modalOpen() || isTyping(e.target)) return;
+        if (k === '?') { e.preventDefault(); App.ui.showShortcuts(); }
+        else if (k === '/' && App.state.screen !== 'runtime' && App.state.exam) { e.preventDefault(); App.ui.openSearch(); }
+    });
+
+    // ---------------------------------------------------------------- update check (service worker)
+    App.ui.checkForUpdate = async function () {
+        if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return App.t('updateNoSw');
+        try {
+            const reg = await navigator.serviceWorker.getRegistration();
+            if (!reg) return App.t('updateNoSw');
+            await reg.update();
+            if (reg.waiting || reg.installing) { App.ui.showUpdateBanner(reg); return App.t('updateAvailable'); }
+            return App.t('updateLatest');
+        } catch (e) { return App.t('updateFailed'); }
+    };
+    App.ui.showUpdateBanner = function (reg) {
+        if ($('update-banner')) return;
+        const b = el('div', { class: 'update-banner', id: 'update-banner', role: 'status' },
+            icon('refresh', 18), el('span', { text: App.t('updateBanner') }),
+            App.ui.btn(App.t('updateReload'), 'refresh', 'btn-sm', () => {
+                const w = reg.waiting;
+                if (w) w.postMessage({ type: 'SKIP_WAITING' }); else location.reload();
+            }, { id: 'update-reload' }),
+            App.ui.btn('', 'x', 'btn-ghost btn-sm', () => b.remove(), { 'aria-label': App.t('closeBtn') }));
+        document.body.appendChild(b);
     };
 })();
 
@@ -4244,19 +5662,31 @@ App.ui = {};
 
     async function boot() {
         await App.initStorage();
-        const lang = App.storage.getPref('lang');
+        const lang = App.ui.getGlobal('lang');
         App.setLang(lang === 'it' ? 'it' : 'en');
-        const theme = App.storage.getPref('theme');
+        const theme = App.ui.getGlobal('theme');
         if (theme === 'dark' || theme === 'light') document.documentElement.setAttribute('data-theme', theme);
         App.ui.applyStatic();
         $('lang-btn').addEventListener('click', () => App.ui.setLang(App.lang === 'en' ? 'it' : 'en'));
         $('theme-btn').addEventListener('click', () => App.ui.setTheme(App.ui.theme() === 'dark' ? 'light' : 'dark'));
+        const pal = $('palette-btn'); pal.appendChild(App.util.icon('search', 18)); pal.title = pal.ariaLabel = App.t('cmdTitle'); pal.addEventListener('click', () => App.ui.openPalette());
+        const opt = $('options-btn'); opt.appendChild(App.util.icon('settings', 18)); opt.title = App.t('optionsTitle'); opt.setAttribute('aria-label', App.t('optionsTitle')); opt.addEventListener('click', () => (App.state.screen === 'options' ? App.ui.closeOptions() : App.ui.openOptions()));
         $('import-file').addEventListener('change', e => { if (e.target.files[0]) App.ui.handleImportFile(e.target.files[0]); e.target.value = ''; });
-        route();
+        await route();
+        if (location.hash === '#options') App.ui.openOptions();
+        App.events.on('sessionEnd', () => { App.backup.writeAuto(); });
         if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
             const first = !navigator.serviceWorker.controller;
+            let reloading = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => { if (first || reloading) return; reloading = true; location.reload(); });
             navigator.serviceWorker.register('sw.js')
-                .then(() => navigator.serviceWorker.ready)
+                .then(reg => {
+                    // a new version was downloaded in the background: offer to switch to it
+                    const watch = r => { const w = r.installing; if (w) w.addEventListener('statechange', () => { if (w.state === 'installed' && navigator.serviceWorker.controller) App.ui.showUpdateBanner(r); }); };
+                    if (reg.waiting && navigator.serviceWorker.controller) App.ui.showUpdateBanner(reg);
+                    reg.addEventListener('updatefound', () => watch(reg));
+                    return navigator.serviceWorker.ready;
+                })
                 .then(() => { if (first) App.ui.toast(App.t('offlineReady')); })
                 .catch(() => { /* offline support is optional */ });
         }

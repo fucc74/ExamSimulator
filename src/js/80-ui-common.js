@@ -7,7 +7,7 @@ App.ui = {};
     const $ = id => document.getElementById(id);
     App.ui.$ = $;
 
-    const VIEWS = ['picker', 'dashboard', 'runtime', 'review', 'summary', 'stats'];
+    const VIEWS = ['picker', 'dashboard', 'runtime', 'review', 'summary', 'stats', 'options', 'library', 'search'];
     App.ui.show = function (view) {
         App.state.screen = view;
         VIEWS.forEach(v => $('view-' + v).classList.toggle('hidden', v !== view));
@@ -65,6 +65,81 @@ App.ui = {};
         return svg;
     };
 
+    // ---- language / theme are per device: stored outside the profile data ----
+    const UI_KEY = 'examsim:ui';
+    const rawBackend = () => App.backend || App.defaultBackend();
+    App.ui.getGlobal = function (k) {
+        try { const o = JSON.parse(rawBackend().getItem(UI_KEY)) || {}; if (o[k] !== undefined) return o[k]; } catch (e) { /* fall through */ }
+        return App.storage.getPref(k);
+    };
+    App.ui.setGlobal = function (k, v) {
+        let o = {};
+        try { o = JSON.parse(rawBackend().getItem(UI_KEY)) || {}; } catch (e) { o = {}; }
+        o[k] = v;
+        try { rawBackend().setItem(UI_KEY, JSON.stringify(o)); if (rawBackend().flush) rawBackend().flush(); } catch (e) { App.events.emit('storageError', e); }
+    };
+
+    // ---- modal dialog ----
+    // App.ui.modal({title, body: Node, actions: [{label, cls, onclick, close:true}], wide}) -> {close, root}
+    App.ui.modal = function (opts) {
+        const prev = document.activeElement;
+        const titleId = 'modal-title-' + App.util.uid();
+        const root = el('div', { class: 'modal-backdrop', onclick: e => { if (e.target === root) close(); } });
+        const card = el('div', { class: 'modal-card' + (opts.wide ? ' wide' : ''), role: 'dialog', aria: { modal: 'true', labelledby: titleId } });
+        card.appendChild(el('div', { class: 'modal-head' }, el('h2', { id: titleId, text: opts.title || '' }),
+            el('button', { type: 'button', class: 'icon-btn', 'aria-label': App.t('closeBtn'), onclick: () => close() }, icon('x', 18))));
+        const body = el('div', { class: 'modal-body' }, opts.body);
+        card.appendChild(body);
+        if (opts.actions && opts.actions.length) {
+            const bar = el('div', { class: 'modal-actions' });
+            opts.actions.forEach(a => bar.appendChild(App.ui.btn(a.label, a.icon, a.cls || '', () => { if (a.onclick) { if (a.onclick() === false) return; } if (a.close !== false) close(); })));
+            card.appendChild(bar);
+        }
+        root.appendChild(card);
+        document.body.appendChild(root);
+        function onKey(e) {
+            if (e.key === 'Escape') { e.stopPropagation(); close(); return; }
+            if (e.key === 'Tab') {      // keep focus inside the dialog
+                const f = Array.from(card.querySelectorAll('button:not(:disabled), input:not(:disabled), select, textarea, a[href], [tabindex]:not([tabindex="-1"])')).filter(n => n.offsetParent !== null);
+                if (!f.length) return;
+                const first = f[0], last = f[f.length - 1];
+                if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
+                else if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault(); }
+            }
+        }
+        document.addEventListener('keydown', onKey, true);
+        function close() {
+            document.removeEventListener('keydown', onKey, true);
+            root.remove();
+            if (prev && prev.focus) { try { prev.focus(); } catch (e) { /* element gone */ } }
+            if (opts.onclose) opts.onclose();
+        }
+        const firstField = card.querySelector('input, textarea, select') || card.querySelector('.modal-actions button, .modal-head button');
+        if (firstField) setTimeout(() => firstField.focus(), 0);
+        return { close, root, card };
+    };
+    App.ui.modalOpen = () => !!document.querySelector('.modal-backdrop');
+
+    // Downloads text as a file
+    App.ui.download = function (name, text, mime) {
+        const blob = new Blob([text], { type: mime || 'text/plain' });
+        const a = el('a', { href: URL.createObjectURL(blob), download: name });
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    };
+
+    // ---- backup reminder banner (picker and dashboard) ----
+    App.ui.backupBanner = function () {
+        if (!App.backup || !App.backup.due()) return null;
+        const days = App.backup.lastBackup() ? Math.round((Date.now() - App.backup.lastBackup()) / 86400000) : null;
+        return el('div', { class: 'banner', id: 'backup-banner', role: 'status' },
+            icon('download', 18),
+            el('span', { class: 'banner-text', text: days === null ? App.t('backupDueNever') : App.t('backupDue', { n: days }) }),
+            el('span', { class: 'banner-actions' },
+                App.ui.btn(App.t('backupNow'), 'download', 'btn-sm', () => { App.ui.exportBackup(); App.ui.rerender(); }),
+                App.ui.btn(App.t('remindLater'), '', 'btn-ghost btn-sm', () => { App.backup.snooze(3); App.ui.rerender(); })));
+    };
+
     // ---- theme / language ----
     App.ui.theme = () => document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
     function paintHeader() {
@@ -78,7 +153,7 @@ App.ui = {};
         document.documentElement.setAttribute('data-theme', theme);
         const meta = document.querySelector('meta[name="theme-color"]');
         if (meta) meta.setAttribute('content', theme === 'dark' ? '#0a0e14' : '#00a67e');
-        App.storage.setPref('theme', theme);
+        App.ui.setGlobal('theme', theme);
         try { localStorage.setItem('examsim:theme', theme); } catch (e) { /* optional mirror for the pre-paint script */ }
         paintHeader();
     };
@@ -95,7 +170,7 @@ App.ui = {};
     };
     App.ui.setLang = function (lang) {
         App.setLang(lang);
-        App.storage.setPref('lang', App.lang);
+        App.ui.setGlobal('lang', App.lang);
         App.ui.applyStatic();
         App.ui.rerender();
     };
@@ -108,24 +183,26 @@ App.ui = {};
         else if (s === 'review') App.ui.renderReview();
         else if (s === 'summary') App.ui.renderSummary();
         else if (s === 'stats') App.ui.renderStats();
+        else if (s === 'options' && App.ui.renderOptions) App.ui.renderOptions();
+        else if (s === 'library' && App.ui.renderLibrary) App.ui.renderLibrary();
+        else if (s === 'search' && App.ui.renderSearch) App.ui.renderSearch();
     };
 
     // ---- export / import of progress ----
     App.ui.exportProgress = function (examIds) {
-        const data = App.storage.exportData(examIds);
-        const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
-        const a = el('a', { href: URL.createObjectURL(blob), download: 'examsim-progress-' + new Date().toISOString().slice(0, 10) + '.json' });
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+        const data = App.backup.snapshot({ examIds, library: !examIds });
+        App.ui.download('examsim-progress-' + new Date().toISOString().slice(0, 10) + '.json', JSON.stringify(data, null, 1), 'application/json');
+        if (!examIds) App.backup.markBackup();
         App.ui.toast(App.t('exportDone'));
     };
+    App.ui.exportBackup = function () { App.ui.exportProgress(null); };
     App.ui.importProgress = function () { $('import-file').click(); };
     App.ui.handleImportFile = function (file) {
         const reader = new FileReader();
         reader.onload = () => {
             try {
-                const r = App.storage.importData(JSON.parse(reader.result));
-                App.ui.toast(App.t('importDone', { a: r.attempts, q: r.qstats }));
+                const r = App.backup.apply(JSON.parse(reader.result));
+                App.ui.toast(App.t('importDone', { a: r.attempts, q: r.qstats }) + (r.library ? ' ' + App.t('importLibrary', { n: r.library }) : ''));
                 App.ui.rerender();
             } catch (e) { App.ui.toast(App.t('importFail', { detail: e.message }), 6000); }
         };

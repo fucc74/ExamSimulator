@@ -1,12 +1,24 @@
 {
   "name": "exam-simulator",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
   "description": "Exam-agnostic practice engine (single-file HTML build)",
   "scripts": {
     "build": "node tools/build.js",
     "validate": "node tools/validate-exam.js *.exam",
     "test": "node --test tests/*.test.js",
-    "e2e": "node tests/e2e.js"
+    "e2e": "node tests/e2e.js",
+    "e2e:mobile": "E2E_DEVICE=\"Pixel 7\" E2E_ONLY=picker,demo,mobile,localized,language,rich,wizard node tests/e2e.js",
+    "audit": "node tests/audit.js",
+    "visual": "node tests/visual.js",
+    "visual:update": "node tests/visual.js --update",
+    "pack": "node tools/pack.js",
+    "check": "npm run build && git diff --exit-code -- exam.html exams.js sw.js && npm test && npm run validate"
+  },
+  "devDependencies": {
+    "axe-core": "4.10.2",
+    "pixelmatch": "5.3.0",
+    "playwright": "1.56.1",
+    "pngjs": "7.0.0"
   }
 }

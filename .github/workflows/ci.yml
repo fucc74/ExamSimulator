@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      update_visual_baseline:
+        description: "Regenerate the visual-regression baseline and upload it as an artifact"
+        type: boolean
+        default: false
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Build, unit tests, exam validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+        env: { PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1" }
+      - name: Generated files are up to date (exam.html, exams.js, sw.js)
+        run: |
+          npm run build
+          git diff --exit-code -- exam.html exams.js sw.js || { echo "::error::Generated files are stale. Run 'npm run build' and commit the result."; exit 1; }
+      - run: npm test
+      - run: npm run validate
+
+  e2e:
+    name: E2E ${{ matrix.browser }}
+    needs: check
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+        env: { PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1" }
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - run: node tests/e2e.js
+        env: { E2E_BROWSER: "${{ matrix.browser }}" }
+
+  e2e-mobile:
+    name: E2E mobile (${{ matrix.device }})
+    needs: check
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { device: "Pixel 7", browser: chromium }
+          - { device: "iPhone 14", browser: webkit }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+        env: { PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1" }
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - run: node tests/e2e.js
+        env:
+          E2E_BROWSER: "${{ matrix.browser }}"
+          E2E_DEVICE: "${{ matrix.device }}"
+          E2E_ONLY: "picker,demo,mobile,localized,language,rich,wizard"
+
+  audit:
+    name: Accessibility and performance audit
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+        env: { PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1" }
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/audit.js
+
+  visual:
+    name: Visual regression
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+        env: { PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1" }
+      - run: npx playwright install --with-deps chromium
+      - name: Compare with the committed baseline (creates one when missing)
+        run: node tests/visual.js ${{ inputs.update_visual_baseline && '--update' || '' }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: visual-regression
+          path: |
+            tests/visual-baseline
+            tests/visual-output
+          if-no-files-found: ignore

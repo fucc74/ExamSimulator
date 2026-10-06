@@ -306,3 +306,26 @@ test('quality: too easy, weak distractors and structural issues', () => {
     assert.ok(s.some(x => x.kind === 'duplicateOptions' && x.id === 2));
     assert.ok(s.some(x => x.kind === 'allOfAbove'));
 });
+
+// ------------------------------------------------------------------ translations
+test('every UI string used in the code exists in English and Italian', () => {
+    const fs = require('fs'), path = require('path');
+    const dir = path.join(__dirname, '..', 'src', 'js');
+    const used = new Set();
+    for (const f of fs.readdirSync(dir)) {
+        const t = fs.readFileSync(path.join(dir, f), 'utf8');
+        for (const m of t.matchAll(/App\.t\('([A-Za-z0-9_]+)'/g)) used.add(m[1]);
+        for (const m of t.matchAll(/App\.t\((?:[^()'"]*\?\s*)?'([A-Za-z0-9_]+)'\s*:\s*'([A-Za-z0-9_]+)'/g)) { used.add(m[1]); used.add(m[2]); }
+    }
+    ['wizNoteText', 'wizNoteCsv', 'wizNoTextColumn', 'wizNoQuestions'].forEach(k => used.add(k));
+    ['noAnswer', 'fewOptions', 'noOptions', 'noText', 'badType'].forEach(k => used.add('issue_' + k));
+    ['wrongAnswer', 'unclear', 'typo', 'outdated', 'other'].forEach(k => used.add('reportKind_' + k));
+    ['single', 'multiple', 'truefalse', 'ordering', 'matching', 'numeric', 'scenario'].forEach(k => used.add('type_' + k));
+    ['tooEasy', 'tooHard', 'dubiousKey', 'weakDistractor', 'slow', 'difficultyMismatch', 'duplicateOptions', 'allOfAbove', 'correctMuchLonger'].forEach(k => { used.add('quality_' + k); used.add('qualityDetail_' + k); });
+    const missing = [];
+    used.forEach(k => { if (k.endsWith('_')) return; ['en', 'it'].forEach(l => { if (!(k in App.I18N[l])) missing.push(l + ':' + k); }); });
+    assert.deepEqual(missing, []);
+    const en = Object.keys(App.I18N.en), it = Object.keys(App.I18N.it);
+    assert.deepEqual(en.filter(k => !it.includes(k)), [], 'keys only in English');
+    assert.deepEqual(it.filter(k => !en.includes(k)), [], 'keys only in Italian');
+});

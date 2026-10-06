@@ -74,5 +74,6 @@
             el('div', { text: App.rich.plain(App.loc(h.text)).slice(0, 220) }),
             el('div', { class: 'hard-meta', text: h.topic + ' · ' + App.t('statsErrRate', { p: Math.round(h.rate * 100), w: h.wrong, n: h.seen }) }))));
         card.appendChild(hard);
+        v.appendChild(App.ui.qualityPanel(exam));
     };
 })();

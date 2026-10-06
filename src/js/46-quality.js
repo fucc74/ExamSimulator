@@ -53,7 +53,7 @@ App.quality = (function () {
             if (texts.some(t => /^(all|none) of the above|^(tutte|nessuna) (le precedenti|delle precedenti)/i.test(t))) add('allOfAbove');
             const ans = Array.isArray(q.answer) ? q.answer : [q.answer];
             const lens = texts.map(t => t.length);
-            if (type === 'single' && lens.length >= 3 && lens[ans[0]] > 1.8 * Math.max(...lens.filter((_, i) => i !== ans[0]))) add('correctMuchLonger');
+            if (type === "single" && lens.length >= 3 && lens[ans[0]] >= 12 && lens[ans[0]] > 1.8 * Math.max(...lens.filter((_, i) => i !== ans[0]))) add('correctMuchLonger');
         });
         return out;
     }

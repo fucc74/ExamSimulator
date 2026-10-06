@@ -289,7 +289,12 @@ ExamSim.register({
       "type": "single",
       "difficulty": 2,
       "text": "Which GPU memory component is shared across a project quota? (plain-string question)",
-      "options": ["None — quotas count GPUs, not memory", "HBM only", "System RAM", "NVLink bandwidth"],
+      "options": [
+        "None — quotas count GPUs, not memory",
+        "HBM only, attached to each GPU",
+        "System RAM of the host server",
+        "NVLink bandwidth between GPUs"
+      ],
       "answer": [0],
       "explanation": "Quotas are expressed in GPUs."
     },

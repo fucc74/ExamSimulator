@@ -52,19 +52,31 @@
 
     async function boot() {
         await App.initStorage();
-        const lang = App.storage.getPref('lang');
+        const lang = App.ui.getGlobal('lang');
         App.setLang(lang === 'it' ? 'it' : 'en');
-        const theme = App.storage.getPref('theme');
+        const theme = App.ui.getGlobal('theme');
         if (theme === 'dark' || theme === 'light') document.documentElement.setAttribute('data-theme', theme);
         App.ui.applyStatic();
         $('lang-btn').addEventListener('click', () => App.ui.setLang(App.lang === 'en' ? 'it' : 'en'));
         $('theme-btn').addEventListener('click', () => App.ui.setTheme(App.ui.theme() === 'dark' ? 'light' : 'dark'));
+        const pal = $('palette-btn'); pal.appendChild(App.util.icon('search', 18)); pal.title = pal.ariaLabel = App.t('cmdTitle'); pal.addEventListener('click', () => App.ui.openPalette());
+        const opt = $('options-btn'); opt.appendChild(App.util.icon('settings', 18)); opt.title = App.t('optionsTitle'); opt.setAttribute('aria-label', App.t('optionsTitle')); opt.addEventListener('click', () => (App.state.screen === 'options' ? App.ui.closeOptions() : App.ui.openOptions()));
         $('import-file').addEventListener('change', e => { if (e.target.files[0]) App.ui.handleImportFile(e.target.files[0]); e.target.value = ''; });
-        route();
+        await route();
+        if (location.hash === '#options') App.ui.openOptions();
+        App.events.on('sessionEnd', () => { App.backup.writeAuto(); });
         if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
             const first = !navigator.serviceWorker.controller;
+            let reloading = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => { if (first || reloading) return; reloading = true; location.reload(); });
             navigator.serviceWorker.register('sw.js')
-                .then(() => navigator.serviceWorker.ready)
+                .then(reg => {
+                    // a new version was downloaded in the background: offer to switch to it
+                    const watch = r => { const w = r.installing; if (w) w.addEventListener('statechange', () => { if (w.state === 'installed' && navigator.serviceWorker.controller) App.ui.showUpdateBanner(r); }); };
+                    if (reg.waiting && navigator.serviceWorker.controller) App.ui.showUpdateBanner(reg);
+                    reg.addEventListener('updatefound', () => watch(reg));
+                    return navigator.serviceWorker.ready;
+                })
                 .then(() => { if (first) App.ui.toast(App.t('offlineReady')); })
                 .catch(() => { /* offline support is optional */ });
         }

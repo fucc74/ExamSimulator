@@ -21,6 +21,11 @@ files.forEach(file => {
         console.log('✓ ' + name + ': ' + exam.questions.length + ' questions, ' + exam.topicList.length + ' topics');
     }
     if (report.errors.length || report.warnings.length) console.log(report.format());
-    if (exam) App.schema.lint(exam).forEach(w => console.log('  ~ ' + w));
+    if (exam) {
+        App.schema.lint(exam).forEach(w => console.log('  ~ ' + w));
+        App.setLang('en');
+        App.quality.structural(exam).forEach(f => console.log('  ~ question ' + f.id + ': ' + App.t('quality_' + f.kind) + ' — ' + App.t('qualityDetail_' + f.kind, f.params)));
+        if (exam.changelog && exam.version && exam.changelog[0] && exam.changelog[0].version !== exam.version) console.log('  ~ the newest changelog entry (' + exam.changelog[0].version + ') does not match version ' + exam.version);
+    }
 });
 process.exit(bad ? 1 : 0);

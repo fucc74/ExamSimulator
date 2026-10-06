@@ -1,6 +1,6 @@
 /* Core: namespace, utilities, event bus, extension points */
 const App = {
-    version: '2.0.0',
+    version: '3.0.0',
     FORMAT_VERSION: 2,
     types: {},        // question type handlers (see 20-types.js)
     modeBuilders: {}, // extra study modes registered by plugins
@@ -88,7 +88,9 @@ App.util.ICONS = {
     star: ['M12 2l3 7 7 .6-5.3 4.7 1.6 7.2L12 17.8 5.7 21.5l1.6-7.2L2 9.6 9 9l3-7z'],
     menu: ['M3 6h18M3 12h18M3 18h18'],
     chevron: ['M6 9l6 6 6-6'],
-    home: ['M3 10.5L12 3l9 7.5', 'M5 9.5V21h14V9.5']
+    home: ['M3 10.5L12 3l9 7.5', 'M5 9.5V21h14V9.5'],
+    settings: ['c', 12, 12, 3, 'M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z'],
+    search: ['c', 11, 11, 7, 'M21 21l-4.3-4.3']
 };
 App.util.icon = function (name, size) {
     const NS = 'http://www.w3.org/2000/svg';

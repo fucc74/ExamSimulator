@@ -157,7 +157,8 @@
                 el('div', { class: 'meta', text: meta }),
                 el('div', { class: 'review-q', role: 'heading', aria: { level: '3' } }, el('strong', { text: App.t('questionN', { n: i + 1, q: '' }) }), App.rich.node(App.loc(item.text))),
                 App.types[item.kind].renderReview(item, s.value(i)),
-                item.explanation ? el('div', { class: 'explanation-box' }, el('h4', { text: App.t('explanation') }), App.rich.node(App.loc(item.explanation))) : null);
+                item.explanation ? el('div', { class: 'explanation-box' }, el('h4', { text: App.t('explanation') }), App.rich.node(App.loc(item.explanation))) : null,
+                el('div', { class: 'review-tools' }, App.ui.btn(App.t('reportBtn'), 'flag', 'btn-ghost btn-sm report-btn', () => App.ui.reportQuestion(item))));
             cards.push({ node: c, ok, answered, flagged: !!(st && st.flag) });
             box.appendChild(c);
         }

@@ -14,6 +14,9 @@ Everything lives under the global `ExamSim.App` (also available as `ExamSim.App`
 | `sessionEnd` | `{session, attempt}` |
 | `viewChange` | `{view}` |
 | `storageError` | `error` |
+| `profileChange` | `{id}` |
+| `libraryChange` | `{id}` |
+| `pause`, `unpause` | `{session}` |
 
 Handler errors are caught and logged; they never break the engine.
 
@@ -33,4 +36,19 @@ App.registerType('slider', {
 `App.registerMode('hardest', (exam, stats, now) => exam.questions.filter(...))` adds a practice pool selectable by id.
 
 ## Storage
-`App.storage` — `listAttempts`, `listSessions`, `allQStats`, `exportData`, `importData`, … (one key, `examsim:v2`, versioned).
+`App.storage` — `listAttempts`, `listSessions`, `allQStats`, `exportData`, `importData`, `addReport/listReports`, `getMeta/setMeta`, … (one key per profile, `examsim:v2` for the default one, versioned).
+Data lives in IndexedDB (loaded into memory at start, writes are debounced and flushed when the page is hidden); `localStorage` and memory are fallbacks. `App.storageKind` tells which one is active.
+`App.profiles` — `list`, `current`, `create`, `rename`, `remove`, `use(id)`.
+
+## Modules (pure logic, usable from Node through `tools/load-app.js`)
+| module | purpose |
+|---|---|
+| `App.scoring`, `App.examRules` | scoring rules and exam-taking rules resolution |
+| `App.rich` | safe Markdown-lite parser/renderer |
+| `App.backup` | `snapshot`, `apply`, `encode/decode` (transfer codes), reminder (`due`, `snooze`), Gist sync, auto-backup file |
+| `App.library` | local exams: `list`, `get`, `save`, `remove`, `exportAll`, `importAll`, `freeId` |
+| `App.convert` | `parseText`, `fromCSV`, `buildExam`, `toCSV`, `toMarkdown`, `toAnki` |
+| `App.quality` | `analyze(exam, qstats)` (answer-based findings), `structural(exam)` |
+
+## UI helpers
+`App.ui.modal({title, body, actions})`, `App.ui.toast`, `App.ui.openPalette()`, `App.ui.openSearch()`, `App.ui.reportQuestion(item)`, `App.ui.exportExamDialog(exam)`.

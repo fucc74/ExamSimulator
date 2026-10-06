@@ -46,9 +46,10 @@ const CACHE = 'examsim-${version}';
 const ASSETS = ${JSON.stringify(assets)};
 self.addEventListener('install', e => {
     e.waitUntil(caches.open(CACHE)
-        .then(c => Promise.all(ASSETS.map(a => c.add(new Request(a, { cache: 'reload' })).catch(() => {}))))
-        .then(() => self.skipWaiting()));
+        .then(c => Promise.all(ASSETS.map(a => c.add(new Request(a, { cache: 'reload' })).catch(() => {})))));
 });
+// The page asks for the switch when the user clicks "Reload" in the "new version available" banner.
+self.addEventListener('message', e => { if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting(); });
 self.addEventListener('activate', e => {
     e.waitUntil(caches.keys()
         .then(keys => Promise.all(keys.filter(k => k.startsWith('examsim-') && k !== CACHE).map(k => caches.delete(k))))
