@@ -173,6 +173,7 @@
                 s.setValue(i, v);
                 App.events.emit('answer', { session: s, index: i, value: v });
                 renderGrid();
+                paintClear();
                 schedulePersist();
                 if (!o || !o.silent) renderQuestion();
             }
@@ -194,9 +195,14 @@
         refs.flag.textContent = ''; refs.flag.appendChild(icon('flag', 14)); refs.flag.appendChild(el('span', { text: st.flag ? App.t('unflag') : App.t('flag') }));
         refs.noteArea.value = st.note || '';
         refs.note.open = !!st.note;
-        refs.clear.disabled = !!checked || !s.hasAnswer(i);
+        paintClear();
         refs.clear.textContent = ''; refs.clear.appendChild(icon('x', 14)); refs.clear.appendChild(el('span', { text: App.t('clearBtn') }));
         refs.report.textContent = ''; refs.report.appendChild(icon('flag', 14)); refs.report.appendChild(el('span', { text: App.t('reportBtn') }));
+    }
+
+    function paintClear() {
+        const s = S(), i = s.index;
+        refs.clear.disabled = s.isChecked(i) && s.studyMode || !s.hasAnswer(i);
     }
 
     function clearAnswer() {

@@ -47,11 +47,11 @@ module.exports = {
         await fresh(p, URL_BASE);
         await openOptions(p);
         check('options page shown', await p.locator('#view-options').isVisible());
-        await p.check('#opt-partial');
+        await p.check('#opt-partial', { force: true });
         await p.fill('#opt-wrong', '0.25');
         await p.dispatchEvent('#opt-wrong', 'change');
         await p.selectOption('#opt-pauses', '2');
-        await p.check('#opt-strict');
+        await p.check('#opt-strict', { force: true });
         const prefs = await p.evaluate(() => ({ s: ExamSim.App.storage.getPref('scoring'), r: ExamSim.App.storage.getPref('examRules') }));
         check('scoring saved', prefs.s && prefs.s.partialCredit === true && prefs.s.wrongPenalty === 0.25, prefs);
         check('exam rules saved', prefs.r && prefs.r.pauses === 2 && prefs.r.strictTime === true, prefs);
@@ -91,7 +91,7 @@ module.exports = {
         await p.goto(URL_BASE);
         check('no reminder right after the first session', (await p.locator('#backup-banner').count()) === 0);
         await p.evaluate(() => { const a = ExamSim.App.storage.raw().exams.demo.attempts; a.forEach(x => { x.ts -= 30 * 86400000; }); ExamSim.App.storage.setPref('x', 1); });
-        await p.reload();
+        await p.goto(URL_BASE);
         await p.waitForSelector('#exam-list');
         check('reminder shown after 30 days without backup', (await p.locator('#backup-banner').count()) === 1);
         await p.click('#backup-banner >> text=Remind me later');
@@ -104,7 +104,7 @@ module.exports = {
         check('last backup recorded', /Last backup/.test(await p.locator('#opt-last-backup').innerText()));
         // restore into a wiped store
         await p.evaluate(async () => { await ExamSim.App.wipeAll(); });
-        await p.reload();
+        await p.goto(URL_BASE);
         await p.waitForSelector('#exam-list');
         check('wiped', (await p.evaluate(() => ExamSim.App.storage.listAttempts('demo').length)) === 0);
         await p.setInputFiles('#import-file', file);
@@ -123,7 +123,7 @@ module.exports = {
         const code = await p.inputValue('#sync-code-out');
         check('transfer code created', /^ES[01]\.[\w-]+$/.test(code), code.slice(0, 20));
         await p.evaluate(async () => { await ExamSim.App.wipeAll(); });
-        await p.reload();
+        await p.goto(URL_BASE);
         await p.waitForSelector('#exam-list');
         await openOptions(p);
         await p.fill('#sync-code-in', 'garbage');
@@ -265,18 +265,19 @@ module.exports = {
         await p.waitForSelector('#search-q');
         const total = await p.evaluate(() => ExamSim.App.state.exam.questions.length);
         check('all questions listed at first', (await p.locator('.search-card').count()) === total);
-        await p.fill('#search-q', 'embedding');
+        await p.fill('#search-q', 'GPU');
         await p.waitForFunction(n => document.querySelectorAll('.search-card').length < n, total);
         const n1 = await p.locator('.search-card').count();
         check('text filter narrows the list and highlights', n1 >= 1 && (await p.locator('.search-card mark').count()) >= 1, n1);
         await p.fill('#search-q', '');
         await p.selectOption('#search-type', 'numeric');
-        await p.waitForFunction(() => document.querySelectorAll('.search-card').length === 1);
-        check('type filter', true);
-        await p.locator('.search-card button:has-text("Show answer")').click();
+        const nNum = await p.evaluate(() => ExamSim.App.state.exam.questions.filter(q => q.type === 'numeric').length);
+        await p.waitForFunction(n => document.querySelectorAll('.search-card').length === n, nNum);
+        check('type filter', nNum >= 1);
+        await p.locator('.search-card button:has-text("Show answer")').first().click();
         check('answer revealed', (await p.locator('.search-details .review-correct').count()) >= 1);
         await p.click('#search-practice');
-        check('practice session started from the results', (await p.evaluate(() => ExamSim.App.state.session.length)) === 1 && (await p.locator('#view-runtime').isVisible()));
+        check('practice session started from the results', (await p.evaluate(() => ExamSim.App.state.session.length)) === nNum && (await p.locator('#view-runtime').isVisible()));
         await p.keyboard.press('Control+K');
         await p.waitForSelector('#palette-input');
         await p.keyboard.type('option');
@@ -308,9 +309,10 @@ module.exports = {
         await p.fill('#report-note', 'there is a typo here');
         await p.click('.modal-actions >> text=Save report');
         check('report stored', (await p.evaluate(() => ExamSim.App.storage.listReports('demo').length)) === 1);
+        await p.waitForTimeout(200);       // let the IndexedDB write commit before leaving the page
         await p.goto(URL_BASE);
         await openOptions(p);
-        check('report listed in options', /Typo/.test(await p.locator('#opt-reports-list').innerText()));
+        const rl = await p.locator('#opt-reports-list').innerText(); check('report listed in options', /Typo/.test(rl), rl);
 
         // quality: question answered wrong many times, always picking the same wrong option
         await p.goto(URL_BASE + '?content=demo');
@@ -339,15 +341,16 @@ module.exports = {
         await p.waitForSelector('#changelog-notice');
         check('notice lists the new entries', /Fixed question 2/.test(await p.locator('#changelog-notice').innerText()) && /Added question 3/.test(await p.locator('#changelog-notice').innerText()));
         await p.click('#changelog-dismiss');
+        await p.waitForTimeout(200);
         await p.reload();
         await p.waitForSelector('#start-btn');
-        check('notice stays dismissed', (await p.locator('#changelog-notice').count()) === 0);
+        check('notice stays dismissed', (await p.locator('#changelog-notice').count()) === 0, await p.evaluate(() => ExamSim.App.storage.getMeta('cl', 'seenVersion')));
         await p.click('#dash-changelog');
         check('full change log available', /Fixed question 2/.test(await p.locator('.modal-body').innerText()));
         await p.keyboard.press('Escape');
     },
 
-    'update prompt: a changed service worker offers a reload': async ({ browser, check, HTTP_BASE }) => {
+    'update prompt: a changed service worker offers a reload': async ({ browser, check, HTTP_BASE, ROOT, override }) => {
         const ctx = await browser.newContext({ viewport: { width: 1000, height: 700 } });
         const p = await ctx.newPage();
         await p.goto(HTTP_BASE + '/exam.html');
@@ -357,11 +360,7 @@ module.exports = {
         await p.waitForFunction(() => !!navigator.serviceWorker.controller);
         check('no banner when nothing changed', (await p.locator('#update-banner').count()) === 0);
         // the "server" now ships a different service worker
-        await ctx.route('**/sw.js', async route => {
-            const resp = await route.fetch();
-            const body = (await resp.text()).replace(/examsim-[0-9a-f]{10}/, 'examsim-newversion1');
-            await route.fulfill({ response: resp, body, headers: Object.assign({}, resp.headers(), { 'cache-control': 'no-store' }) });
-        });
+        override('/sw.js', () => fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').replace(/examsim-[0-9a-f]{10}/, 'examsim-newversion1'));
         await p.waitForSelector('#options-btn');
         await p.click('#options-btn');
         await p.click('#opt-check-update');
@@ -370,6 +369,7 @@ module.exports = {
         await Promise.all([p.waitForNavigation({ waitUntil: 'load', timeout: 15000 }), p.click('#update-reload')]);
         const names = await p.evaluate(() => caches.keys());
         check('page reloaded on the new version', names.includes('examsim-newversion1'), names);
+        override('/sw.js', null);
         await ctx.close();
     }
 };

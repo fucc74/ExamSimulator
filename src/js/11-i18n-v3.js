@@ -1,6 +1,6 @@
 /* UI translations added in engine v3 (options, backup/sync, library, editor, search, reports, quality). */
 Object.assign(App.I18N.en, {
-    closeBtn: "Close", cancelBtn: "Cancel", openBtn: "Open", editBtn: "Edit", renameBtn: "Rename", clearBtn: "Clear", localChip: "My exam",
+    formulaLabel: "Formula", closeBtn: "Close", cancelBtn: "Cancel", openBtn: "Open", editBtn: "Edit", renameBtn: "Rename", clearBtn: "Clear", localChip: "My exam",
     optionsTitle: "Options", optionsSub: "Profile: {name}", themeLight: "Light", themeDark: "Dark",
     optGeneral: "General", optLanguage: "Language", optTheme: "Theme",
     optScoring: "Scoring", optScoringHint: "Applies to practice sessions. Exam modes that define their own rules keep them.",
@@ -66,7 +66,7 @@ Object.assign(App.I18N.en, {
 });
 
 Object.assign(App.I18N.it, {
-    closeBtn: "Chiudi", cancelBtn: "Annulla", openBtn: "Apri", editBtn: "Modifica", renameBtn: "Rinomina", clearBtn: "Cancella", localChip: "Mio esame",
+    formulaLabel: "Formula", closeBtn: "Chiudi", cancelBtn: "Annulla", openBtn: "Apri", editBtn: "Modifica", renameBtn: "Rinomina", clearBtn: "Cancella", localChip: "Mio esame",
     optionsTitle: "Opzioni", optionsSub: "Profilo: {name}", themeLight: "Chiaro", themeDark: "Scuro",
     optGeneral: "Generale", optLanguage: "Lingua", optTheme: "Tema",
     optScoring: "Punteggio", optScoringHint: "Vale per le esercitazioni. Le modalità esame che definiscono regole proprie le mantengono.",

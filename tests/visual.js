@@ -13,7 +13,7 @@ const OUT_DIR = path.join(ROOT, 'tests', 'visual-output');
 const VIEWPORTS = { desktop: { width: 1280, height: 800 }, phone: { width: 390, height: 780 } };
 const SCREENS = ['picker', 'dashboard', 'runtime', 'checked', 'summary', 'stats', 'options', 'editor', 'search', 'palette'];
 const PIXEL_THRESHOLD = 0.12;       // per-pixel colour distance (anti-aliasing tolerance)
-const MAX_DIFF_RATIO = 0.015;       // share of pixels allowed to differ
+const MAX_DIFF_RATIO = 0.008;       // share of pixels allowed to differ
 
 (async () => {
     const update = process.argv.includes('--update');

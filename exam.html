@@ -23,27 +23,27 @@
     --border-strong: #cbd5e1;
     --text: #0f172a;
     --text-2: #334155;
-    --muted: #64748b;
+    --muted: #52627a;
 
-    --primary: #00a67e;
-    --primary-600: #008a69;
+    --primary: #007558;
+    --primary-600: #00624a;
     --primary-soft: #e3f7f1;
     --primary-ink: #ffffff;
     --accent: #3b82f6;
-    --grad: linear-gradient(135deg, #00b38a 0%, #0a9bb8 55%, #3b82f6 100%);
+    --grad: linear-gradient(135deg, #00755a 0%, #057a94 55%, #2f66cf 100%);
 
-    --success: #12a150;
+    --success: #0b7035;
     --success-soft: #e0f6e9;
-    --error: #e5484d;
+    --error: #b42318;
     --error-soft: #fdeaea;
-    --warning: #f59e0b;
+    --warning: #a35200;
     --warning-soft: #fff4dc;
 
     --header-bg: rgba(255, 255, 255, 0.78);
     --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
     --shadow-md: 0 6px 18px rgba(15, 23, 42, 0.08);
     --shadow-lg: 0 18px 44px rgba(15, 23, 42, 0.14);
-    --ring: 0 0 0 3px rgba(0, 166, 126, 0.35);
+    --ring: 0 0 0 3px rgba(0, 117, 88, 0.4);
 
     --r-sm: 8px; --r-md: 12px; --r-lg: 18px; --r-pill: 999px;
     --space: clamp(14px, 2.4vw, 24px);
@@ -659,6 +659,14 @@ kbd { display: inline-block; min-width: 22px; padding: 2px 7px; border-radius: 6
 }
 @media print { .banner, .update-banner, .modal-backdrop, .review-tools { display: none !important; } }
 
+/* question header: extra buttons wrap and shrink on phones */
+.q-top { flex-wrap: wrap; }
+.q-meta { flex-wrap: wrap; justify-content: flex-end; min-width: 0; }
+@media (max-width: 600px) {
+    #clear-btn span, #report-btn span { display: none; }
+    #clear-btn, #report-btn { padding: 5px 9px; }
+}
+
     </style>
     <script>
     // Apply the saved theme before first paint (avoids a flash)
@@ -754,6 +762,8 @@ App.util.el = function (tag, props, ...children) {
         else if (k === 'dataset') Object.entries(v).forEach(([dk, dv]) => { node.dataset[dk] = dv; });
         else if (k === 'aria') Object.entries(v).forEach(([ak, av]) => node.setAttribute('aria-' + ak, av));
         else if (k.startsWith('on') && typeof v === 'function') node.addEventListener(k.slice(2), v);
+        else if (k === 'for') node.htmlFor = v;
+        else if (k.includes('-') || k === 'role') node.setAttribute(k, v);      // aria-*, data-*, role must be attributes, not properties
         else node[k] = v;
     });
     children.flat().forEach(c => { if (c) node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
@@ -996,7 +1006,7 @@ App.loc = function (v) {
 
 /* UI translations added in engine v3 (options, backup/sync, library, editor, search, reports, quality). */
 Object.assign(App.I18N.en, {
-    closeBtn: "Close", cancelBtn: "Cancel", openBtn: "Open", editBtn: "Edit", renameBtn: "Rename", clearBtn: "Clear", localChip: "My exam",
+    formulaLabel: "Formula", closeBtn: "Close", cancelBtn: "Cancel", openBtn: "Open", editBtn: "Edit", renameBtn: "Rename", clearBtn: "Clear", localChip: "My exam",
     optionsTitle: "Options", optionsSub: "Profile: {name}", themeLight: "Light", themeDark: "Dark",
     optGeneral: "General", optLanguage: "Language", optTheme: "Theme",
     optScoring: "Scoring", optScoringHint: "Applies to practice sessions. Exam modes that define their own rules keep them.",
@@ -1062,7 +1072,7 @@ Object.assign(App.I18N.en, {
 });
 
 Object.assign(App.I18N.it, {
-    closeBtn: "Chiudi", cancelBtn: "Annulla", openBtn: "Apri", editBtn: "Modifica", renameBtn: "Rinomina", clearBtn: "Cancella", localChip: "Mio esame",
+    formulaLabel: "Formula", closeBtn: "Chiudi", cancelBtn: "Annulla", openBtn: "Apri", editBtn: "Modifica", renameBtn: "Rinomina", clearBtn: "Cancella", localChip: "Mio esame",
     optionsTitle: "Opzioni", optionsSub: "Profilo: {name}", themeLight: "Chiaro", themeDark: "Scuro",
     optGeneral: "Generale", optLanguage: "Lingua", optTheme: "Tema",
     optScoring: "Punteggio", optScoringHint: "Vale per le esercitazioni. Le modalità esame che definiscono regole proprie le mantengono.",
@@ -1338,7 +1348,7 @@ Object.assign(App.I18N.it, {
                 case 'ul': case 'ol': { const l = el(b.t); b.items.forEach(it => l.appendChild(inlineDom(it, el('li')))); parent.appendChild(l); break; }
                 case 'quote': parent.appendChild(inlineDom(b.c, el('blockquote'))); break;
                 case 'hr': parent.appendChild(el('hr')); break;
-                case 'math': { const m = document.createElementNS(MATHNS, 'math'); m.setAttribute('display', 'block'); m.appendChild(mathDom(b.m)); parent.appendChild(el('div', { class: 'rich-math' }, m)); break; }
+                case 'math': { const m = document.createElementNS(MATHNS, 'math'); m.setAttribute('display', 'block'); m.appendChild(mathDom(b.m)); parent.appendChild(el('div', { class: 'rich-math', tabIndex: 0, role: 'group', 'aria-label': App.t('formulaLabel') }, m)); break; }
                 case 'table': {
                     const t = el('table', { class: 'rich-table' });
                     const th = el('tr'); b.head.forEach(h => th.appendChild(inlineDom(h, el('th')))); t.appendChild(el('thead', {}, th));
@@ -2258,7 +2268,7 @@ App.storageKind = 'memory';
 
 /* IndexedDB storage backend: far larger quota than localStorage.
    The whole key/value set is loaded into memory at start-up, so the storage API stays synchronous;
-   writes go to IndexedDB in the background (flushed when the page is hidden). */
+   writes are sent to IndexedDB in the background right after each change (and again when the page is hidden). */
 App.createIdbBackend = function (dbName) {
     dbName = dbName || 'examsim';
     const mem = new Map();
@@ -2302,7 +2312,9 @@ App.createIdbBackend = function (dbName) {
         }));
         return flushing;
     }
-    const schedule = () => { if (!timer) timer = setTimeout(flush, 120); };
+    // writes are coalesced within the same tick and sent to IndexedDB immediately (no delay that a closing tab could cut)
+    let queued = false;
+    const schedule = () => { if (queued) return; queued = true; Promise.resolve().then(() => { queued = false; flush(); }); };
 
     const backend = {
         kind: 'indexeddb',
@@ -2385,7 +2397,7 @@ App.profiles = (function () {
         if (!m.list.some(p => p.id === m.current)) m.current = m.list[0].id;
         return m;
     }
-    function write(m) { try { backend().setItem(META, JSON.stringify(m)); } catch (e) { App.events.emit('storageError', e); } }
+    function write(m) { try { backend().setItem(META, JSON.stringify(m)); if (backend().flush) backend().flush(); } catch (e) { App.events.emit('storageError', e); } }
 
     const keyOf = id => id === 'default' ? 'examsim:v2' : 'examsim:v2:p:' + id;
 
@@ -4144,6 +4156,7 @@ App.ui = {};
                 s.setValue(i, v);
                 App.events.emit('answer', { session: s, index: i, value: v });
                 renderGrid();
+                paintClear();
                 schedulePersist();
                 if (!o || !o.silent) renderQuestion();
             }
@@ -4165,9 +4178,14 @@ App.ui = {};
         refs.flag.textContent = ''; refs.flag.appendChild(icon('flag', 14)); refs.flag.appendChild(el('span', { text: st.flag ? App.t('unflag') : App.t('flag') }));
         refs.noteArea.value = st.note || '';
         refs.note.open = !!st.note;
-        refs.clear.disabled = !!checked || !s.hasAnswer(i);
+        paintClear();
         refs.clear.textContent = ''; refs.clear.appendChild(icon('x', 14)); refs.clear.appendChild(el('span', { text: App.t('clearBtn') }));
         refs.report.textContent = ''; refs.report.appendChild(icon('flag', 14)); refs.report.appendChild(el('span', { text: App.t('reportBtn') }));
+    }
+
+    function paintClear() {
+        const s = S(), i = s.index;
+        refs.clear.disabled = s.isChecked(i) && s.studyMode || !s.hasAnswer(i);
     }
 
     function clearAnswer() {
@@ -5537,10 +5555,11 @@ App.ui = {};
     // ---------------------------------------------------------------- "what's new" notice
     function notesOf(entry) { return (Array.isArray(entry.notes) ? entry.notes : (entry.notes ? [entry.notes] : [])); }
     App.ui.changelogNotice = function (exam) {
-        if (!exam.changelog || !exam.changelog.length || !exam.version || exam.preview) return null;
+        if (!exam.version || exam.preview) return null;
         const seen = App.storage.getMeta(exam.id, 'seenVersion');
         if (seen === undefined) { App.storage.setMeta(exam.id, 'seenVersion', exam.version); return null; }
         if (seen === exam.version) return null;
+        if (!exam.changelog || !exam.changelog.length) { App.storage.setMeta(exam.id, 'seenVersion', exam.version); return null; }
         const fresh = [];
         for (const c of exam.changelog) { if (c.version === seen) break; fresh.push(c); }
         const list = fresh.length ? fresh : exam.changelog.slice(0, 1);

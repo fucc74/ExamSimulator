@@ -37,6 +37,8 @@ App.util.el = function (tag, props, ...children) {
         else if (k === 'dataset') Object.entries(v).forEach(([dk, dv]) => { node.dataset[dk] = dv; });
         else if (k === 'aria') Object.entries(v).forEach(([ak, av]) => node.setAttribute('aria-' + ak, av));
         else if (k.startsWith('on') && typeof v === 'function') node.addEventListener(k.slice(2), v);
+        else if (k === 'for') node.htmlFor = v;
+        else if (k.includes('-') || k === 'role') node.setAttribute(k, v);      // aria-*, data-*, role must be attributes, not properties
         else node[k] = v;
     });
     children.flat().forEach(c => { if (c) node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });

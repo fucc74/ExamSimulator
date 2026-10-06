@@ -67,7 +67,7 @@ async function runAll(p, mode) {
 }
 
 async function main() {
-    const { server, port } = await start(ROOT, 0);
+    const { server, port, override } = await start(ROOT, 0);
     const HTTP_BASE = 'http://127.0.0.1:' + port;
     const browser = await pw[BROWSER].launch();
     console.log('browser: ' + BROWSER + (DEVICE ? ' (' + process.env.E2E_DEVICE + ')' : ''));
@@ -83,7 +83,7 @@ async function main() {
     for (const [name, fn] of Object.entries(suites)) {
         if (only.length && !only.some(o => name.toLowerCase().includes(o))) continue;
         console.log(name);
-        try { await fn({ p, ctx, check, answerCurrent, runAll, URL_BASE, HTTP_BASE, ROOT, errors, browser }); }
+        try { await fn({ p, ctx, check, answerCurrent, runAll, URL_BASE, HTTP_BASE, ROOT, errors, browser, override }); }
         catch (e) { failures++; console.log('  ✗ suite crashed: ' + e.message); }
     }
     check('no page errors', errors.length === 0, errors);

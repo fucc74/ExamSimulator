@@ -11,7 +11,7 @@ App.profiles = (function () {
         if (!m.list.some(p => p.id === m.current)) m.current = m.list[0].id;
         return m;
     }
-    function write(m) { try { backend().setItem(META, JSON.stringify(m)); } catch (e) { App.events.emit('storageError', e); } }
+    function write(m) { try { backend().setItem(META, JSON.stringify(m)); if (backend().flush) backend().flush(); } catch (e) { App.events.emit('storageError', e); } }
 
     const keyOf = id => id === 'default' ? 'examsim:v2' : 'examsim:v2:p:' + id;
 

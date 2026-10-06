@@ -215,7 +215,7 @@
                 case 'ul': case 'ol': { const l = el(b.t); b.items.forEach(it => l.appendChild(inlineDom(it, el('li')))); parent.appendChild(l); break; }
                 case 'quote': parent.appendChild(inlineDom(b.c, el('blockquote'))); break;
                 case 'hr': parent.appendChild(el('hr')); break;
-                case 'math': { const m = document.createElementNS(MATHNS, 'math'); m.setAttribute('display', 'block'); m.appendChild(mathDom(b.m)); parent.appendChild(el('div', { class: 'rich-math' }, m)); break; }
+                case 'math': { const m = document.createElementNS(MATHNS, 'math'); m.setAttribute('display', 'block'); m.appendChild(mathDom(b.m)); parent.appendChild(el('div', { class: 'rich-math', tabIndex: 0, role: 'group', 'aria-label': App.t('formulaLabel') }, m)); break; }
                 case 'table': {
                     const t = el('table', { class: 'rich-table' });
                     const th = el('tr'); b.head.forEach(h => th.appendChild(inlineDom(h, el('th')))); t.appendChild(el('thead', {}, th));

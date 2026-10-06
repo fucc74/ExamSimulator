@@ -1,6 +1,6 @@
 /* IndexedDB storage backend: far larger quota than localStorage.
    The whole key/value set is loaded into memory at start-up, so the storage API stays synchronous;
-   writes go to IndexedDB in the background (flushed when the page is hidden). */
+   writes are sent to IndexedDB in the background right after each change (and again when the page is hidden). */
 App.createIdbBackend = function (dbName) {
     dbName = dbName || 'examsim';
     const mem = new Map();
@@ -44,7 +44,9 @@ App.createIdbBackend = function (dbName) {
         }));
         return flushing;
     }
-    const schedule = () => { if (!timer) timer = setTimeout(flush, 120); };
+    // writes are coalesced within the same tick and sent to IndexedDB immediately (no delay that a closing tab could cut)
+    let queued = false;
+    const schedule = () => { if (queued) return; queued = true; Promise.resolve().then(() => { queued = false; flush(); }); };
 
     const backend = {
         kind: 'indexeddb',

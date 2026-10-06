@@ -126,3 +126,11 @@ kbd { display: inline-block; min-width: 22px; padding: 2px 7px; border-radius: 6
     .app-header-inner .icon-btn { min-width: 36px; }
 }
 @media print { .banner, .update-banner, .modal-backdrop, .review-tools { display: none !important; } }
+
+/* question header: extra buttons wrap and shrink on phones */
+.q-top { flex-wrap: wrap; }
+.q-meta { flex-wrap: wrap; justify-content: flex-end; min-width: 0; }
+@media (max-width: 600px) {
+    #clear-btn span, #report-btn span { display: none; }
+    #clear-btn, #report-btn { padding: 5px 9px; }
+}

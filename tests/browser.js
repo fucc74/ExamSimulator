@@ -12,6 +12,8 @@ async function open(opts) {
     const ctx = await browser.newContext({ colorScheme: opts.scheme || 'light', viewport: opts.viewport || { width: 1280, height: 800 }, serviceWorkers: 'block', reducedMotion: 'reduce', deviceScaleFactor: 1 });
     // deterministic rendering: no web font download
     await ctx.route(/fonts\.(googleapis|gstatic)\.com/, r => r.abort());
+    // deterministic shuffles: seeded Math.random
+    await ctx.addInitScript(() => { let a = 123456789; Math.random = () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; });
     const p = await ctx.newPage();
     return { p, ctx, browser, base, close: async () => { await browser.close(); server.close(); } };
 }

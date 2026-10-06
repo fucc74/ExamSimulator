@@ -252,10 +252,11 @@
     // ---------------------------------------------------------------- "what's new" notice
     function notesOf(entry) { return (Array.isArray(entry.notes) ? entry.notes : (entry.notes ? [entry.notes] : [])); }
     App.ui.changelogNotice = function (exam) {
-        if (!exam.changelog || !exam.changelog.length || !exam.version || exam.preview) return null;
+        if (!exam.version || exam.preview) return null;
         const seen = App.storage.getMeta(exam.id, 'seenVersion');
         if (seen === undefined) { App.storage.setMeta(exam.id, 'seenVersion', exam.version); return null; }
         if (seen === exam.version) return null;
+        if (!exam.changelog || !exam.changelog.length) { App.storage.setMeta(exam.id, 'seenVersion', exam.version); return null; }
         const fresh = [];
         for (const c of exam.changelog) { if (c.version === seen) break; fresh.push(c); }
         const list = fresh.length ? fresh : exam.changelog.slice(0, 1);
