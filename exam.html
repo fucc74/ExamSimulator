@@ -848,7 +848,18 @@
     }
 
     // Exam catalog (from exams.js)
-    function catalog() { return Array.isArray(window.ExamCatalog) ? window.ExamCatalog : []; }
+    // Built-in list, used when exams.js is missing or empty (exams.js, if present, replaces it)
+    const DEFAULT_CATALOG = [
+        { file: 'managedServices', title: 'HPE Managed Services Expertise',
+          description: { en: 'ITSM, delivery, tooling, security and partner programs.', it: 'ITSM, delivery, tooling, sicurezza e programmi partner.' } },
+        { file: 'v31', title: 'V31 Practice Test',
+          description: { en: 'AI fundamentals, Private Cloud AI, AI Essentials, NIM/MLIS, edge and HPC — base, scenario and advanced questions.', it: 'Fondamenti di AI, Private Cloud AI, AI Essentials, NIM/MLIS, edge e HPC — domande base, scenario e advanced.' } },
+        { file: 'v31advanced', title: 'V31 Advanced Practice Test',
+          description: { en: 'Expert-level questions: sizing, KAI Scheduler, MLIS multi-node, air-gapped NIM, edge and HPC.', it: 'Domande di livello expert: sizing, KAI Scheduler, MLIS multi-node, NIM air-gapped, edge e HPC.' } }
+    ];
+    function catalog() {
+        return Array.isArray(window.ExamCatalog) && window.ExamCatalog.length ? window.ExamCatalog : DEFAULT_CATALOG;
+    }
 
     function renderExamLists() {
         const picker = $('exam-list');
