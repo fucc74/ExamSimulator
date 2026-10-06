@@ -196,6 +196,7 @@
         add(App.t('libraryImport'), '', 'upload', () => App.ui.openWizard());
         add(App.t('libraryNew'), '', 'star', () => App.ui.openEditor(null));
         add(App.t('shortcutsBtn'), '?', 'grid', () => App.ui.showShortcuts());
+        if (App.config.supportUrl) add(App.t('supportBtn'), '', 'coffee', () => window.open(App.config.supportUrl, '_blank', 'noopener'));
         return out;
     }
 

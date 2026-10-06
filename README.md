@@ -4,6 +4,8 @@
 It runs as a **single HTML file** — double-click `exam.html`, no server, no account, no install.
 Bring your own questions (one text file per exam) and QZ gives you timed mock exams, study mode, spaced-repetition review, statistics and more.
 
+[![Buy me a coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-ffdd00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/gifwebsolutions) [![License: GPL v3](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
+
 🇮🇹 [Leggi in italiano](README.it.md) · 📘 [User guide](docs/USER-GUIDE.md) · 🧩 [Exam format](docs/EXAM-FORMAT.md) · 🏗️ [Architecture](docs/ARCHITECTURE.md) · 🤝 [Contributing](CONTRIBUTING.md)
 
 ![QZ — choose an exam](docs/img/picker.png)
@@ -133,6 +135,9 @@ Bug reports, new exams, translations and code are all welcome — see [CONTRIBUT
 
 ## About exam content
 QZ is the engine; exams are separate data files. Whoever shares an exam is responsible for having the right to do so — please do not publish questions copied from copyrighted or confidential material.
+
+## Support the project
+QZ is free. If it helps you, you can [buy me a coffee](https://buymeacoffee.com/gifwebsolutions) — a plain link, no tracking. In the app it appears only in calm places (start page footer, results, *Options → About*, command palette), never during a session or in print. Forks can change or remove it: `App.config.supportUrl` in `src/js/00-core.js` (empty = hidden), plus `.github/FUNDING.yml`.
 
 ## License
 QZ is released under the **GNU General Public License v3.0** — see [LICENSE](LICENSE).

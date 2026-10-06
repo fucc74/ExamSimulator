@@ -174,6 +174,7 @@
         card.appendChild(chips);
         card.appendChild(box);
         v.appendChild(card);
+        const sup = App.ui.supportBlock(); if (sup) { sup.id = 'support-results'; v.appendChild(sup); }
         applyFilter(App.state.reviewFilter || 'all');
     };
 

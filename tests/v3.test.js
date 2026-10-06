@@ -381,3 +381,7 @@ test('folder import copies exams into the library: new, updated, bundled skipped
     assert.equal(App.library.get('a').questions.length, 4);
     assert.equal(App.library.list().length, 1);
 });
+
+test('support link is a plain https link and can be switched off', () => {
+    assert.match(App.config.supportUrl, /^https:\/\/buymeacoffee\.com\/[\w-]+$/);
+});

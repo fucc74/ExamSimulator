@@ -143,3 +143,10 @@ kbd { display: inline-block; min-width: 22px; padding: 2px 7px; border-radius: 6
 .scan-bad { color: var(--error); }
 .scan-bad-line { margin: 6px 0; font-size: 0.9rem; overflow-wrap: anywhere; }
 .exam-switcher select { flex: 1 1 0; min-width: 0; width: 100%; max-width: 460px; font-weight: 600; text-overflow: ellipsis; }
+
+/* Support link ("Buy me a coffee") */
+.support { display: flex; align-items: center; justify-content: center; gap: 8px 14px; flex-wrap: wrap; max-width: 620px; margin: calc(var(--space) * 1.5) auto 0; padding: 14px 18px; border: 1px dashed var(--border-strong); border-radius: var(--r-md); color: var(--text-2); font-size: 0.9rem; text-align: center; }
+.support-link { display: inline-flex; align-items: center; gap: 8px; padding: 8px 15px; border-radius: var(--r-pill); background: #ffdd00; color: #1a1a1a; font-weight: 700; font-size: 0.88rem; text-decoration: none; box-shadow: var(--shadow-sm); transition: transform .15s, box-shadow .15s; }
+.support-link:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.support-link:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; box-shadow: none; }
+@media print { .support, .support-link { display: none !important; } }

@@ -4,6 +4,8 @@
 Funziona come **un unico file HTML**: doppio clic su `exam.html`, nessun server, nessun account, nessuna installazione.
 Porti le tue domande (un file di testo per esame) e QZ ti dà simulazioni a tempo, modalità studio, ripasso a ripetizione dilazionata, statistiche e molto altro.
 
+[![Buy me a coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-ffdd00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/gifwebsolutions) [![License: GPL v3](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
+
 🇬🇧 [Read in English](README.md) · 📘 [Guida utente](docs/USER-GUIDE.md) (in inglese) · 🧩 [Formato degli esami](docs/EXAM-FORMAT.md) · 🏗️ [Architettura](docs/ARCHITECTURE.md) · 🤝 [Contribuire](CONTRIBUTING.md)
 
 ![QZ — scegli un esame](docs/img/picker.png)
@@ -133,6 +135,9 @@ Segnalazioni di bug, nuovi esami, traduzioni e codice sono tutti benvenuti: vedi
 
 ## Sul contenuto degli esami
 QZ è il motore; gli esami sono file di dati separati. Chi condivide un esame è responsabile di averne il diritto: non pubblicare domande copiate da materiale protetto da copyright o riservato.
+
+## Sostieni il progetto
+QZ è gratuito. Se ti è utile puoi [offrirmi un caffè](https://buymeacoffee.com/gifwebsolutions): un semplice link, senza tracciamento. Nell'app compare solo in punti tranquilli (piè di pagina della pagina iniziale, risultati, *Opzioni → Informazioni*, palette comandi), mai durante una sessione né in stampa. Chi fa un fork può cambiarlo o toglierlo: `App.config.supportUrl` in `src/js/00-core.js` (vuoto = nascosto) e `.github/FUNDING.yml`.
 
 ## Licenza
 QZ è rilasciato con licenza **GNU General Public License v3.0** — vedi [LICENSE](LICENSE).

@@ -435,5 +435,38 @@ module.exports = {
         check('the unreadable file is listed', true);
         await p.keyboard.press('Escape');
         check('imported exams appear as cards', (await p.locator('.exam-card:has-text("Imported Two") .chip:has-text("My exam")').count()) === 1);
+    },
+
+    'support link: calm places only, plain link, hidden in print': async ({ p, check, runAll, URL_BASE }) => {
+        const URL = 'https://buymeacoffee.com/gifwebsolutions';
+        await fresh(p, URL_BASE);
+        const foot = p.locator('#support-footer a.support-link');
+        check('start page footer has the link', (await foot.count()) === 1 && (await foot.getAttribute('href')) === URL);
+        check('opens in a new tab without leaking the opener', (await foot.getAttribute('target')) === '_blank' && /noopener/.test(await foot.getAttribute('rel')));
+        check('no third-party script was added', (await p.locator('script[src*="buymeacoffee"]').count()) === 0);
+        await openOptions(p);
+        check('Options → About has it', (await p.locator('#opt-support a.support-link').count()) === 1);
+        await p.keyboard.press('Escape');
+        await p.goto(URL_BASE + '?content=demo');
+        await p.waitForSelector('#start-btn');
+        await p.selectOption('#cfg-mode', 'quick');
+        await p.click('#start-btn');
+        check('never shown during a session', (await p.locator('a.support-link:visible').count()) === 0);
+        await p.goto(URL_BASE + '?content=demo');
+        await p.waitForSelector('#start-btn');
+        await runAll(p, 'quick');
+        await p.waitForSelector('#support-results');
+        check('results page has it', (await p.locator('#support-results a.support-link').count()) === 1);
+        await p.emulateMedia({ media: 'print' });
+        check('hidden when printing', !(await p.locator('#support-results').isVisible()));
+        await p.emulateMedia({ media: 'screen' });
+        await p.keyboard.press('Control+K');
+        await p.waitForSelector('#palette-input');
+        await p.keyboard.type('coffee');
+        check('command palette offers it', /Buy me a coffee/.test(await p.locator('#palette-list').innerText()));
+        await p.keyboard.press('Escape');
+        // switching the setting off hides every spot
+        await p.evaluate(() => { ExamSim.App.config.supportUrl = ''; ExamSim.App.ui.rerender(); });
+        check('empty supportUrl hides the link', (await p.locator('a.support-link').count()) === 0);
     }
 };

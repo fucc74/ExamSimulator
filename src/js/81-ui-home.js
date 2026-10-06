@@ -53,6 +53,7 @@
             App.ui.btn(App.t('libraryImport'), 'upload', 'btn-sm', () => App.ui.openWizard(), { id: 'picker-wizard' }),
             App.ui.btn(App.t('libraryNew'), 'star', 'btn-ghost btn-sm', () => App.ui.openEditor(null), { id: 'picker-new' }),
             App.ui.toolbarButtons({ stats: false })));
+        const sup = App.ui.supportBlock(); if (sup) { sup.id = 'support-footer'; v.appendChild(sup); }
     };
 
     // ------------------------------------------------------------- dashboard

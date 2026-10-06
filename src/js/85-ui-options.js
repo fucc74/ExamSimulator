@@ -228,6 +228,8 @@
         const upd = el('p', { class: 'hint', id: 'opt-update-status' });
         return section('about', App.t('optAbout'), 'bolt',
             el('p', { text: 'QZ ' + App.version }),
+            App.config.supportUrl ? el('p', { class: 'hint', text: App.t('supportText') }) : null,
+            App.config.supportUrl ? el('div', { class: 'toolbar', id: 'opt-support' }, App.ui.supportLink()) : null,
             el('div', { class: 'toolbar' },
                 App.ui.btn(App.t('shortcutsBtn'), 'grid', 'btn-ghost btn-sm', () => App.ui.showShortcuts()),
                 App.ui.btn(App.t('checkUpdate'), 'refresh', 'btn-ghost btn-sm', async () => { upd.textContent = App.t('updateChecking'); upd.textContent = await App.ui.checkForUpdate(); }, { id: 'opt-check-update' })),
