@@ -674,7 +674,7 @@ kbd { display: inline-block; min-width: 22px; padding: 2px 7px; border-radius: 6
 .link-btn { background: none; border: 0; padding: 0; color: var(--primary); font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }
 .scan-bad { color: var(--error); }
 .scan-bad-line { margin: 6px 0; font-size: 0.9rem; overflow-wrap: anywhere; }
-.exam-switcher select { flex: 1 1 260px; max-width: min(100%, 460px); width: auto; font-weight: 600; }
+.exam-switcher select { flex: 1 1 0; min-width: 0; width: 100%; max-width: 460px; font-weight: 600; text-overflow: ellipsis; }
 
     </style>
     <script>
