@@ -1,13 +1,15 @@
 # ExamSimulator
 Exam Simulator
 
-## Uso
-- `exam.html?content=NomeFile` carica `NomeFile.js` dalla stessa cartella (es. `?content=managedServices`).
-- In alternativa apri `exam.html` e usa il pulsante **Carica file domande** (`.js` o `.json`).
+## Usage
+- Open `exam.html` and pick an exam from the list, or open `exam.html?content=NAME` to load `NAME.exam` directly.
+- The header has a language toggle (EN/IT) and a light/dark theme toggle; both choices are remembered.
+- Interrupted sessions are saved in the browser and can be resumed.
 
-## Formato del file domande
-`window.ExamData = { config: {...}, questions: [...] }` — vedi `managedServices.js`.
-Ogni domanda: `id`, `topic`, `question`, `options[]`, `answer[]` (indici base 0; più di uno = risposta multipla), `explanation`.
+## Adding an exam
+1. Put the exam file in this folder, named `NAME.exam` (a JavaScript file that sets `window.ExamData`).
+2. Add an entry to `window.ExamCatalog` in `exams.js` (`file: "NAME"`, plus a bilingual title and description).
 
-## Elenco esami
-La pagina iniziale mostra gli esami elencati in `exams.js`. Per aggiungerne uno, copia il file `.js` nella cartella e aggiungi una voce in `window.ExamCatalog`.
+## Exam file format
+`window.ExamData = { config: {...}, questions: [...] }` — see `managedServices.exam`.
+Each question: `id`, `topic`, `question`, `options[]`, `answer[]` (0-based indexes; more than one = multiple answer), `explanation`, and optionally `shuffle: false` to keep the option order.

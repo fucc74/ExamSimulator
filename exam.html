@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -22,7 +22,34 @@
             --error: #ef4444;
             --error-light: #fee2e2;
             --warning: #f59e0b;
+            --on-accent: #ffffff;
+            --shadow: rgba(0,0,0,0.05);
+            --reveal-ok-bg: #d1fae5; --reveal-ok-fg: #065f46;
+            --reveal-bad-bg: #fee2e2; --reveal-bad-fg: #991b1b;
         }
+
+        :root[data-theme="dark"] {
+            --primary: #10c79a;
+            --primary-hover: #0ea982;
+            --primary-light: #0f3a30;
+            --dark: #e8edf2;
+            --dark-gray: #c3ccd6;
+            --gray: #94a3b8;
+            --light-gray: #0e1216;
+            --border: #2b333c;
+            --white: #181d23;
+            --success: #34d399;
+            --success-light: #123d2e;
+            --error: #f87171;
+            --error-light: #4a1f1f;
+            --warning: #fbbf24;
+            --on-accent: #06251d;
+            --shadow: rgba(0,0,0,0.4);
+            --reveal-ok-bg: #123d2e; --reveal-ok-fg: #a7f3d0;
+            --reveal-bad-bg: #4a1f1f; --reveal-bad-fg: #fecaca;
+        }
+        html { color-scheme: light; }
+        :root[data-theme="dark"] { color-scheme: dark; }
 
         * {
             box-sizing: border-box;
@@ -46,7 +73,7 @@
             position: sticky;
             top: 0;
             z-index: 10;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            box-shadow: 0 2px 4px var(--shadow);
         }
 
         .header-container {
@@ -91,7 +118,7 @@
             border-radius: 8px;
             border: 1px solid var(--border);
             padding: 30px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.01);
+            box-shadow: 0 4px 6px var(--shadow);
             margin-bottom: 25px;
         }
 
@@ -186,7 +213,7 @@
 
         .btn {
             background-color: var(--primary);
-            color: var(--white);
+            color: var(--on-accent);
             border: none;
             padding: 12px 20px;
             font-size: 1rem;
@@ -309,7 +336,7 @@
         .option-card.selected .option-marker {
             border-color: var(--primary);
             background-color: var(--primary);
-            color: var(--white);
+            color: var(--on-accent);
         }
 
         .option-text {
@@ -388,13 +415,13 @@
 
         .nav-grid-btn.answered-correct {
             background-color: var(--success);
-            color: var(--white);
+            color: var(--on-accent);
             border-color: var(--success);
         }
 
         .nav-grid-btn.answered-wrong {
             background-color: var(--error);
-            color: var(--white);
+            color: var(--on-accent);
             border-color: var(--error);
         }
 
@@ -482,149 +509,251 @@
         .option-marker input[type='checkbox']{ width:18px; height:18px; transform:translateY(-1px);}
 
         #validate-btn {
-            background-color: #111111; color: #ffffff;
-            border: 2px solid #111111; padding: 12px 20px;
+            background-color: var(--dark); color: var(--white);
+            border: 2px solid var(--dark); padding: 12px 20px;
             border-radius: 6px; font-size: 1rem; font-weight: 600;
             cursor: pointer; transition: all 0.2s ease; margin-right: 12px;
         }
-        #validate-btn:hover { background-color: #333333; border-color: #333333; }
+        #validate-btn:hover { opacity: 0.85; }
         #validate-btn:disabled { opacity: 0.5; cursor: default; }
-        .correct-reveal  { background-color: #d1fae5 !important; border: 2px solid #10b981 !important; color: #065f46 !important; }
-        .incorrect-reveal{ background-color: #fee2e2 !important; border: 2px solid #ef4444 !important; color: #991b1b !important; }
+        .correct-reveal  { background-color: var(--reveal-ok-bg) !important; border: 2px solid var(--success) !important; color: var(--reveal-ok-fg) !important; }
+        .correct-reveal .option-text, .incorrect-reveal .option-text { color: inherit; }
+        .incorrect-reveal{ background-color: var(--reveal-bad-bg) !important; border: 2px solid var(--error) !important; color: var(--reveal-bad-fg) !important; }
         .dynamic-explanation-box {
-            background-color: #f4f6f8; border-left: 4px solid #01a982;
+            background-color: var(--light-gray); border-left: 4px solid var(--primary);
             padding: 16px; margin-top: 20px; margin-bottom: 20px;
-            border-radius: 0 8px 8px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border-radius: 0 8px 8px 0; box-shadow: 0 1px 3px var(--shadow);
         }
+        .dynamic-explanation-box h4 { font-size: 1rem; color: var(--dark); margin-bottom: 6px; font-weight: 700; }
+        .dynamic-explanation-box p { font-size: 0.92rem; color: var(--dark-gray); line-height: 1.5; margin: 0; }
+        .btn-final { background-color: var(--dark) !important; color: var(--white) !important; }
+        .btn-danger-outline { width: 100%; border-color: var(--error); color: var(--error); }
+        .question-text { white-space: pre-line; }
+
+        .header-controls { display: flex; align-items: center; gap: 10px; }
+        .icon-btn {
+            min-width: 40px; height: 36px; padding: 0 10px; border-radius: 6px;
+            border: 1px solid var(--border); background: var(--white); color: var(--dark);
+            font-size: 0.85rem; font-weight: 700; cursor: pointer;
+        }
+        .icon-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+        .exam-card {
+            display: block; padding: 14px 16px; margin-bottom: 10px;
+            border: 1px solid var(--border); border-radius: 8px;
+            text-decoration: none; color: var(--dark); background: var(--white);
+        }
+        .exam-card:hover, .exam-card.current { border-color: var(--primary); }
+        .exam-card-title { font-weight: 700; color: var(--primary); }
+        .exam-card-desc { font-size: 0.9rem; color: var(--gray); margin-top: 4px; }
+        .exam-switcher { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+        .exam-switcher-label { font-weight: 600; font-size: 0.9rem; color: var(--gray); }
+        .exam-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .exam-chip {
+            padding: 6px 14px; border-radius: 999px; font-size: 0.85rem; font-weight: 600;
+            border: 1px solid var(--border); color: var(--dark-gray); text-decoration: none; background: var(--white);
+        }
+        .exam-chip:hover { border-color: var(--primary); color: var(--primary); }
+        .exam-chip.current { background: var(--primary); border-color: var(--primary); color: var(--on-accent); }
+
+        .topic-total { background-color: var(--primary-light); border-radius: 6px; border-bottom: none; margin-bottom: 10px; }
+        .review-option { margin: 6px 0; }
+        .review-correct { color: var(--success); font-weight: 600; background-color: var(--success-light); border-radius: 4px; padding: 2px 6px; }
+        .review-wrong { color: var(--error); font-weight: 600; background-color: var(--error-light); border-radius: 4px; padding: 2px 6px; }
     </style>
     <script src="exams.js"></script>
     <script>
+    // Theme applied before first paint to avoid a flash
+    (function () {
+        var theme = null;
+        try { theme = localStorage.getItem('exam_theme'); } catch (e) {}
+        if (theme !== 'dark' && theme !== 'light') {
+            theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', theme);
+    })();
+    // Exam content: ?content=name loads name.exam
     (function() {
-        var p = new URLSearchParams(window.location.search);
-        var c = p.get('content');
-        if (c && /^[\w.\-]+$/.test(c)) { document.write('<scr' + 'ipt src="' + c + '.js"></scr' + 'ipt>'); }
+        var c = new URLSearchParams(window.location.search).get('content');
+        if (c && /^[\w.\-]+$/.test(c)) { document.write('<scr' + 'ipt src="' + c + '.exam"></scr' + 'ipt>'); }
     })();
     </script>
 </head>
 <body>
 <header>
-        <div class="header-container">
-            <div class="logo-area">
-                <div class="hpe-element"></div>
-                <div class="logo-text"><span id="logo-exam-code">EXAM</span> <span>SIMULATOR</span> <span id="logo-version" style="font-size:0.7rem;color:var(--gray);font-weight:400;"></span></div>
-            </div>
-            <div id="runtime-timer-box" class="q-number hidden">Time Remaining: <span id="runtime-clock-string" style="color: var(--dark); font-weight: 600;">--:--</span></div>
+    <div class="header-container">
+        <div class="logo-area">
+            <div class="hpe-element"></div>
+            <div class="logo-text"><span id="logo-exam-code">EXAM</span> <span id="logo-simulator" data-i18n="simulator">SIMULATOR</span> <span id="logo-version" style="font-size:0.7rem;color:var(--gray);font-weight:400;"></span></div>
         </div>
-    </header>
-
-    <div class="main-wrapper">
-        <div id="no-content-message" class="card hidden" style="text-align:center; padding:60px 30px;">
-            <div id="no-content-body">
-                <h1 style="font-size:1.5rem; margin-bottom:15px; color:var(--dark);">No exam content loaded</h1>
-                <p style="color:var(--gray); font-size:1rem;">Use the URL parameter <code style="background:var(--light-gray);padding:2px 8px;border-radius:4px;font-weight:600;">?content=ExamName</code> to load an exam file.</p>
-                <p style="color:var(--gray); font-size:0.9rem; margin-top:10px;">Example: <code style="background:var(--light-gray);padding:2px 8px;border-radius:4px;">exam.html?content=genAI</code></p>
-            </div>
-            <p style="color:var(--gray); margin:20px 0 10px;">oppure</p>
-            <button type="button" class="upload-exam-btn" style="padding:12px 24px;font-size:1rem;font-weight:600;border:none;border-radius:6px;background:var(--primary);color:var(--white);cursor:pointer;">Carica file domande (.js / .json)</button>
-            <input type="file" id="exam-file-input" accept=".js,.json" class="hidden">
-            <div id="exam-list" style="margin-top:30px; text-align:left;"></div>
+        <div class="header-controls">
+            <div id="runtime-timer-box" class="q-number hidden"><span data-i18n="timeRemaining">Time remaining:</span> <span id="runtime-clock-string" style="color: var(--dark); font-weight: 600;">--:--</span></div>
+            <button type="button" id="lang-btn" class="icon-btn" title="Language / Lingua">EN</button>
+            <button type="button" id="theme-btn" class="icon-btn" title="Theme / Tema">☾</button>
         </div>
+    </div>
+</header>
 
-        <!-- MAIN DASHBOARD -->
-        <div id="main-dashboard" class="card hidden">
-            <h1 id="dashboard-title">Exam Practice Repository</h1>
-            <p id="dashboard-subtitle" class="subtitle"></p>
-            <button type="button" class="upload-exam-btn" style="margin-bottom:15px;padding:8px 16px;font-size:0.85rem;font-weight:600;border:1px solid var(--primary);border-radius:6px;background:transparent;color:var(--primary);cursor:pointer;">Carica un altro file domande</button>
-            <button type="button" id="choose-exam-btn" style="margin-bottom:15px;margin-left:8px;padding:8px 16px;font-size:0.85rem;font-weight:600;border:1px solid var(--primary);border-radius:6px;background:transparent;color:var(--primary);cursor:pointer;">Scegli un altro esame</button>
-            
-            <div class="grid-dashboard">
-                <div>
-                    <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 10px;">Operational Knowledge Distribution</h3>
-                    <div id="distribution-payload-box" class="topic-list">
-                        <!-- Dynamic Distribution Items -->
-                    </div>
-                </div>
-                
-                <div class="sidebar-box" style="margin-top: 15px;">
-                    <h3 class="sidebar-title">Session Configuration</h3>
-                    <div class="setup-box">
-                        <div class="form-group">
-                            <label for="config-selection-mode">Select Target Mode / Scope</label>
-                            <select id="config-selection-mode">
-                                <!-- Populated Dynamically with Options -->
-                            </select>
-                        </div>
-                        <button id="start-btn" class="btn" type="button">Initialize Simulator Session</button>
-                    </div>
-                </div>
-            </div>
+<div class="main-wrapper">
+    <!-- EXAM PICKER (no exam loaded) -->
+    <div id="no-content-message" class="card hidden" style="text-align:center; padding:50px 30px;">
+        <div id="no-content-body">
+            <h1 style="font-size:1.5rem; margin-bottom:12px;" data-i18n="noExamTitle">Choose an exam</h1>
+            <p style="color:var(--gray);" data-i18n="noExamText">Select one of the available exams below to start practicing.</p>
         </div>
-
-        <!-- RUNTIME ENGINE INTERFACE -->
-        <div id="runtime-interface" class="hidden">
-            <div class="runtime-layout">
-                <div class="card" style="margin-bottom: 0;">
-                    <div class="question-header">
-                        <span id="runtime-topic-tag" class="tag-topic">TOPIC TAG</span>
-                        <span id="runtime-position-string" class="q-number">Question -- of --</span>
-                    </div>
-                    
-                    <div id="runtime-question-text" class="question-text">Loading question scenario metadata...</div>
-                    
-                    <div id="runtime-options-box" class="options-list">
-                        <!-- Dynamic Options List -->
-                    </div>
-                    
-                    <div class="nav-controls">
-                        <button id="prev-btn" class="btn btn-secondary" type="button">Previous</button>
-                        <button id="validate-btn" type="button">Validate Answer</button>
-                        <button id="session-action-trigger" class="btn" type="button">Next Question</button>
-                    </div>
-                </div>
-                
-                <div class="sidebar-box">
-                    <h3 class="sidebar-title">Session Progress Matrix</h3>
-                    <div id="runtime-matrix-grid" class="grid-navigation">
-                        <!-- Dynamic Navigation Matrix Grid Blocks -->
-                    </div>
-                    <button id="submit-btn" class="btn btn-secondary" type="button" style="width: 100%; border-color: var(--error); color: var(--error);">Terminate & Score Session</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- SUMMARY RESULTS DASHBOARD -->
-        <div id="summary-dashboard" class="card hidden">
-            <h1>Performance Analysis Metric Dashboard</h1>
-            <p class="subtitle">Detailed evaluation breakdown matching baseline compliance configurations.</p>
-            
-            <div class="metrics-summary-box">
-                <div id="metric-percentage" class="score-circle">--%</div>
-                <div>
-                    <h2 id="metric-raw-string" style="font-size: 1.3rem; font-weight: 600; margin-bottom: 4px;">You answered -- out of -- questions correctly.</h2>
-                    <p style="color: var(--gray); font-size: 0.95rem;">Review the comprehensive rationale validation matrix below to evaluate infrastructure constraints.</p>
-                </div>
-            </div>
-            
-            <div style="margin-bottom: 25px; display: flex; gap: 15px;">
-                <button id="return-btn" class="btn" type="button">Return to Main Repository</button>
-            </div>
-
-            <div id="review-payload-box">
-                <!-- Dynamic Post-Exam Evaluation Cards -->
-            </div>
-        </div>
-
+        <div id="exam-list" style="margin-top:25px; text-align:left;"></div>
     </div>
 
-    <script>
+    <!-- MAIN DASHBOARD -->
+    <div id="main-dashboard" class="card hidden">
+        <h1 id="dashboard-title">Exam Practice</h1>
+        <p id="dashboard-subtitle" class="subtitle"></p>
+
+        <div class="exam-switcher">
+            <span class="exam-switcher-label" data-i18n="switchExam">Exams:</span>
+            <div id="dash-exam-list" class="exam-chips"></div>
+        </div>
+
+        <div class="grid-dashboard">
+            <div>
+                <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 10px;" data-i18n="distribution">Question distribution</h3>
+                <div id="distribution-payload-box" class="topic-list"></div>
+            </div>
+
+            <div class="sidebar-box" style="margin-top: 15px;">
+                <h3 class="sidebar-title" data-i18n="sessionConfig">Session setup</h3>
+                <div class="setup-box">
+                    <div class="form-group">
+                        <label for="config-selection-mode" data-i18n="selectMode">Select mode</label>
+                        <select id="config-selection-mode"></select>
+                    </div>
+                    <button id="start-btn" class="btn" type="button" data-i18n="startSession">Start session</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RUNTIME ENGINE INTERFACE -->
+    <div id="runtime-interface" class="hidden">
+        <div class="runtime-layout">
+            <div class="card" style="margin-bottom: 0;">
+                <div class="question-header">
+                    <span id="runtime-topic-tag" class="tag-topic">TOPIC</span>
+                    <span id="runtime-position-string" class="q-number"></span>
+                </div>
+
+                <div id="runtime-question-text" class="question-text"></div>
+
+                <div id="runtime-options-box" class="options-list"></div>
+
+                <div class="nav-controls">
+                    <button id="prev-btn" class="btn btn-secondary" type="button" data-i18n="previous">Previous</button>
+                    <button id="validate-btn" type="button" data-i18n="validate">Check answer</button>
+                    <button id="session-action-trigger" class="btn" type="button"></button>
+                </div>
+            </div>
+
+            <div class="sidebar-box">
+                <h3 class="sidebar-title" data-i18n="progress">Progress</h3>
+                <div id="runtime-matrix-grid" class="grid-navigation"></div>
+                <button id="submit-btn" class="btn btn-secondary btn-danger-outline" type="button" data-i18n="endScore">End and score</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUMMARY RESULTS DASHBOARD -->
+    <div id="summary-dashboard" class="card hidden">
+        <h1 data-i18n="resultsTitle">Results</h1>
+        <p class="subtitle" data-i18n="resultsSubtitle">Review each question and its explanation below.</p>
+
+        <div class="metrics-summary-box">
+            <div id="metric-percentage" class="score-circle">--%</div>
+            <div>
+                <h2 id="metric-raw-string" style="font-size: 1.3rem; font-weight: 600; margin-bottom: 4px;"></h2>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 25px; display: flex; gap: 15px;">
+            <button id="return-btn" class="btn" type="button" data-i18n="backToMenu">Back to main menu</button>
+        </div>
+
+        <div id="review-payload-box"></div>
+    </div>
+</div>
+
+<script>
 (function () {
     'use strict';
+
+    // ── Translations (UI only; exam content keeps its own language) ─────────
+    const I18N = {
+        en: {
+            simulator: 'SIMULATOR', timeRemaining: 'Time remaining:',
+            noExamTitle: 'Choose an exam', noExamText: 'Select one of the available exams below to start practicing.',
+            availableExams: 'Available exams', switchExam: 'Exams:',
+            loadFailedTitle: 'Failed to load exam file',
+            loadFailedText: 'Could not load "{name}". Choose an exam from the list below.',
+            distribution: 'Question distribution',
+            totalQuestions: 'Total questions', nQuestions: '{n} questions',
+            sessionConfig: 'Session setup', selectMode: 'Select mode', startSession: 'Start session',
+            modeMock20: 'Standard mock exam ({n} random questions)',
+            modeMock40: 'Official exam simulation ({n} questions · {m} min · pass {p}%)',
+            modeAll: 'Full bank (all {n} questions)', modeTopics: 'Practice by topic',
+            questionOf: 'Question {i} of {n}', previous: 'Previous', validate: 'Check answer',
+            next: 'Next question', finish: 'Finish exam', progress: 'Progress', endScore: 'End and score',
+            explanation: 'Explanation', noExplanation: 'No explanation available.',
+            selectFirst: 'Select an answer before checking!',
+            resultsTitle: 'Results', resultsSubtitle: 'Review each question and its explanation below.',
+            scoreLine: 'You answered {c} out of {n} questions correctly.',
+            pass: '✅ PASS — {t}% threshold reached', fail: '❌ FAIL — {t}% threshold not reached',
+            correct: 'Correct', incorrect: 'Incorrect', questionN: 'Question {n}: {q}',
+            backToMenu: 'Back to main menu',
+            resume: 'An unfinished session was found. Do you want to resume it?',
+            langTitle: 'Switch language', themeTitle: 'Switch light/dark theme'
+        },
+        it: {
+            simulator: 'SIMULATORE', timeRemaining: 'Tempo rimanente:',
+            noExamTitle: 'Scegli un esame', noExamText: 'Seleziona uno degli esami disponibili qui sotto per iniziare.',
+            availableExams: 'Esami disponibili', switchExam: 'Esami:',
+            loadFailedTitle: "Impossibile caricare l'esame",
+            loadFailedText: 'Impossibile caricare "{name}". Scegli un esame dall\'elenco qui sotto.',
+            distribution: 'Distribuzione delle domande',
+            totalQuestions: 'Domande totali', nQuestions: '{n} domande',
+            sessionConfig: 'Configurazione sessione', selectMode: 'Seleziona la modalità', startSession: 'Avvia sessione',
+            modeMock20: 'Simulazione standard ({n} domande casuali)',
+            modeMock40: 'Simulazione esame ufficiale ({n} domande · {m} min · soglia {p}%)',
+            modeAll: 'Intero archivio (tutte le {n} domande)', modeTopics: 'Esercitazione per argomento',
+            questionOf: 'Domanda {i} di {n}', previous: 'Precedente', validate: 'Verifica risposta',
+            next: 'Domanda successiva', finish: "Termina l'esame", progress: 'Avanzamento', endScore: 'Termina e valuta',
+            explanation: 'Spiegazione', noExplanation: 'Nessuna spiegazione disponibile.',
+            selectFirst: 'Seleziona una risposta prima di verificare!',
+            resultsTitle: 'Risultati', resultsSubtitle: 'Rivedi ogni domanda e la relativa spiegazione qui sotto.',
+            scoreLine: 'Hai risposto correttamente a {c} domande su {n}.',
+            pass: '✅ SUPERATO — soglia del {t}% raggiunta', fail: '❌ NON SUPERATO — soglia del {t}% non raggiunta',
+            correct: 'Corretta', incorrect: 'Errata', questionN: 'Domanda {n}: {q}',
+            backToMenu: 'Torna al menu principale',
+            resume: 'È stata trovata una sessione precedente non completata. Vuoi riprenderla?',
+            langTitle: 'Cambia lingua', themeTitle: 'Cambia tema chiaro/scuro'
+        }
+    };
 
     // ── Helpers ─────────────────────────────────────────────────────────────
     const $ = id => document.getElementById(id);
     const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
-    // Costruisce un elemento DOM; i testi passano sempre da textContent (niente innerHTML).
+    function readPref(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+    function writePref(key, value) { try { localStorage.setItem(key, value); } catch (e) { /* ignore */ } }
+
+    let lang = readPref('exam_lang');
+    if (lang !== 'en' && lang !== 'it') lang = 'en';
+
+    function t(key, params) {
+        let s = (I18N[lang] && I18N[lang][key]) || I18N.en[key] || key;
+        Object.keys(params || {}).forEach(k => { s = s.split('{' + k + '}').join(params[k]); });
+        return s;
+    }
+
+    // Builds a DOM element; text always goes through textContent (no innerHTML).
     function el(tag, props, ...children) {
         const node = document.createElement(tag);
         Object.entries(props || {}).forEach(([k, v]) => {
@@ -653,17 +782,18 @@
 
     const data = () => window.ExamData;
     const cfg = () => window.ExamData.config;
+    const loc = v => (v && typeof v === 'object') ? (v[lang] || v.en || '') : (v || '');
 
-    // ── Preparazione dati ───────────────────────────────────────────────────
-    // Lettere assegnate dal motore, tipo derivato da answer, opzioni rimescolate.
+    // ── Question preparation ────────────────────────────────────────────────
+    // Letters are rendered by the engine, type derives from answer count, options are shuffled.
     function normalizeQuestions() {
-        const stripLetter = t => String(t).replace(/^\s*[A-Fa-f][)\.]\s+/, '');
+        const stripLetter = s => String(s).replace(/^\s*[A-Fa-f][)\.]\s+/, '');
         data().questions.forEach(q => {
             if (!Array.isArray(q.options)) return;
             if (!Array.isArray(q.answer)) q.answer = [q.answer];
             q.type = q.answer.length > 1 ? 'multiple' : 'single';
 
-            // shuffle:false mantiene l'ordine (es. opzioni tipo "All of the above")
+            // shuffle:false keeps the option order (e.g. "All of the above")
             const identity = q.options.map((_, i) => i);
             const order = q.shuffle === false ? identity : shuffle(identity);
             const opts = q.options.map(stripLetter);
@@ -672,31 +802,22 @@
         });
     }
 
-    // ── Stato ───────────────────────────────────────────────────────────────
+    // ── State ───────────────────────────────────────────────────────────────
     const state = {
-        items: [],
-        index: 0,
-        selections: {},   // indice -> number | number[]
-        validated: {},    // indice -> boolean (risposta corretta?)
-        mode: null,
-        secondsLeft: 0,
-        timer: null
+        screen: 'picker',   // picker | dashboard | runtime | summary
+        items: [], index: 0, selections: {}, validated: {}, mode: null,
+        secondsLeft: 0, timer: null, examFile: null
     };
 
     const storeKey = () => 'exam_session_' + cfg().examCode;
 
     function saveSession() {
-        try {
-            localStorage.setItem(storeKey(), JSON.stringify({
-                items: state.items, index: state.index, selections: state.selections,
-                validated: state.validated, mode: state.mode, secondsLeft: state.secondsLeft
-            }));
-        } catch (e) { /* storage non disponibile */ }
+        writePref(storeKey(), JSON.stringify({
+            items: state.items, index: state.index, selections: state.selections,
+            validated: state.validated, mode: state.mode, secondsLeft: state.secondsLeft
+        }));
     }
-
-    function clearSession() {
-        try { localStorage.removeItem(storeKey()); } catch (e) { /* ignora */ }
-    }
+    function clearSession() { try { localStorage.removeItem(storeKey()); } catch (e) { /* ignore */ } }
 
     function isCorrect(i) {
         const sel = state.selections[i];
@@ -704,10 +825,50 @@
         return sameSet(Array.isArray(sel) ? sel : [sel], state.items[i].answer);
     }
 
-    // ── Schermate ───────────────────────────────────────────────────────────
-    function show(id) {
-        ['main-dashboard', 'runtime-interface', 'summary-dashboard'].forEach(s =>
-            $(s).classList.toggle('hidden', s !== id));
+    // ── Screens ─────────────────────────────────────────────────────────────
+    function show(screen) {
+        state.screen = screen;
+        $('no-content-message').classList.toggle('hidden', screen !== 'picker');
+        $('main-dashboard').classList.toggle('hidden', screen !== 'dashboard');
+        $('runtime-interface').classList.toggle('hidden', screen !== 'runtime');
+        $('summary-dashboard').classList.toggle('hidden', screen !== 'summary');
+    }
+
+    function applyStaticText() {
+        document.documentElement.lang = lang;
+        document.querySelectorAll('[data-i18n]').forEach(node => { node.textContent = t(node.getAttribute('data-i18n')); });
+        $('lang-btn').textContent = lang.toUpperCase();
+        $('lang-btn').title = t('langTitle');
+        $('theme-btn').title = t('themeTitle');
+    }
+
+    function renderTheme() {
+        const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        $('theme-btn').textContent = dark ? '☀' : '☾';
+    }
+
+    // Exam catalog (from exams.js)
+    function catalog() { return Array.isArray(window.ExamCatalog) ? window.ExamCatalog : []; }
+
+    function renderExamLists() {
+        const picker = $('exam-list');
+        picker.textContent = '';
+        if (catalog().length) {
+            picker.appendChild(el('h3', { style: 'font-size:1.05rem;font-weight:600;margin-bottom:10px;text-align:center;', text: t('availableExams') }));
+        }
+        catalog().forEach(item => {
+            const current = item.file === state.examFile;
+            picker.appendChild(el('a', { href: '?content=' + encodeURIComponent(item.file), class: 'exam-card' + (current ? ' current' : '') },
+                el('div', { class: 'exam-card-title', text: loc(item.title) || item.file }),
+                el('div', { class: 'exam-card-desc', text: loc(item.description) })));
+        });
+
+        const chips = $('dash-exam-list');
+        chips.textContent = '';
+        catalog().forEach(item => {
+            const current = item.file === state.examFile;
+            chips.appendChild(el('a', { href: '?content=' + encodeURIComponent(item.file), class: 'exam-chip' + (current ? ' current' : ''), text: loc(item.title) || item.file, title: loc(item.description) }));
+        });
     }
 
     function renderDashboard() {
@@ -715,43 +876,42 @@
         const counts = {};
         questions.forEach(q => { counts[q.topic] = (counts[q.topic] || 0) + 1; });
 
+        $('dashboard-title').textContent = cfg().examTitle || cfg().examCode || 'Exam';
+        $('dashboard-subtitle').textContent = loc(cfg().subtitle);
+
         const select = $('config-selection-mode');
+        const previous = select.value;
         select.textContent = '';
-        const addOpt = (parent, value, label) =>
-            parent.appendChild(el('option', { value: value, text: label }));
-        addOpt(select, 'mock20', `Standard Mock Exam (${cfg().mockStandardCount} Randomized Questions)`);
-        addOpt(select, 'mock40', `Official Exam Simulation (${cfg().mockOfficialCount} Questions · ${Math.floor(cfg().mockOfficialTimeSec / 60)} min · Pass ${cfg().passThresholdMockOfficial}%)`);
-        addOpt(select, 'all', `Comprehensive Blueprint Evaluation (All ${questions.length} Items)`);
-        const group = el('optgroup', { label: 'Practice by Target Domain Topic' });
+        const addOpt = (parent, value, label) => parent.appendChild(el('option', { value: value, text: label }));
+        addOpt(select, 'mock20', t('modeMock20', { n: cfg().mockStandardCount }));
+        addOpt(select, 'mock40', t('modeMock40', { n: cfg().mockOfficialCount, m: Math.floor(cfg().mockOfficialTimeSec / 60), p: cfg().passThresholdMockOfficial }));
+        addOpt(select, 'all', t('modeAll', { n: questions.length }));
+        const group = el('optgroup', { label: t('modeTopics') });
         select.appendChild(group);
 
         const box = $('distribution-payload-box');
         box.textContent = '';
-        box.appendChild(el('div', {
-            class: 'topic-item',
-            style: 'background-color: var(--primary-light); border-radius: 6px; border-bottom: none; margin-bottom: 10px;'
-        },
-            el('span', { class: 'topic-name', style: 'color: var(--primary); font-weight: 700;', text: 'Aggregate Active Question Vault Size' }),
-            el('span', { class: 'topic-count', style: 'background-color: var(--primary); color: var(--white);', text: `${questions.length} Questions` })
-        ));
+        box.appendChild(el('div', { class: 'topic-item topic-total' },
+            el('span', { class: 'topic-name', style: 'color: var(--primary); font-weight: 700;', text: t('totalQuestions') }),
+            el('span', { class: 'topic-count', style: 'background-color: var(--primary); color: var(--on-accent);', text: t('nQuestions', { n: questions.length }) })));
         Object.keys(counts).forEach(topic => {
             box.appendChild(el('div', { class: 'topic-item' },
                 el('span', { class: 'topic-name', text: topic }),
-                el('span', { class: 'topic-count', text: `${counts[topic]} Items` })
-            ));
-            addOpt(group, topic, `${topic} (${counts[topic]} Items)`);
+                el('span', { class: 'topic-count', text: t('nQuestions', { n: counts[topic] }) })));
+            addOpt(group, topic, `${topic} (${t('nQuestions', { n: counts[topic] })})`);
         });
+        if (previous) select.value = previous;
+        renderExamLists();
     }
 
-    // ── Selezione domande ───────────────────────────────────────────────────
+    // ── Question selection ──────────────────────────────────────────────────
     function pickItems(mode) {
         const questions = data().questions;
         const byTopic = {};
         questions.forEach(q => (byTopic[q.topic] = byTopic[q.topic] || []).push(q));
 
         if (mode === 'mock20') {
-            // Una domanda garantita per topic, il resto casuale
-            const pool = Object.keys(byTopic).map(t => shuffle(byTopic[t])[0]);
+            const pool = Object.keys(byTopic).map(k => shuffle(byTopic[k])[0]);
             const used = new Set(pool.map(q => q.id));
             const rest = shuffle(questions.filter(q => !used.has(q.id)));
             pool.push(...rest.slice(0, Math.max(0, cfg().mockStandardCount - pool.length)));
@@ -783,21 +943,19 @@
         return questions.filter(q => q.topic === mode);
     }
 
-    // ── Sessione ────────────────────────────────────────────────────────────
+    // ── Session ─────────────────────────────────────────────────────────────
     function startExam() {
         state.mode = $('config-selection-mode').value;
         state.items = pickItems(state.mode);
         state.index = 0;
         state.selections = {};
         state.validated = {};
-        const seconds = state.mode === 'mock40'
-            ? cfg().mockOfficialTimeSec
-            : state.items.length * cfg().timePerQuestionSec;
+        const seconds = state.mode === 'mock40' ? cfg().mockOfficialTimeSec : state.items.length * cfg().timePerQuestionSec;
         beginSession(seconds);
     }
 
     function beginSession(seconds) {
-        show('runtime-interface');
+        show('runtime');
         startClock(seconds);
         renderQuestion();
         renderMatrix();
@@ -827,7 +985,7 @@
         const validated = state.validated[state.index] !== undefined;
 
         $('runtime-topic-tag').textContent = q.topic;
-        $('runtime-position-string').textContent = `Question ${state.index + 1} of ${state.items.length}`;
+        $('runtime-position-string').textContent = t('questionOf', { i: state.index + 1, n: state.items.length });
         $('runtime-question-text').textContent = q.question;
 
         const box = $('runtime-options-box');
@@ -847,21 +1005,19 @@
             box.appendChild(card);
         });
 
-        // Spiegazione dopo la validazione
         const oldExp = document.querySelector('.dynamic-explanation-box');
         if (oldExp) oldExp.remove();
         if (validated) {
             box.parentNode.insertBefore(el('div', { class: 'dynamic-explanation-box' },
-                el('h4', { style: 'font-size:1rem;color:#111;margin-bottom:6px;font-weight:700;', text: 'Architectural Rationale' }),
-                el('p', { style: 'font-size:0.92rem;color:#444;line-height:1.5;margin:0;', text: q.explanation || 'No explanation available.' })
-            ), box.nextSibling);
+                el('h4', { text: t('explanation') }),
+                el('p', { text: q.explanation || t('noExplanation') })), box.nextSibling);
         }
 
         $('validate-btn').disabled = validated;
-        const next = $('session-action-trigger');
         const last = state.index === state.items.length - 1;
-        next.textContent = last ? 'Commit Final Selections' : 'Next Question';
-        next.style.backgroundColor = last ? 'var(--dark)' : 'var(--primary)';
+        const next = $('session-action-trigger');
+        next.textContent = last ? t('finish') : t('next');
+        next.classList.toggle('btn-final', last);
     }
 
     function renderMatrix() {
@@ -879,13 +1035,11 @@
     }
 
     function selectOption(i) {
-        if (state.validated[state.index] !== undefined) return; // bloccata dopo la validazione
+        if (state.validated[state.index] !== undefined) return; // locked after checking
         const q = state.items[state.index];
         if (q.type === 'multiple') {
             const cur = Array.isArray(state.selections[state.index]) ? state.selections[state.index] : [];
-            state.selections[state.index] = cur.includes(i)
-                ? cur.filter(x => x !== i)
-                : [...cur, i].sort((a, b) => a - b);
+            state.selections[state.index] = cur.includes(i) ? cur.filter(x => x !== i) : [...cur, i].sort((a, b) => a - b);
         } else {
             state.selections[state.index] = i;
         }
@@ -898,10 +1052,7 @@
         const idx = state.index;
         if (state.validated[idx] !== undefined) return;
         const sel = state.selections[idx];
-        if (sel === undefined || (Array.isArray(sel) && sel.length === 0)) {
-            alert("Seleziona un'opzione prima di validare!");
-            return;
-        }
+        if (sel === undefined || (Array.isArray(sel) && sel.length === 0)) { alert(t('selectFirst')); return; }
         state.validated[idx] = isCorrect(idx);
         renderQuestion();
         renderMatrix();
@@ -921,13 +1072,16 @@
         else goTo(state.index + 1);
     }
 
-    // ── Risultati ───────────────────────────────────────────────────────────
+    // ── Results ─────────────────────────────────────────────────────────────
     function submitExam() {
         clearInterval(state.timer);
         clearSession();
         $('runtime-timer-box').classList.add('hidden');
-        show('summary-dashboard');
+        show('summary');
+        renderSummary();
+    }
 
+    function renderSummary() {
         const review = $('review-payload-box');
         review.textContent = '';
         let correctCount = 0;
@@ -940,25 +1094,19 @@
 
             const optionsBox = el('div', { style: 'margin-bottom:15px; font-size:0.95rem;' });
             q.options.forEach((opt, k) => {
-                let style = 'margin: 6px 0;';
-                if (q.answer.includes(k)) {
-                    style += 'color: var(--success); font-weight: 600; background-color: var(--success-light); border-radius: 4px; padding: 2px 6px;';
-                } else if (chosen.includes(k)) {
-                    style += 'color: var(--error); font-weight: 600; background-color: var(--error-light); border-radius: 4px; padding: 2px 6px;';
-                }
-                optionsBox.appendChild(el('p', { style: style },
-                    el('strong', { text: LETTERS[k] + ': ' }),
-                    document.createTextNode(opt)));
+                let cls = 'review-option';
+                if (q.answer.includes(k)) cls += ' review-correct';
+                else if (chosen.includes(k)) cls += ' review-wrong';
+                optionsBox.appendChild(el('p', { class: cls }, el('strong', { text: LETTERS[k] + ': ' }), document.createTextNode(opt)));
             });
 
             review.appendChild(el('div', { class: 'review-item-card ' + (ok ? 'is-correct' : 'is-incorrect') },
-                el('span', { class: 'review-status-badge', text: ok ? 'Verification Success' : 'Anomaly Flagged' }),
-                el('h3', { style: 'font-size:1.05rem; margin-bottom:10px;', text: `Question ${i + 1}: ${q.question}` }),
+                el('span', { class: 'review-status-badge', text: ok ? t('correct') : t('incorrect') }),
+                el('h3', { style: 'font-size:1.05rem; margin-bottom:10px;', text: t('questionN', { n: i + 1, q: q.question }) }),
                 optionsBox,
                 el('div', { class: 'explanation-box', style: 'margin-top:15px;' },
-                    el('h4', { style: 'font-size:0.95rem;', text: 'Rationale' }),
-                    el('p', { style: 'font-size:0.9rem;', text: q.explanation || '' }))
-            ));
+                    el('h4', { style: 'font-size:0.95rem;', text: t('explanation') }),
+                    el('p', { style: 'font-size:0.9rem;', text: q.explanation || '' }))));
         });
 
         const pct = Math.round((correctCount / state.items.length) * 100);
@@ -976,29 +1124,25 @@
         score.parentNode.appendChild(el('p', {
             id: 'exam-result-badge',
             style: 'font-size:1rem;font-weight:700;margin-top:8px;color:' + color,
-            text: passed ? `✅ PASS — Soglia ${threshold}% raggiunta` : `❌ FAIL — Soglia ${threshold}% non raggiunta`
+            text: t(passed ? 'pass' : 'fail', { t: threshold })
         }));
-        $('metric-raw-string').textContent =
-            `You correctly answered ${correctCount} out of ${state.items.length} questions.`;
+        $('metric-raw-string').textContent = t('scoreLine', { c: correctCount, n: state.items.length });
     }
 
     function returnToMainMenu() {
         const badge = $('exam-result-badge');
         if (badge) badge.remove();
-        show('main-dashboard');
+        show('dashboard');
         window.scrollTo(0, 0);
         renderDashboard();
     }
 
-    // ── Ripristino sessione interrotta ──────────────────────────────────────
+    // ── Resume an interrupted session ───────────────────────────────────────
     function offerResume() {
         let saved;
         try { saved = JSON.parse(localStorage.getItem(storeKey())); } catch (e) { return; }
         if (!saved || !Array.isArray(saved.items) || !saved.items.length) return;
-        if (!confirm('È stata trovata una sessione precedente non completata. Vuoi riprenderla?')) {
-            clearSession();
-            return;
-        }
+        if (!confirm(t('resume'))) { clearSession(); return; }
         state.items = saved.items;
         state.index = Math.min(saved.index || 0, saved.items.length - 1);
         state.selections = saved.selections || {};
@@ -1007,109 +1151,78 @@
         beginSession(saved.secondsLeft > 0 ? saved.secondsLeft : saved.items.length * cfg().timePerQuestionSec);
     }
 
-    // ── Caricamento dell'esame ──────────────────────────────────────────────
-    const msg = $('no-content-message');
-
+    // ── Loading ─────────────────────────────────────────────────────────────
     function validExamData(d) {
         return !!(d && d.config && Array.isArray(d.questions) && d.questions.length > 0 &&
             d.questions.every(q => q && q.topic && q.question && Array.isArray(q.options) && q.answer !== undefined));
     }
 
-    function startApp() {
-        clearInterval(state.timer);
-        state.items = [];
-        $('runtime-timer-box').classList.add('hidden');
+    function startApp(file) {
+        state.examFile = file;
         normalizeQuestions();
-
         document.title = cfg().examTitle || 'Exam Simulator';
         $('logo-exam-code').textContent = cfg().examCode || 'EXAM';
         $('logo-version').textContent = cfg().version || '';
-        $('dashboard-title').textContent = (cfg().examCode || 'Exam') + ' Exam Practice Repository';
-        $('dashboard-subtitle').textContent = cfg().subtitle || '';
-        msg.classList.add('hidden');
-        show('main-dashboard');
+        show('dashboard');
         renderDashboard();
         offerResume();
     }
 
-    function loadFromFile(file) {
-        const reader = new FileReader();
-        reader.onerror = () => alert('Impossibile leggere il file.');
-        reader.onload = () => {
-            const previous = window.ExamData;
-            try {
-                window.ExamData = undefined;
-                if (/\.json$/i.test(file.name)) window.ExamData = JSON.parse(reader.result);
-                else (0, eval)(reader.result); // file .js: assegna window.ExamData
-                if (!validExamData(window.ExamData)) throw new Error('Formato non valido: servono config e questions.');
-            } catch (e) {
-                window.ExamData = previous;
-                alert('Errore nel file "' + file.name + '": ' + e.message);
-                return;
-            }
-            startApp();
-        };
-        reader.readAsText(file);
-    }
-
-    function showLoadError(name) {
+    function showPicker(failedName) {
+        document.title = 'Exam Simulator';
+        $('logo-exam-code').textContent = 'EXAM';
+        $('logo-version').textContent = '';
         const body = $('no-content-body');
         body.textContent = '';
-        body.appendChild(el('h1', { style: 'font-size:1.5rem;margin-bottom:15px;color:var(--error);', text: 'Failed to load exam file' }));
-        body.appendChild(el('p', { style: 'color:var(--gray);' },
-            document.createTextNode('Could not load '),
-            el('strong', { text: name + '.js' }),
-            document.createTextNode('. Check the name, or load the file manually.')));
-        msg.classList.remove('hidden');
+        if (failedName) {
+            body.appendChild(el('h1', { style: 'font-size:1.5rem;margin-bottom:12px;color:var(--error);', text: t('loadFailedTitle') }));
+            body.appendChild(el('p', { style: 'color:var(--gray);', text: t('loadFailedText', { name: failedName + '.exam' }) }));
+        } else {
+            body.appendChild(el('h1', { style: 'font-size:1.5rem;margin-bottom:12px;', text: t('noExamTitle') }));
+            body.appendChild(el('p', { style: 'color:var(--gray);', text: t('noExamText') }));
+        }
+        show('picker');
+        renderExamLists();
     }
 
-    // Selettore degli esami (da exams.js)
-    function renderExamList() {
-        const box = $('exam-list');
-        box.textContent = '';
-        const catalog = window.ExamCatalog;
-        if (!Array.isArray(catalog) || !catalog.length) return;
-        box.appendChild(el('h3', { style: 'font-size:1.05rem;font-weight:600;margin-bottom:10px;text-align:center;', text: 'Esami disponibili' }));
-        catalog.forEach(item => {
-            const card = el('a', {
-                href: '?content=' + encodeURIComponent(item.file),
-                style: 'display:block;padding:14px 16px;margin-bottom:10px;border:1px solid var(--light-gray);border-radius:8px;text-decoration:none;color:var(--dark);'
-            },
-                el('div', { style: 'font-weight:700;color:var(--primary);', text: item.title }),
-                el('div', { style: 'font-size:0.9rem;color:var(--gray);margin-top:4px;', text: item.description || '' }));
-            box.appendChild(card);
-        });
+    // ── Language / theme ────────────────────────────────────────────────────
+    function rerender() {
+        applyStaticText();
+        renderTheme();
+        if (state.screen === 'picker') showPicker(state.failedName);
+        else if (state.screen === 'dashboard') renderDashboard();
+        else if (state.screen === 'runtime') { renderQuestion(); renderMatrix(); }
+        else if (state.screen === 'summary') renderSummary();
     }
 
     function bindControls() {
-        $('choose-exam-btn').addEventListener('click', () => {
-            clearInterval(state.timer);
-            window.location.href = window.location.pathname;
-        });
         $('start-btn').addEventListener('click', startExam);
         $('prev-btn').addEventListener('click', () => goTo(state.index - 1));
         $('session-action-trigger').addEventListener('click', nextQuestion);
         $('validate-btn').addEventListener('click', validateAnswer);
         $('submit-btn').addEventListener('click', submitExam);
         $('return-btn').addEventListener('click', returnToMainMenu);
-
-        const input = $('exam-file-input');
-        input.addEventListener('change', () => {
-            if (input.files && input.files[0]) loadFromFile(input.files[0]);
-            input.value = '';
+        $('lang-btn').addEventListener('click', () => {
+            lang = lang === 'en' ? 'it' : 'en';
+            writePref('exam_lang', lang);
+            rerender();
         });
-        document.querySelectorAll('.upload-exam-btn').forEach(b =>
-            b.addEventListener('click', () => input.click()));
+        $('theme-btn').addEventListener('click', () => {
+            const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            writePref('exam_theme', next);
+            renderTheme();
+        });
     }
 
-    // ── Avvio ───────────────────────────────────────────────────────────────
+    // ── Boot ────────────────────────────────────────────────────────────────
     bindControls();
-    renderExamList();
+    applyStaticText();
+    renderTheme();
     const contentName = new URLSearchParams(window.location.search).get('content');
-    if (validExamData(window.ExamData)) startApp();
-    else if (contentName) showLoadError(contentName);
-    else msg.classList.remove('hidden');
+    if (validExamData(window.ExamData)) startApp(contentName);
+    else { state.failedName = contentName && /^[\w.\-]+$/.test(contentName) ? contentName : null; showPicker(state.failedName); }
 })();
-    </script>
+</script>
 </body>
 </html>
