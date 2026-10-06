@@ -11,7 +11,7 @@ function pack(outDir) {
     build();
     fs.rmSync(outDir, { recursive: true, force: true });
     fs.mkdirSync(outDir, { recursive: true });
-    const files = ['exam.html', 'exams.js', 'sw.js', 'manifest.webmanifest', 'icon.svg'].concat(fs.readdirSync(ROOT).filter(f => f.endsWith('.exam')));
+    const files = ['exam.html', 'exams.js', 'sw.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'].concat(fs.readdirSync(ROOT).filter(f => f.endsWith('.exam')));
     files.forEach(f => fs.copyFileSync(path.join(ROOT, f), path.join(outDir, f)));
     fs.copyFileSync(path.join(ROOT, 'exam.html'), path.join(outDir, 'index.html'));
     fs.writeFileSync(path.join(outDir, '.nojekyll'), '');

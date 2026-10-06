@@ -91,7 +91,7 @@ module.exports = {
     },
 
     'full run of each bundled exam (single/multiple)': async ({ p, check, runAll, URL_BASE }) => {
-        for (const name of ['managedServices', 'v31', 'v31realtest']) {
+        for (const name of ['managedServices', 'v31', 'v31realtest', 'ai-realtest', 'cinema-realtest']) {
             await fresh(p, URL_BASE, name);
             const n = await runAll(p, 'all');
             const pct = await p.locator('#metric-percentage').innerText();

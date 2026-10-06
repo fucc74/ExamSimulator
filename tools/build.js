@@ -26,6 +26,8 @@ function build() {
     writeCatalogFile(catalog);
     let html = fs.readFileSync(path.join(SRC, 'template.html'), 'utf8');
     // function replacers: avoid "$&"-style special patterns in the inserted text
+    const dataUri = f => 'data:image/png;base64,' + fs.readFileSync(path.join(SRC, 'assets', f)).toString('base64');
+    html = html.replace('/*{{LOGO_96}}*/', () => dataUri('logo-96.png')).replace('/*{{LOGO_48}}*/', () => dataUri('logo-48.png'));
     html = html.replace('/*{{CSS}}*/', () => bundleCss());
     html = html.replace('/*{{CATALOG}}*/', () => 'window.ExamCatalogDefault = ' + JSON.stringify(catalog) + ';');
     html = html.replace('/*{{JS}}*/', () => bundleJs().replace(/<\/script/gi, '<\\/script'));
@@ -37,7 +39,7 @@ function build() {
 // Service worker: caches the app shell and every exam file so the simulator works offline.
 function writeServiceWorker(html, catalog) {
     const crypto = require('crypto');
-    const assets = ['./', 'exam.html', 'exams.js', 'manifest.webmanifest', 'icon.svg'].concat(catalog.map(e => e.file + '.exam'));
+    const assets = ['./', 'exam.html', 'exams.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'].concat(catalog.map(e => e.file + '.exam'));
     const hash = crypto.createHash('sha1').update(html);
     catalog.forEach(e => hash.update(fs.readFileSync(path.join(ROOT, e.file + '.exam'))));
     const version = hash.digest('hex').slice(0, 10);

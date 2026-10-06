@@ -1,0 +1,1237 @@
+// ExamSim exam file (format 2). Pure JSON inside ExamSim.register(...); validate with: node tools/validate-exam.js cinema-realtest.exam
+ExamSim.register({
+  "format": 2,
+  "id": "cinema-realtest",
+  "code": "CINE-80",
+  "title": "Cinema degli ultimi 50 anni — Test completo",
+  "description": "Ottanta domande sulla filmografia dal 1976 a oggi: premi e festival, registi, attori, blockbuster e franchise, animazione, cinema italiano, colonne sonore e industria. Mix di scelta singola e multipla, vero/falso, ordinamento, abbinamento, risposte numeriche e scenari.",
+  "version": "v1.0",
+  "settings": { "passThreshold": 70, "timePerQuestionSec": 83, "shuffleOptions": true },
+  "modes": [
+    {
+      "id": "real",
+      "name": {
+        "en": "Full test (80 questions, 110 minutes)",
+        "it": "Test completo (80 domande, 110 minuti)"
+      },
+      "selection": "random",
+      "exam": true,
+      "count": 80,
+      "timeSec": 6600,
+      "passThreshold": 70
+    },
+    {
+      "id": "standard",
+      "name": { "en": "Quick mock (20 questions)", "it": "Simulazione rapida (20 domande)" },
+      "selection": "balanced",
+      "count": 20
+    }
+  ],
+  "questions": [
+    {
+      "topic": "Premi e festival",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Quale film vinse l'Oscar come miglior film alla cerimonia del 1995 (film del 1994)?",
+      "options": [
+        "Forrest Gump, di Robert Zemeckis, con Tom Hanks",
+        "Quiz Show, di Robert Redford, con Ralph Fiennes e John Turturro",
+        "Quattro matrimoni e un funerale, di Mike Newell, con Hugh Grant",
+        "Pulp Fiction, di Quentin Tarantino, con John Travolta e Uma Thurman"
+      ],
+      "answer": [0],
+      "explanation": "Forrest Gump vinse 6 Oscar, tra cui miglior film, regia e attore protagonista; gli altri erano candidati.",
+      "id": 1
+    },
+    {
+      "topic": "Premi e festival",
+      "type": "single",
+      "difficulty": 2,
+      "text": "Quale film, premiato agli Oscar del 2020, è stato il primo film non in lingua inglese a vincere come miglior film?",
+      "options": [
+        "Roma, di Alfonso Cuarón, in spagnolo e mixteco, candidato nel 2019",
+        "Parasite, di Bong Joon-ho, in lingua coreana",
+        "La tigre e il dragone, di Ang Lee, in mandarino, candidato nel 2001",
+        "La vita è bella, di Roberto Benigni, in italiano, premiato nel 1999 per altre categorie"
+      ],
+      "answer": [1],
+      "explanation": "Parasite ha vinto 4 Oscar nel 2020, compreso miglior film; gli altri film non in inglese erano stati solo candidati.",
+      "id": 2
+    },
+    {
+      "topic": "Premi e festival",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Quale film vinse la Palma d'Oro al Festival di Cannes del 1994?",
+      "options": [
+        "Parasite, di Bong Joon-ho, vincitore della Palma d'Oro nel 2019",
+        "Pulp Fiction, di Quentin Tarantino",
+        "Il pianista, di Roman Polanski, vincitore della Palma d'Oro nel 2002",
+        "La stanza del figlio, di Nanni Moretti, vincitore della Palma d'Oro nel 2001"
+      ],
+      "answer": [1],
+      "explanation": "Pulp Fiction vinse la Palma d'Oro nel 1994; gli altri film l'hanno vinta in anni diversi.",
+      "id": 3
+    },
+    {
+      "topic": "Premi e festival",
+      "type": "single",
+      "difficulty": 2,
+      "text": "Chi è stata la prima donna a vincere l'Oscar come miglior regista?",
+      "options": [
+        "Sofia Coppola, candidata per Lost in Translation alla cerimonia del 2004",
+        "Kathryn Bigelow, premiata per The Hurt Locker alla cerimonia del 2010",
+        "Jane Campion, candidata per Lezioni di piano alla cerimonia del 1994",
+        "Greta Gerwig, candidata per Lady Bird alla cerimonia del 2018"
+      ],
+      "answer": [1],
+      "explanation": "Kathryn Bigelow è stata la prima donna a ricevere l'Oscar per la regia (The Hurt Locker, 2010).",
+      "id": 4
+    },
+    {
+      "topic": "Premi e festival",
+      "type": "single",
+      "difficulty": 2,
+      "text": "Quale film vinse 11 Oscar alla cerimonia del 2004, pareggiando il record di Ben-Hur e Titanic?",
+      "options": [
+        "Master and Commander, di Peter Weir, candidato a 10 premi e vincitore di 2",
+        "Il Signore degli Anelli: La compagnia dell'anello, candidato a 13 premi e vincitore di 4",
+        "Il Signore degli Anelli: Il ritorno del re, di Peter Jackson",
+        "Il Signore degli Anelli: Le due torri, candidato a 6 premi e vincitore di 2"
+      ],
+      "answer": [2],
+      "explanation": "Il ritorno del re vinse tutti gli 11 Oscar per cui era candidato.",
+      "id": 5
+    },
+    {
+      "topic": "Premi e festival",
+      "type": "single",
+      "difficulty": 3,
+      "text": "Quale fu il primo film distribuito da un servizio di streaming a vincere l'Oscar come miglior film?",
+      "options": [
+        "Il potere del cane, di Jane Campion, distribuito da Netflix e candidato nel 2022",
+        "CODA - I segni del cuore, distribuito da Apple TV+",
+        "Roma, di Alfonso Cuarón, distribuito da Netflix e candidato nel 2019",
+        "The Irishman, di Martin Scorsese, distribuito da Netflix e candidato nel 2020"
+      ],
+      "answer": [1],
+      "explanation": "CODA vinse nel 2022: fu il primo film di una piattaforma streaming a conquistare il premio principale.",
+      "id": 6
+    },
+    {
+      "topic": "Registi e autori",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Quale regista diresse nello stesso anno, il 1993, sia Jurassic Park sia Schindler's List?",
+      "options": [
+        "George Lucas, creatore e regista del primo Star Wars, uscito nel 1977",
+        "Robert Zemeckis, autore di Ritorno al futuro e Chi ha incastrato Roger Rabbit",
+        "Steven Spielberg, autore anche di Lo squalo e I predatori dell'arca perduta",
+        "Ridley Scott, autore di Alien e Blade Runner, usciti tra il 1979 e il 1982"
+      ],
+      "answer": [2],
+      "explanation": "Spielberg girò Jurassic Park e, subito dopo, Schindler's List (premiato con 7 Oscar).",
+      "id": 7
+    },
+    {
+      "topic": "Registi e autori",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Quale regista diresse sia Blade Runner (1982) sia Il gladiatore (2000)?",
+      "options": [
+        "Ridley Scott, regista britannico",
+        "Denis Villeneuve, regista canadese di Arrival e Dune",
+        "Christopher Nolan, regista britannico di Inception e Interstellar",
+        "James Cameron, regista canadese di Terminator e Titanic"
+      ],
+      "answer": [0],
+      "explanation": "Entrambi i film sono di Ridley Scott; Il gladiatore vinse l'Oscar per il miglior film nel 2001.",
+      "id": 8
+    },
+    {
+      "topic": "Registi e autori",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Quale regista ha diretto Memento, Inception e Oppenheimer?",
+      "options": [
+        "David Fincher, autore anche di Se7en e The Social Network",
+        "Quentin Tarantino, autore anche di Le iene e Kill Bill",
+        "Christopher Nolan, regista britannico",
+        "Martin Scorsese, autore anche di Taxi Driver e Quei bravi ragazzi"
+      ],
+      "answer": [2],
+      "explanation": "Nolan: Memento (2000), Inception (2010), Oppenheimer (2023).",
+      "id": 9
+    },
+    {
+      "topic": "Registi e autori",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Quale regista sudcoreano ha diretto Parasite?",
+      "options": [
+        "Kim Ki-duk, autore di Primavera, estate, autunno, inverno… e ancora primavera",
+        "Park Chan-wook, autore di Old Boy e Mr. Vendetta",
+        "Lee Chang-dong, autore di Poetry e Burning",
+        "Bong Joon-ho, autore anche di Memorie di un assassino e Snowpiercer"
+      ],
+      "answer": [3],
+      "explanation": "Parasite (2019) è di Bong Joon-ho.",
+      "id": 10
+    },
+    {
+      "topic": "Registi e autori",
+      "type": "single",
+      "difficulty": 2,
+      "text": "Chi ha diretto Il silenzio degli innocenti (1991)?",
+      "options": [
+        "Jonathan Demme, che diresse anche Philadelphia",
+        "Michael Mann, autore di Heat - La sfida e Insider",
+        "Ridley Scott, autore di Alien e Thelma & Louise",
+        "David Fincher, autore di Se7en e Fight Club"
+      ],
+      "answer": [0],
+      "explanation": "Jonathan Demme vinse l'Oscar per la regia, e il film vinse i cinque premi principali.",
+      "id": 11
+    },
+    {
+      "topic": "Registi e autori",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Chi ha diretto Fight Club (1999)?",
+      "options": [
+        "Darren Aronofsky, autore di Requiem for a Dream e Il cigno nero",
+        "Danny Boyle, autore di Trainspotting e The Beach",
+        "David Fincher, autore anche di Se7en e The Social Network",
+        "Sam Mendes, autore di American Beauty e Revolutionary Road"
+      ],
+      "answer": [2],
+      "explanation": "Fight Club è di David Fincher, tratto dal romanzo di Chuck Palahniuk.",
+      "id": 12
+    },
+    {
+      "topic": "Registi e autori",
+      "type": "single",
+      "difficulty": 2,
+      "text": "Chi diresse Il pianista (2002), vincitore della Palma d'Oro e dell'Oscar per la regia?",
+      "options": [
+        "Rob Marshall, che quell'anno presentò il celebre musical Chicago",
+        "Roman Polanski, autore anche di Chinatown e Rosemary's Baby",
+        "Martin Scorsese, che quell'anno presentò Gangs of New York con DiCaprio",
+        "Peter Weir, autore di The Truman Show e di L'attimo fuggente"
+      ],
+      "answer": [1],
+      "explanation": "Il pianista è di Roman Polanski; Adrien Brody vinse l'Oscar come attore protagonista.",
+      "id": 13
+    },
+    {
+      "topic": "Attori e interpreti",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Quale attore vinse l'Oscar come miglior protagonista per Philadelphia e, l'anno seguente, per Forrest Gump?",
+      "options": [
+        "Daniel Day-Lewis, vincitore di tre Oscar come migliore attore",
+        "Tom Hanks",
+        "Dustin Hoffman, premiato per Kramer contro Kramer e Rain Man",
+        "Jack Nicholson, vincitore di due Oscar come protagonista"
+      ],
+      "answer": [1],
+      "explanation": "Tom Hanks vinse due Oscar consecutivi come miglior attore (1994 e 1995).",
+      "id": 14
+    },
+    {
+      "topic": "Attori e interpreti",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Quale attore ricevette un Oscar postumo come non protagonista per aver interpretato il Joker ne Il cavaliere oscuro (2008)?",
+      "options": [
+        "Jack Nicholson, che interpretò il Joker nel Batman del 1989 di Tim Burton",
+        "Joaquin Phoenix, che interpretò il Joker nel film del 2019 e vinse come protagonista",
+        "Heath Ledger, scomparso nel gennaio 2008",
+        "Jared Leto, che interpretò il Joker in Suicide Squad e vinse per Dallas Buyers Club"
+      ],
+      "answer": [2],
+      "explanation": "Heath Ledger morì prima dell'uscita del film; l'Oscar fu ritirato dalla famiglia nel 2009.",
+      "id": 15
+    },
+    {
+      "topic": "Attori e interpreti",
+      "type": "single",
+      "difficulty": 2,
+      "text": "Quale attore è l'unico ad aver vinto tre Oscar come miglior attore protagonista?",
+      "options": [
+        "Daniel Day-Lewis, premiato per Il mio piede sinistro, Il petroliere e Lincoln",
+        "Sean Penn, premiato per Mystic River e per Milk",
+        "Dustin Hoffman, premiato per Kramer contro Kramer e per Rain Man",
+        "Jack Nicholson, che ne ha vinti due da protagonista e uno da non protagonista"
+      ],
+      "answer": [0],
+      "explanation": "Daniel Day-Lewis è l'unico con tre statuette da protagonista.",
+      "id": 16
+    },
+    {
+      "topic": "Attori e interpreti",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Chi interpretò Hannibal Lecter ne Il silenzio degli innocenti (1991)?",
+      "options": [
+        "Anthony Hopkins, che per questo ruolo vinse l'Oscar",
+        "Mads Mikkelsen, che lo interpretò nella serie televisiva Hannibal",
+        "Brian Cox, che lo interpretò in Manhunter - Frammenti di un omicidio",
+        "Gaspard Ulliel, che lo interpretò in Hannibal Lecter - Le origini del male"
+      ],
+      "answer": [0],
+      "explanation": "Anthony Hopkins vinse l'Oscar come miglior attore protagonista pur restando in scena meno di venti minuti.",
+      "id": 17
+    },
+    {
+      "topic": "Blockbuster e franchise",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Quale film del 2008, diretto da Jon Favreau, diede inizio al Marvel Cinematic Universe?",
+      "options": [
+        "Iron Man, con Robert Downey Jr.",
+        "Captain America - Il primo Vendicatore, uscito nel 2011",
+        "L'incredibile Hulk, uscito nello stesso 2008 con Edward Norton",
+        "Thor, diretto da Kenneth Branagh e uscito nel 2011"
+      ],
+      "answer": [0],
+      "explanation": "Iron Man (2008) è il primo film dell'MCU.",
+      "id": 18
+    },
+    {
+      "topic": "Blockbuster e franchise",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Quale regista ha diretto sia Titanic sia Avatar?",
+      "options": [
+        "Peter Jackson, regista neozelandese di King Kong e della trilogia de Il Signore degli Anelli",
+        "Ridley Scott, regista britannico di Alien e Il gladiatore",
+        "Steven Spielberg, regista statunitense di E.T. e Jurassic Park",
+        "James Cameron, regista canadese"
+      ],
+      "answer": [3],
+      "explanation": "James Cameron firmò i due film che hanno guidato a lungo la classifica degli incassi mondiali.",
+      "id": 19
+    },
+    {
+      "topic": "Blockbuster e franchise",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Chi ha creato e diretto il primo film di Star Wars, uscito nel 1977?",
+      "options": [
+        "Steven Spielberg, che nel 1981 diresse I predatori dell'arca perduta",
+        "Francis Ford Coppola, autore de Il padrino e Apocalypse Now",
+        "Brian De Palma, autore di Carrie - Lo sguardo di Satana e Scarface",
+        "George Lucas, già autore di American Graffiti"
+      ],
+      "answer": [3],
+      "explanation": "Star Wars (1977) è di George Lucas, che ne scrisse anche la storia.",
+      "id": 20
+    },
+    {
+      "topic": "Blockbuster e franchise",
+      "type": "single",
+      "difficulty": 1,
+      "text": "In quale film del 1985, diretto da Robert Zemeckis, Marty McFly viaggia nel tempo a bordo di una DeLorean?",
+      "options": [
+        "Gremlins, di Joe Dante, uscito nel 1984",
+        "Ghostbusters - Acchiappafantasmi, di Ivan Reitman, uscito nel 1984",
+        "I Goonies, di Richard Donner, uscito nel 1985",
+        "Ritorno al futuro, con Michael J. Fox e Christopher Lloyd"
+      ],
+      "answer": [3],
+      "explanation": "Ritorno al futuro (1985) è il film con Marty McFly e Doc Brown.",
+      "id": 21
+    },
+    {
+      "topic": "Animazione",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Quale film del 1995 è considerato il primo lungometraggio interamente realizzato in animazione digitale?",
+      "options": [
+        "Alla ricerca di Nemo, di Pixar, uscito nel 2003",
+        "Shrek, di DreamWorks Animation, uscito nel 2001",
+        "Toy Story - Il mondo dei giocattoli, diretto da John Lasseter",
+        "Il re leone, di Walt Disney, in animazione tradizionale del 1994"
+      ],
+      "answer": [2],
+      "explanation": "Toy Story (Pixar, 1995) fu il primo lungometraggio interamente in computer grafica.",
+      "id": 22
+    },
+    {
+      "topic": "Animazione",
+      "type": "single",
+      "difficulty": 2,
+      "text": "Quale film di Hayao Miyazaki vinse l'Oscar come miglior film d'animazione nel 2003?",
+      "options": [
+        "La città incantata, uscita in Giappone nel 2001",
+        "Il castello errante di Howl, candidato all'Oscar nel 2006",
+        "Il vento si alza, candidato all'Oscar nel 2014",
+        "Il ragazzo e l'airone, vincitore dell'Oscar nel 2024"
+      ],
+      "answer": [0],
+      "explanation": "La città incantata vinse l'Oscar (cerimonia 2003) e l'Orso d'oro a Berlino.",
+      "id": 23
+    },
+    {
+      "topic": "Animazione",
+      "type": "single",
+      "difficulty": 2,
+      "text": "Quale studio di animazione produsse Shrek (2001)?",
+      "options": [
+        "DreamWorks Animation, nata dalla DreamWorks SKG fondata nel 1994",
+        "Studio Ghibli, fondato da Hayao Miyazaki e Isao Takahata",
+        "Pixar Animation Studios, autori di Toy Story e Alla ricerca di Nemo",
+        "Walt Disney Animation Studios, autori di Frozen e Il re leone"
+      ],
+      "answer": [0],
+      "explanation": "Shrek è un film DreamWorks Animation e vinse il primo Oscar per il miglior film d'animazione.",
+      "id": 24
+    },
+    {
+      "topic": "Cinema italiano",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Chi ha diretto La vita è bella (1997)?",
+      "options": [
+        "Gabriele Salvatores, autore di Mediterraneo e Io non ho paura",
+        "Massimo Troisi, interprete e cosceneggiatore de Il postino, diretto da Michael Radford",
+        "Giuseppe Tornatore, autore di Nuovo Cinema Paradiso e Malèna",
+        "Roberto Benigni, che lo interpretò e vinse l'Oscar come miglior attore"
+      ],
+      "answer": [3],
+      "explanation": "La vita è bella vinse tre Oscar nel 1999 (miglior film straniero, attore e colonna sonora).",
+      "id": 25
+    },
+    {
+      "topic": "Cinema italiano",
+      "type": "single",
+      "difficulty": 2,
+      "text": "Quale film di Paolo Sorrentino vinse l'Oscar come miglior film straniero nel 2014?",
+      "options": [
+        "La grande bellezza, con Toni Servillo",
+        "Il divo, premio della giuria a Cannes nel 2008",
+        "L'uomo in più, suo esordio alla regia nel 2001",
+        "Youth - La giovinezza, uscito nel 2015"
+      ],
+      "answer": [0],
+      "explanation": "La grande bellezza (2013) vinse l'Oscar, il Golden Globe e il BAFTA come miglior film straniero.",
+      "id": 26
+    },
+    {
+      "topic": "Cinema italiano",
+      "type": "single",
+      "difficulty": 2,
+      "text": "Quale regista italiano diresse L'ultimo imperatore (1987), vincitore di nove Oscar?",
+      "options": [
+        "Gabriele Salvatores, autore di Mediterraneo, Oscar come miglior film straniero 1992",
+        "Giuseppe Tornatore, autore di Nuovo Cinema Paradiso e La leggenda del pianista sull'oceano",
+        "Bernardo Bertolucci, autore anche di Novecento",
+        "Nanni Moretti, autore di Caro diario e Palma d'Oro nel 2001 con La stanza del figlio"
+      ],
+      "answer": [2],
+      "explanation": "L'ultimo imperatore vinse nove Oscar su nove candidature, regia compresa.",
+      "id": 27
+    },
+    {
+      "topic": "Colonne sonore",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Chi ha composto la colonna sonora originale di Star Wars (1977)?",
+      "options": [
+        "Vangelis, compositore greco di Momenti di gloria e Blade Runner",
+        "Howard Shore, compositore canadese de Il Signore degli Anelli",
+        "Hans Zimmer, compositore tedesco di Il re leone e Inception",
+        "John Williams, compositore statunitense"
+      ],
+      "answer": [3],
+      "explanation": "John Williams vinse l'Oscar per la colonna sonora di Star Wars.",
+      "id": 28
+    },
+    {
+      "topic": "Colonne sonore",
+      "type": "single",
+      "difficulty": 3,
+      "text": "Per quale film Ennio Morricone vinse nel 2016 il suo primo Oscar non onorario?",
+      "options": [
+        "Gli intoccabili, di Brian De Palma, candidato nel 1988",
+        "The Hateful Eight, di Quentin Tarantino",
+        "Mission, di Roland Joffé, candidato nel 1987",
+        "Malèna, di Giuseppe Tornatore, candidato nel 2001"
+      ],
+      "answer": [1],
+      "explanation": "Morricone ebbe l'Oscar onorario nel 2007 e quello per la miglior colonna sonora originale con The Hateful Eight.",
+      "id": 29
+    },
+    {
+      "topic": "Tecnologia e industria",
+      "type": "single",
+      "difficulty": 3,
+      "text": "Quale film del 2009 fu il primo a superare i due miliardi di dollari di incassi mondiali?",
+      "options": [
+        "Avengers: Endgame, che nel 2019 incassò circa 2,8 miliardi di dollari",
+        "Star Wars: Il risveglio della Forza, che all'inizio del 2016 superò i due miliardi di dollari",
+        "Titanic, che nel 1998 fu il primo a superare il miliardo di dollari",
+        "Avatar, di James Cameron"
+      ],
+      "answer": [3],
+      "explanation": "Avatar (2009) fu il primo film a superare i 2 miliardi di dollari al botteghino.",
+      "id": 30
+    },
+    {
+      "topic": "Premi e festival",
+      "type": "multiple",
+      "difficulty": 2,
+      "text": "Quali di questi film hanno vinto la Palma d'Oro al Festival di Cannes? Seleziona i tre corretti.",
+      "options": [
+        "La stanza del figlio, di Nanni Moretti, premiato nel 2001",
+        "Titanic, di James Cameron, uscito nel 1997",
+        "Il gladiatore, di Ridley Scott, uscito nel 2000",
+        "Pulp Fiction, di Quentin Tarantino, premiato nel 1994",
+        "Parasite, di Bong Joon-ho, premiato nel 2019"
+      ],
+      "answer": [0, 3, 4],
+      "explanation": "Il gladiatore e Titanic vinsero molti Oscar, ma non la Palma d'Oro.",
+      "id": 31
+    },
+    {
+      "topic": "Registi e autori",
+      "type": "multiple",
+      "difficulty": 2,
+      "text": "Quali di questi film sono stati diretti da Christopher Nolan? Seleziona i tre corretti.",
+      "options": [
+        "Dunkirk, uscito nel 2017",
+        "Gravity, uscito nel 2013 e diretto da un regista messicano",
+        "Interstellar, uscito nel 2014",
+        "Tenet, uscito nel 2020",
+        "Dune, uscito nel 2021 e diretto da un altro regista canadese"
+      ],
+      "answer": [0, 2, 3],
+      "explanation": "Dune è di Denis Villeneuve e Gravity di Alfonso Cuarón.",
+      "id": 32
+    },
+    {
+      "topic": "Premi e festival",
+      "type": "multiple",
+      "difficulty": 2,
+      "text": "Quali di questi film hanno vinto l'Oscar come miglior film? Seleziona i tre corretti.",
+      "options": [
+        "Titanic, premiato nel 1998",
+        "Il gladiatore, premiato nel 2001",
+        "Avatar, candidato nel 2010 ma sconfitto",
+        "Pulp Fiction, candidato nel 1995 ma sconfitto",
+        "Il Signore degli Anelli: Il ritorno del re, premiato nel 2004"
+      ],
+      "answer": [0, 1, 4],
+      "explanation": "Pulp Fiction e Avatar furono candidati senza vincere come miglior film.",
+      "id": 33
+    },
+    {
+      "topic": "Blockbuster e franchise",
+      "type": "multiple",
+      "difficulty": 1,
+      "text": "Quali di questi film fanno parte del Marvel Cinematic Universe? Seleziona i tre corretti.",
+      "options": [
+        "Il cavaliere oscuro, della Warner Bros. e legato ai fumetti DC",
+        "Man of Steel, della Warner Bros. e legato ai fumetti DC",
+        "Iron Man, uscito nel 2008",
+        "Black Panther, uscito nel 2018",
+        "Doctor Strange, uscito nel 2016"
+      ],
+      "answer": [2, 3, 4],
+      "explanation": "Il cavaliere oscuro e Man of Steel sono film DC.",
+      "id": 34
+    },
+    {
+      "topic": "Animazione",
+      "type": "multiple",
+      "difficulty": 1,
+      "text": "Quali di questi film sono stati prodotti da Pixar? Seleziona i tre corretti.",
+      "options": [
+        "Up, uscito nel 2009",
+        "Shrek, prodotto da DreamWorks Animation nel 2001",
+        "Inside Out, uscito nel 2015",
+        "Toy Story, uscito nel 1995",
+        "Frozen, prodotto dai Walt Disney Animation Studios nel 2013"
+      ],
+      "answer": [0, 2, 3],
+      "explanation": "Frozen è dei Walt Disney Animation Studios, Shrek di DreamWorks.",
+      "id": 35
+    },
+    {
+      "topic": "Cinema italiano",
+      "type": "multiple",
+      "difficulty": 3,
+      "text": "Quali di questi film italiani hanno vinto l'Oscar come miglior film straniero? Seleziona i tre corretti.",
+      "options": [
+        "Il postino, candidato a cinque Oscar e premiato solo per la colonna sonora",
+        "Nuovo Cinema Paradiso, di Giuseppe Tornatore",
+        "La stanza del figlio, di Nanni Moretti, Palma d'Oro a Cannes ma senza Oscar",
+        "La vita è bella, di Roberto Benigni",
+        "La grande bellezza, di Paolo Sorrentino"
+      ],
+      "answer": [1, 3, 4],
+      "explanation": "Il postino e La stanza del figlio non hanno vinto come miglior film straniero.",
+      "id": 36
+    },
+    {
+      "topic": "Premi e festival",
+      "type": "multiple",
+      "difficulty": 3,
+      "text": "Quali di queste registe hanno vinto l'Oscar come miglior regista? Seleziona le tre corrette.",
+      "options": [
+        "Greta Gerwig, candidata come regista per Lady Bird ma mai premiata",
+        "Jane Campion, per Il potere del cane",
+        "Sofia Coppola, candidata per Lost in Translation e premiata per la sceneggiatura",
+        "Chloé Zhao, per Nomadland",
+        "Kathryn Bigelow, per The Hurt Locker"
+      ],
+      "answer": [1, 3, 4],
+      "explanation": "Gerwig e Sofia Coppola sono state candidate alla regia senza vincere.",
+      "id": 37
+    },
+    {
+      "topic": "Blockbuster e franchise",
+      "type": "multiple",
+      "difficulty": 2,
+      "text": "Quali di questi attori hanno interpretato James Bond in un film della serie ufficiale? Seleziona i tre corretti.",
+      "options": [
+        "Daniel Craig, protagonista di Casino Royale",
+        "Clive Owen, spesso accostato al ruolo ma mai scelto",
+        "Pierce Brosnan, protagonista di GoldenEye",
+        "Hugh Grant, noto per commedie come Notting Hill",
+        "Timothy Dalton, protagonista di 007 - Zona pericolo"
+      ],
+      "answer": [0, 2, 4],
+      "explanation": "Hugh Grant e Clive Owen non hanno mai interpretato Bond.",
+      "id": 38
+    },
+    {
+      "topic": "Colonne sonore",
+      "type": "multiple",
+      "difficulty": 2,
+      "text": "Quali di queste colonne sonore sono state composte da Hans Zimmer? Seleziona le tre corrette.",
+      "options": [
+        "Star Wars, composta da un altro compositore statunitense",
+        "Jurassic Park, composta da un altro compositore statunitense",
+        "Inception, diretto da Christopher Nolan",
+        "Interstellar, diretto da Christopher Nolan",
+        "Il re leone, premiata con l'Oscar"
+      ],
+      "answer": [2, 3, 4],
+      "explanation": "Star Wars e Jurassic Park sono di John Williams.",
+      "id": 39
+    },
+    {
+      "topic": "Colonne sonore",
+      "type": "multiple",
+      "difficulty": 2,
+      "text": "Quali di queste colonne sonore sono state composte da John Williams? Seleziona le tre corrette.",
+      "options": [
+        "Schindler's List",
+        "Il gladiatore, composta da Hans Zimmer con Lisa Gerrard",
+        "E.T. l'extra-terrestre",
+        "Il Signore degli Anelli, composta da Howard Shore",
+        "Jurassic Park"
+      ],
+      "answer": [0, 2, 4],
+      "explanation": "Il gladiatore è di Zimmer e Gerrard; Il Signore degli Anelli è di Howard Shore.",
+      "id": 40
+    },
+    {
+      "topic": "Registi e autori",
+      "type": "multiple",
+      "difficulty": 2,
+      "text": "Quali di questi film ha diretto Steven Spielberg? Seleziona i tre corretti.",
+      "options": [
+        "Lincoln, uscito nel 2012",
+        "Salvate il soldato Ryan, uscito nel 1998",
+        "Terminator 2, uscito nel 1991 e diretto da James Cameron",
+        "Minority Report, uscito nel 2002",
+        "Atto di forza, uscito nel 1990 e diretto da Paul Verhoeven"
+      ],
+      "answer": [0, 1, 3],
+      "explanation": "Atto di forza è di Verhoeven e Terminator 2 di Cameron.",
+      "id": 41
+    },
+    {
+      "topic": "Animazione",
+      "type": "multiple",
+      "difficulty": 3,
+      "text": "Quali di questi film hanno vinto l'Oscar come miglior film d'animazione? Seleziona i tre corretti.",
+      "options": [
+        "Il ragazzo e l'airone, premiato nel 2024",
+        "Kung Fu Panda, candidato nel 2009 ma battuto da WALL-E",
+        "Cars, candidato nel 2007 ma battuto da Happy Feet",
+        "La città incantata, premiato nel 2003",
+        "Up, premiato nel 2010"
+      ],
+      "answer": [0, 3, 4],
+      "explanation": "Cars e Kung Fu Panda furono solo candidati.",
+      "id": 42
+    },
+    {
+      "topic": "Premi e festival",
+      "type": "truefalse",
+      "difficulty": 1,
+      "text": "Titanic (1997) ha vinto 11 Oscar.",
+      "answer": true,
+      "explanation": "Pareggiò il record di Ben-Hur (1959).",
+      "id": 43
+    },
+    {
+      "topic": "Registi e autori",
+      "type": "truefalse",
+      "difficulty": 1,
+      "text": "Avatar (2009) è stato diretto da Steven Spielberg.",
+      "answer": false,
+      "explanation": "Avatar è di James Cameron.",
+      "id": 44
+    },
+    {
+      "topic": "Premi e festival",
+      "type": "truefalse",
+      "difficulty": 2,
+      "text": "Parasite ha vinto sia la Palma d'Oro a Cannes sia l'Oscar come miglior film.",
+      "answer": true,
+      "explanation": "Palma d'Oro 2019 e Oscar come miglior film 2020.",
+      "id": 45
+    },
+    {
+      "topic": "Cinema italiano",
+      "type": "truefalse",
+      "difficulty": 3,
+      "text": "La vita è bella di Roberto Benigni ha vinto l'Oscar come miglior film (non soltanto come miglior film straniero).",
+      "answer": false,
+      "explanation": "Vinse miglior film straniero, miglior attore e miglior colonna sonora, ma non il premio principale.",
+      "id": 46
+    },
+    {
+      "topic": "Blockbuster e franchise",
+      "type": "truefalse",
+      "difficulty": 2,
+      "text": "Daniel Craig ha interpretato James Bond in cinque film.",
+      "answer": true,
+      "explanation": "Casino Royale, Quantum of Solace, Skyfall, Spectre e No Time to Die.",
+      "id": 47
+    },
+    {
+      "topic": "Animazione",
+      "type": "truefalse",
+      "difficulty": 1,
+      "text": "Toy Story è stato prodotto da Pixar e distribuito da Disney.",
+      "answer": true,
+      "explanation": "Fu il primo film Pixar.",
+      "id": 48
+    },
+    {
+      "topic": "Premi e festival",
+      "type": "truefalse",
+      "difficulty": 2,
+      "text": "E.T. l'extra-terrestre (1982) ha vinto l'Oscar come miglior film.",
+      "answer": false,
+      "explanation": "Quell'anno vinse Gandhi; E.T. ottenne quattro Oscar tecnici e musicali.",
+      "id": 49
+    },
+    {
+      "topic": "Premi e festival",
+      "type": "truefalse",
+      "difficulty": 2,
+      "text": "Il Signore degli Anelli: Il ritorno del re ha vinto tutti gli 11 Oscar per cui era candidato.",
+      "answer": true,
+      "explanation": "Undici candidature, undici statuette.",
+      "id": 50
+    },
+    {
+      "topic": "Registi e autori",
+      "type": "truefalse",
+      "difficulty": 1,
+      "text": "Quentin Tarantino ha diretto Le iene (Reservoir Dogs).",
+      "answer": true,
+      "explanation": "È il suo esordio, del 1992.",
+      "id": 51
+    },
+    {
+      "topic": "Attori e interpreti",
+      "type": "truefalse",
+      "difficulty": 1,
+      "text": "Heath Ledger ritirò di persona l'Oscar per Il cavaliere oscuro.",
+      "answer": false,
+      "explanation": "Il premio fu postumo: l'attore era morto nel gennaio 2008.",
+      "id": 52
+    },
+    {
+      "topic": "Premi e festival",
+      "type": "truefalse",
+      "difficulty": 1,
+      "text": "Oppenheimer (2023) ha vinto l'Oscar come miglior film.",
+      "answer": true,
+      "explanation": "Ottenne 7 Oscar nella cerimonia del 2024.",
+      "id": 53
+    },
+    {
+      "topic": "Registi e autori",
+      "type": "truefalse",
+      "difficulty": 2,
+      "text": "Il film 1917 (2019) è stato diretto da Sam Mendes.",
+      "answer": true,
+      "explanation": "È costruito per sembrare quasi un unico piano sequenza.",
+      "id": 54
+    },
+    {
+      "topic": "Blockbuster e franchise",
+      "type": "ordering",
+      "difficulty": 2,
+      "text": "Metti in ordine cronologico, dal più vecchio al più recente, questi film di fantascienza.",
+      "items": [
+        "Star Wars (1977)",
+        "Blade Runner (1982)",
+        "Matrix (1999)",
+        "Avatar (2009)",
+        "Dune di Denis Villeneuve (2021)"
+      ],
+      "explanation": "Dal 1977 al 2021.",
+      "id": 55
+    },
+    {
+      "topic": "Premi e festival",
+      "type": "ordering",
+      "difficulty": 2,
+      "text": "Ordina cronologicamente questi vincitori dell'Oscar come miglior film in base all'anno di uscita.",
+      "items": [
+        "Rocky (1976)",
+        "Platoon (1986)",
+        "Forrest Gump (1994)",
+        "The Departed - Il bene e il male (2006)",
+        "Parasite (2019)"
+      ],
+      "explanation": "Tutti vincitori dell'Oscar come miglior film.",
+      "id": 56
+    },
+    {
+      "topic": "Animazione",
+      "type": "ordering",
+      "difficulty": 2,
+      "text": "Metti in ordine cronologico questi film Pixar.",
+      "items": ["Toy Story (1995)", "Alla ricerca di Nemo (2003)", "WALL-E (2008)", "Inside Out (2015)"],
+      "explanation": "Dal primo film Pixar a Inside Out.",
+      "id": 57
+    },
+    {
+      "topic": "Registi e autori",
+      "type": "ordering",
+      "difficulty": 2,
+      "text": "Ordina cronologicamente questi film di Christopher Nolan.",
+      "items": [
+        "Memento (2000)",
+        "Il cavaliere oscuro (2008)",
+        "Inception (2010)",
+        "Interstellar (2014)",
+        "Oppenheimer (2023)"
+      ],
+      "explanation": "Tutti diretti da Nolan.",
+      "id": 58
+    },
+    {
+      "topic": "Registi e autori",
+      "type": "ordering",
+      "difficulty": 3,
+      "text": "Ordina cronologicamente questi film di Steven Spielberg.",
+      "items": [
+        "I predatori dell'arca perduta (1981)",
+        "Schindler's List (1993)",
+        "Salvate il soldato Ryan (1998)",
+        "Minority Report (2002)",
+        "Lincoln (2012)"
+      ],
+      "explanation": "Dal 1981 al 2012.",
+      "id": 59
+    },
+    {
+      "topic": "Blockbuster e franchise",
+      "type": "ordering",
+      "difficulty": 3,
+      "text": "Ordina gli attori che hanno interpretato James Bond in base al film d'esordio nel ruolo, dal primo all'ultimo.",
+      "items": ["Roger Moore", "Timothy Dalton", "Pierce Brosnan", "Daniel Craig"],
+      "explanation": "Moore dal 1973, Dalton dal 1987, Brosnan dal 1995, Craig dal 2006.",
+      "id": 60
+    },
+    {
+      "topic": "Registi e autori",
+      "type": "matching",
+      "difficulty": 1,
+      "text": "Abbina ogni film al suo regista.",
+      "pairs": [
+        { "left": "Pulp Fiction", "right": "Quentin Tarantino" },
+        { "left": "Schindler's List", "right": "Steven Spielberg" },
+        { "left": "Inception", "right": "Christopher Nolan" },
+        { "left": "Parasite", "right": "Bong Joon-ho" },
+        { "left": "Il gladiatore", "right": "Ridley Scott" }
+      ],
+      "explanation": "Cinque film, cinque autori.",
+      "id": 61
+    },
+    {
+      "topic": "Attori e interpreti",
+      "type": "matching",
+      "difficulty": 2,
+      "text": "Abbina ogni film all'attore protagonista.",
+      "pairs": [
+        { "left": "Forrest Gump", "right": "Tom Hanks" },
+        { "left": "Il gladiatore", "right": "Russell Crowe" },
+        { "left": "Joker (2019)", "right": "Joaquin Phoenix" },
+        { "left": "Il pianista", "right": "Adrien Brody" },
+        { "left": "Il petroliere", "right": "Daniel Day-Lewis" }
+      ],
+      "explanation": "Tutti protagonisti premiati con l'Oscar.",
+      "id": 62
+    },
+    {
+      "topic": "Premi e festival",
+      "type": "matching",
+      "difficulty": 2,
+      "text": "Abbina ogni film vincitore dell'Oscar come miglior film all'anno di uscita.",
+      "pairs": [
+        { "left": "Rocky", "right": "1976" },
+        { "left": "Il silenzio degli innocenti", "right": "1991" },
+        { "left": "Titanic", "right": "1997" },
+        { "left": "Il gladiatore", "right": "2000" },
+        { "left": "Moonlight", "right": "2016" }
+      ],
+      "explanation": "Anni di uscita nelle sale.",
+      "id": 63
+    },
+    {
+      "topic": "Blockbuster e franchise",
+      "type": "matching",
+      "difficulty": 2,
+      "text": "Abbina ogni film dei grandi franchise al regista che ne diresse il primo capitolo.",
+      "pairs": [
+        {
+          "left": "Il Signore degli Anelli: La compagnia dell'anello",
+          "right": "Peter Jackson"
+        },
+        { "left": "Harry Potter e la pietra filosofale", "right": "Chris Columbus" },
+        { "left": "Iron Man", "right": "Jon Favreau" },
+        { "left": "Matrix", "right": "Lana e Lilly Wachowski" },
+        { "left": "Ritorno al futuro", "right": "Robert Zemeckis" }
+      ],
+      "explanation": "Cinque film dei grandi franchise.",
+      "id": 64
+    },
+    {
+      "topic": "Colonne sonore",
+      "type": "matching",
+      "difficulty": 2,
+      "text": "Abbina ogni colonna sonora al suo compositore.",
+      "pairs": [
+        { "left": "Jurassic Park", "right": "John Williams" },
+        { "left": "Inception", "right": "Hans Zimmer" },
+        { "left": "Il Signore degli Anelli", "right": "Howard Shore" },
+        { "left": "The Hateful Eight", "right": "Ennio Morricone" },
+        { "left": "Momenti di gloria", "right": "Vangelis" }
+      ],
+      "explanation": "Cinque compositori premiati agli Oscar.",
+      "id": 65
+    },
+    {
+      "topic": "Cinema italiano",
+      "type": "matching",
+      "difficulty": 3,
+      "text": "Abbina ogni film italiano al suo regista.",
+      "pairs": [
+        { "left": "La grande bellezza", "right": "Paolo Sorrentino" },
+        { "left": "Gomorra", "right": "Matteo Garrone" },
+        { "left": "Nuovo Cinema Paradiso", "right": "Giuseppe Tornatore" },
+        { "left": "La stanza del figlio", "right": "Nanni Moretti" },
+        { "left": "Mediterraneo", "right": "Gabriele Salvatores" }
+      ],
+      "explanation": "Cinque film italiani premiati a Cannes o agli Oscar.",
+      "id": 66
+    },
+    {
+      "topic": "Blockbuster e franchise",
+      "type": "numeric",
+      "difficulty": 1,
+      "text": "In che anno uscì il primo film della saga di Star Wars?",
+      "answer": 1977,
+      "explanation": "Uscì il 25 maggio 1977.",
+      "id": 67
+    },
+    {
+      "topic": "Blockbuster e franchise",
+      "type": "numeric",
+      "difficulty": 1,
+      "text": "Quanti sono i film della saga di Harry Potter?",
+      "answer": 8,
+      "explanation": "L'ultimo libro fu diviso in due film.",
+      "id": 68
+    },
+    {
+      "topic": "Blockbuster e franchise",
+      "type": "numeric",
+      "difficulty": 3,
+      "text": "Quanti film compongono la «Saga dell'Infinito» del Marvel Cinematic Universe, da Iron Man ad Avengers: Endgame?",
+      "answer": 23,
+      "explanation": "Le Fasi 1, 2 e 3 comprendono 23 film.",
+      "id": 69
+    },
+    {
+      "topic": "Animazione",
+      "type": "numeric",
+      "difficulty": 1,
+      "text": "In che anno uscì Toy Story?",
+      "answer": 1995,
+      "explanation": "Il primo lungometraggio in animazione interamente digitale.",
+      "id": 70
+    },
+    {
+      "topic": "Blockbuster e franchise",
+      "type": "numeric",
+      "difficulty": 2,
+      "text": "In quanti film della serie ufficiale Daniel Craig ha interpretato James Bond?",
+      "answer": 5,
+      "explanation": "Da Casino Royale (2006) a No Time to Die (2021).",
+      "id": 71
+    },
+    {
+      "topic": "Premi e festival",
+      "type": "numeric",
+      "difficulty": 2,
+      "text": "In che anno Pulp Fiction vinse la Palma d'Oro a Cannes?",
+      "answer": 1994,
+      "explanation": "Presidente di giuria era Clint Eastwood.",
+      "id": 72
+    },
+    {
+      "topic": "Premi e festival",
+      "type": "numeric",
+      "difficulty": 3,
+      "text": "Quanti Oscar ha vinto Oppenheimer alla cerimonia del 2024?",
+      "answer": 7,
+      "explanation": "Film, regia, attore, non protagonista, fotografia, montaggio e colonna sonora.",
+      "id": 73
+    },
+    {
+      "topic": "Blockbuster e franchise",
+      "type": "numeric",
+      "difficulty": 2,
+      "text": "In quale anno è ambientato il futuro in cui Marty McFly viaggia in Ritorno al futuro - Parte II (1989)?",
+      "answer": 2015,
+      "explanation": "Il film è ambientato il 21 ottobre 2015.",
+      "id": 74
+    },
+    {
+      "topic": "Premi e festival",
+      "type": "scenario",
+      "difficulty": 3,
+      "text": "La notte degli Oscar 2020",
+      "context": "Nel febbraio 2020 si tenne la novantaduesima cerimonia di consegna degli Oscar, dedicata ai film usciti nel 2019. Tra i candidati c'erano 1917, Joker, The Irishman, C'era una volta a… Hollywood e un film sudcoreano.",
+      "parts": [
+        {
+          "type": "single",
+          "text": "Quale film vinse l'Oscar come miglior film?",
+          "options": [
+            "Parasite, di Bong Joon-ho",
+            "1917, di Sam Mendes, costruito come un unico piano sequenza",
+            "Joker, di Todd Phillips, con Joaquin Phoenix",
+            "C'era una volta a… Hollywood, di Quentin Tarantino"
+          ],
+          "answer": [0],
+          "explanation": "Parasite vinse miglior film."
+        },
+        {
+          "type": "single",
+          "text": "Chi vinse l'Oscar come miglior regista?",
+          "options": [
+            "Todd Phillips, candidato per Joker",
+            "Sam Mendes, candidato per 1917",
+            "Bong Joon-ho, per Parasite",
+            "Martin Scorsese, candidato per The Irishman"
+          ],
+          "answer": [2],
+          "explanation": "Bong Joon-ho vinse regia e miglior film."
+        },
+        {
+          "type": "numeric",
+          "text": "Quanti Oscar vinse Parasite in totale?",
+          "answer": 4,
+          "explanation": "Film, regia, sceneggiatura originale e film internazionale."
+        }
+      ],
+      "id": 75
+    },
+    {
+      "topic": "Blockbuster e franchise",
+      "type": "scenario",
+      "difficulty": 3,
+      "text": "Barbenheimer",
+      "context": "Il 21 luglio 2023 uscirono negli Stati Uniti due film molto attesi: Barbie e Oppenheimer. Il fenomeno, soprannominato «Barbenheimer», ebbe un enorme successo di pubblico.",
+      "parts": [
+        {
+          "type": "single",
+          "text": "Chi diresse Barbie?",
+          "options": [
+            "Sofia Coppola, regista di Il giardino delle vergini suicide",
+            "Kathryn Bigelow, regista di The Hurt Locker",
+            "Greta Gerwig, già regista di Lady Bird e Piccole donne",
+            "Emerald Fennell, regista di Una donna promettente"
+          ],
+          "answer": [2],
+          "explanation": "Barbie è di Greta Gerwig."
+        },
+        {
+          "type": "truefalse",
+          "text": "Oppenheimer vinse l'Oscar come miglior film alla cerimonia del 2024.",
+          "answer": true,
+          "explanation": "Ottenne 7 premi."
+        },
+        {
+          "type": "numeric",
+          "text": "In quale mese del 2023 uscirono i due film? (numero del mese)",
+          "answer": 7,
+          "explanation": "Luglio."
+        }
+      ],
+      "id": 76
+    },
+    {
+      "topic": "Cinema italiano",
+      "type": "scenario",
+      "difficulty": 3,
+      "text": "Il cinema italiano agli Oscar",
+      "context": "Nel marzo 2014 un film italiano diretto da Paolo Sorrentino, con Toni Servillo nel ruolo di Jep Gambardella, conquistò uno dei premi più importanti del cinema mondiale.",
+      "parts": [
+        {
+          "type": "single",
+          "text": "Di quale film si parla?",
+          "options": ["La grande bellezza", "Il divo", "L'amico di famiglia", "Youth - La giovinezza"],
+          "answer": [0],
+          "explanation": "La grande bellezza."
+        },
+        {
+          "type": "single",
+          "text": "Quale premio ricevette il film agli Oscar?",
+          "options": [
+            "Miglior colonna sonora",
+            "Miglior film straniero",
+            "Miglior sceneggiatura originale",
+            "Miglior film"
+          ],
+          "answer": [1],
+          "explanation": "Miglior film straniero (oggi miglior film internazionale)."
+        },
+        {
+          "type": "numeric",
+          "text": "In quale anno si tenne la cerimonia?",
+          "answer": 2014,
+          "explanation": "La 86ª cerimonia degli Oscar si tenne a marzo 2014."
+        }
+      ],
+      "id": 77
+    },
+    {
+      "topic": "Tecnologia e industria",
+      "type": "scenario",
+      "difficulty": 3,
+      "text": "Cinema e streaming",
+      "context": "Nel 2018 Netflix distribuì Roma, un film in bianco e nero ambientato a Città del Messico, diretto da Alfonso Cuarón e parlato per lo più in spagnolo e mixteco.",
+      "parts": [
+        {
+          "type": "single",
+          "text": "Chi diresse Roma?",
+          "options": [
+            "Alejandro González Iñárritu, regista di Birdman e Revenant",
+            "Alfonso Cuarón, regista di Gravity",
+            "Pedro Almodóvar, regista di Parla con lei",
+            "Guillermo del Toro, regista de La forma dell'acqua"
+          ],
+          "answer": [1],
+          "explanation": "Roma è di Alfonso Cuarón."
+        },
+        {
+          "type": "truefalse",
+          "text": "Roma è un film girato in bianco e nero.",
+          "answer": true,
+          "explanation": "Cuarón firmò anche la fotografia."
+        },
+        {
+          "type": "numeric",
+          "text": "Quante candidature agli Oscar ottenne Roma?",
+          "answer": 10,
+          "explanation": "Ne ottenne 10 e ne vinse 3."
+        }
+      ],
+      "id": 78
+    },
+    {
+      "topic": "Blockbuster e franchise",
+      "type": "scenario",
+      "difficulty": 3,
+      "text": "L'esordio di Daniel Craig",
+      "context": "Nel 2006 la serie di James Bond ripartì da zero con un film tratto dal primo romanzo di Ian Fleming, in cui il nuovo protagonista guadagna lo status di agente 007.",
+      "parts": [
+        {
+          "type": "single",
+          "text": "Quale attore interpretò Bond in quel film?",
+          "options": ["Daniel Craig", "Pierce Brosnan", "Timothy Dalton", "Roger Moore"],
+          "answer": [0],
+          "explanation": "Daniel Craig, in Casino Royale."
+        },
+        {
+          "type": "single",
+          "text": "Chi diresse il film?",
+          "options": [
+            "Cary Joji Fukunaga, regista di No Time to Die",
+            "Sam Mendes, regista di Skyfall",
+            "Marc Forster, regista di Quantum of Solace",
+            "Martin Campbell, già regista di GoldenEye"
+          ],
+          "answer": [3],
+          "explanation": "Martin Campbell diresse GoldenEye e Casino Royale."
+        },
+        {
+          "type": "truefalse",
+          "text": "Era il primo film in cui Daniel Craig interpretava James Bond.",
+          "answer": true,
+          "explanation": "Poi seguirono altri quattro film."
+        }
+      ],
+      "id": 79
+    },
+    {
+      "topic": "Blockbuster e franchise",
+      "type": "scenario",
+      "difficulty": 3,
+      "text": "Dune",
+      "context": "Nel 2021 uscì un adattamento cinematografico del celebre romanzo di fantascienza di Frank Herbert, con Timothée Chalamet nel ruolo di Paul Atreides.",
+      "parts": [
+        {
+          "type": "single",
+          "text": "Chi diresse il film?",
+          "options": [
+            "Ridley Scott, regista britannico di Alien",
+            "Peter Jackson, regista neozelandese de Lo Hobbit",
+            "Denis Villeneuve, regista canadese di Arrival e Blade Runner 2049",
+            "Christopher Nolan, regista britannico di Interstellar"
+          ],
+          "answer": [2],
+          "explanation": "Denis Villeneuve."
+        },
+        {
+          "type": "numeric",
+          "text": "Quanti Oscar vinse il film alla cerimonia del 2022?",
+          "answer": 6,
+          "explanation": "Fotografia, montaggio, scenografia, sonoro, colonna sonora ed effetti visivi."
+        },
+        {
+          "type": "truefalse",
+          "text": "Il film è tratto da un romanzo di Frank Herbert.",
+          "answer": true,
+          "explanation": "Il romanzo è del 1965."
+        }
+      ],
+      "id": 80
+    }
+  ]
+});

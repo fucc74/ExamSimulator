@@ -1,0 +1,1283 @@
+// ExamSim exam file (format 2). Pure JSON inside ExamSim.register(...); validate with: node tools/validate-exam.js ai-realtest.exam
+ExamSim.register({
+  "format": 2,
+  "id": "ai-realtest",
+  "code": "AI-80",
+  "title": "Intelligenza artificiale — Test completo",
+  "description": "Ottanta domande sull'intelligenza artificiale: storia, machine learning, reti neurali, modelli linguistici, visione, dati e MLOps, etica e normativa, hardware. Mix di scelta singola e multipla, vero/falso, ordinamento, abbinamento, risposte numeriche e scenari.",
+  "version": "v1.0",
+  "settings": { "passThreshold": 70, "timePerQuestionSec": 83, "shuffleOptions": true },
+  "modes": [
+    {
+      "id": "real",
+      "name": {
+        "en": "Full test (80 questions, 110 minutes)",
+        "it": "Test completo (80 domande, 110 minuti)"
+      },
+      "selection": "random",
+      "exam": true,
+      "count": 80,
+      "timeSec": 6600,
+      "passThreshold": 70
+    },
+    {
+      "id": "standard",
+      "name": { "en": "Quick mock (20 questions)", "it": "Simulazione rapida (20 domande)" },
+      "selection": "balanced",
+      "count": 20
+    }
+  ],
+  "questions": [
+    {
+      "topic": "Storia e concetti di base",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Chi propose nel 1950 un test per valutare se una macchina sa esibire un comportamento intelligente indistinguibile da quello di una persona?",
+      "options": [
+        "Claude Shannon, nella teoria matematica della comunicazione",
+        "Marvin Minsky, nel libro dedicato ai limiti del perceptron",
+        "Alan Turing, nell'articolo «Computing Machinery and Intelligence»",
+        "John McCarthy, durante il workshop estivo organizzato a Dartmouth"
+      ],
+      "answer": [2],
+      "explanation": "Il «gioco dell'imitazione», poi detto test di Turing, è descritto da Alan Turing nel 1950.",
+      "id": 1
+    },
+    {
+      "topic": "Storia e concetti di base",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Dove e quando fu coniato il termine «intelligenza artificiale»?",
+      "options": [
+        "Nella proposta per il workshop di Dartmouth del 1956, firmata tra gli altri da McCarthy e Minsky",
+        "Alla presentazione commerciale dei primi sistemi esperti per le aziende, negli anni Ottanta del Novecento",
+        "Nel saggio di Alan Turing del 1950, che apriva per la prima volta il dibattito sulle macchine che pensano",
+        "In un grande congresso internazionale sulle reti neurali tenuto all'università di Stanford nel 1986"
+      ],
+      "answer": [0],
+      "explanation": "Il termine compare nella proposta del workshop di Dartmouth (estate 1956), considerato l'atto di nascita della disciplina.",
+      "id": 2
+    },
+    {
+      "topic": "Storia e concetti di base",
+      "type": "single",
+      "difficulty": 2,
+      "text": "Che cosa si intende con «inverno dell'IA»?",
+      "options": [
+        "Una tecnica per raffreddare i data center e ridurre il consumo energetico durante l'addestramento dei modelli",
+        "Un rallentamento stagionale delle ricerche dovuto alla chiusura invernale dei laboratori universitari e dei centri di ricerca",
+        "Un periodo in cui i primi computer non riuscivano a funzionare correttamente a basse temperature nei laboratori",
+        "Una fase di forte calo di fondi e interesse dopo promesse che la tecnologia non aveva mantenuto"
+      ],
+      "answer": [3],
+      "explanation": "Gli inverni dell'IA (anni '70 e fine anni '80) furono periodi di disillusione e riduzione dei finanziamenti.",
+      "id": 3
+    },
+    {
+      "topic": "Storia e concetti di base",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Come si definisce un sistema di «IA ristretta» (narrow AI)?",
+      "options": [
+        "Un sistema che funziona soltanto su dispositivi con memoria e capacità di calcolo molto ridotte, come i microcontrollori",
+        "Un sistema progettato e addestrato per svolgere un compito specifico o un insieme limitato di compiti",
+        "Un sistema capace di apprendere qualsiasi compito intellettuale umano senza bisogno di alcun riaddestramento, come farebbe una persona",
+        "Un sistema in cui tutte le regole sono scritte a mano da esperti del settore e non possono mai essere modificate"
+      ],
+      "answer": [1],
+      "explanation": "Tutti i sistemi attuali sono IA ristretta; l'intelligenza artificiale generale (AGI) resta un obiettivo ipotetico.",
+      "id": 4
+    },
+    {
+      "topic": "Storia e concetti di base",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Quale sistema di IBM sconfisse il campione del mondo di scacchi Garry Kasparov in un match del 1997?",
+      "options": [
+        "AlphaGo, sviluppato da DeepMind e addestrato con apprendimento per rinforzo",
+        "Watson, il sistema che vinse il quiz televisivo Jeopardy!",
+        "ELIZA, il primo programma di conversazione in linguaggio naturale",
+        "Deep Blue, un computer specializzato nella ricerca di mosse"
+      ],
+      "answer": [3],
+      "explanation": "Deep Blue batté Kasparov nel 1997; AlphaGo (Go, 2016) e Watson (Jeopardy!, 2011) vennero dopo.",
+      "id": 5
+    },
+    {
+      "topic": "Storia e concetti di base",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Quale sistema di DeepMind sconfisse il campione di Go Lee Sedol nel 2016?",
+      "options": [
+        "Deep Blue, che esplorava milioni di posizioni al secondo",
+        "AlphaFold, specializzato nella previsione di strutture proteiche",
+        "AlphaGo, che combinava reti neurali profonde e ricerca ad albero",
+        "Stockfish, un motore scacchistico open source"
+      ],
+      "answer": [2],
+      "explanation": "AlphaGo vinse 4-1 contro Lee Sedol nel marzo 2016.",
+      "id": 6
+    },
+    {
+      "topic": "Machine learning classico",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Quale paradigma di apprendimento usa esempi in cui è già nota la risposta corretta (etichetta)?",
+      "options": [
+        "Apprendimento supervisionato, basato su coppie di input ed etichetta",
+        "Apprendimento autonomo senza dati, basato solo su regole scritte a mano",
+        "Apprendimento non supervisionato, che cerca strutture nei dati senza etichette",
+        "Apprendimento per rinforzo, basato su ricompense ricevute da un ambiente"
+      ],
+      "answer": [0],
+      "explanation": "Nel supervisionato il modello impara una funzione dagli input alle etichette note.",
+      "id": 7
+    },
+    {
+      "topic": "Machine learning classico",
+      "type": "single",
+      "difficulty": 2,
+      "text": "Un'azienda vuole raggruppare i clienti in segmenti omogenei senza avere categorie predefinite. Quale approccio è il più adatto?",
+      "options": [
+        "Apprendimento per rinforzo, con una ricompensa per ogni segmento",
+        "Clustering, un metodo di apprendimento non supervisionato",
+        "Classificazione supervisionata, con segmenti già etichettati a priori",
+        "Regressione lineare, per prevedere l'importo di un acquisto"
+      ],
+      "answer": [1],
+      "explanation": "Il clustering raggruppa esempi simili senza etichette (ad esempio con k-means).",
+      "id": 8
+    },
+    {
+      "topic": "Machine learning classico",
+      "type": "single",
+      "difficulty": 2,
+      "text": "In un problema di apprendimento per rinforzo, che cosa cerca di massimizzare l'agente?",
+      "options": [
+        "La ricompensa cumulativa ottenuta interagendo con l'ambiente nel tempo",
+        "La varianza spiegata dalle prime componenti principali dei dati osservati nell'ambiente",
+        "Il numero di parametri attivi nella rete durante ogni passo di addestramento della politica",
+        "La precisione sul test set, calcolata su dati etichettati in precedenza da esperti umani"
+      ],
+      "answer": [0],
+      "explanation": "L'agente impara una politica che massimizza la somma (scontata) delle ricompense future.",
+      "id": 9
+    },
+    {
+      "topic": "Machine learning classico",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Che cos'è l'overfitting?",
+      "options": [
+        "Il modello è troppo semplice e non riesce a cogliere nemmeno i dati di addestramento che ha già visto molte volte",
+        "Il modello si adatta così bene ai dati di addestramento da generalizzare male su dati nuovi",
+        "Il modello usa troppa memoria della GPU durante la fase di inferenza e rallenta in modo evidente le risposte",
+        "Il modello viene addestrato troppo in fretta, con un learning rate molto basso e un numero esiguo di epoche"
+      ],
+      "answer": [1],
+      "explanation": "Overfitting = memorizzazione del rumore del training set; l'errore su dati nuovi è molto più alto.",
+      "id": 10
+    },
+    {
+      "topic": "Machine learning classico",
+      "type": "single",
+      "difficulty": 2,
+      "text": "A che cosa serve l'analisi delle componenti principali (PCA)?",
+      "options": [
+        "Aumentare il numero di esempi disponibili generando nuove righe sintetiche a partire dai dati",
+        "Ottimizzare la velocità di calcolo delle moltiplicazioni di matrici eseguite su GPU e acceleratori",
+        "Etichettare automaticamente gli esempi non classificati con la classe più frequente nel dataset",
+        "Ridurre il numero di variabili proiettando i dati sulle direzioni di massima varianza"
+      ],
+      "answer": [3],
+      "explanation": "La PCA è una tecnica di riduzione della dimensionalità non supervisionata.",
+      "id": 11
+    },
+    {
+      "topic": "Machine learning classico",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Quale algoritmo assegna ogni punto al centroide più vicino e ricalcola i centroidi fino alla convergenza?",
+      "options": [
+        "Algoritmo k-means, usato per il clustering",
+        "Albero decisionale, che divide i dati con regole successive",
+        "Naive Bayes, basato sul teorema di Bayes",
+        "Regressione logistica, con soglia sulla probabilità stimata"
+      ],
+      "answer": [0],
+      "explanation": "k-means alterna assegnazione ai centroidi e aggiornamento dei centroidi.",
+      "id": 12
+    },
+    {
+      "topic": "Reti neurali e deep learning",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Quale funzione di attivazione restituisce max(0, x)?",
+      "options": [
+        "Softmax, che trasforma un vettore in una distribuzione di probabilità",
+        "ReLU (Rectified Linear Unit), molto usata nelle reti profonde",
+        "Tangente iperbolica, che comprime i valori tra -1 e 1",
+        "Sigmoide, che comprime i valori nell'intervallo tra 0 e 1"
+      ],
+      "answer": [1],
+      "explanation": "ReLU(x) = max(0, x).",
+      "id": 13
+    },
+    {
+      "topic": "Reti neurali e deep learning",
+      "type": "single",
+      "difficulty": 2,
+      "text": "Quale algoritmo calcola i gradienti della funzione di perdita rispetto ai pesi propagando l'errore dall'uscita verso gli strati precedenti?",
+      "options": [
+        "Campionamento di Gibbs, usato nei modelli probabilistici",
+        "Algoritmo k-nearest neighbors, che memorizza gli esempi di addestramento",
+        "Discesa del gradiente stocastica, che usa solo i gradienti già calcolati",
+        "Backpropagation, applicazione della regola della catena"
+      ],
+      "answer": [3],
+      "explanation": "La backpropagation calcola i gradienti; l'ottimizzatore (SGD, Adam…) li usa per aggiornare i pesi.",
+      "id": 14
+    },
+    {
+      "topic": "Reti neurali e deep learning",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Quale tipo di rete neurale è stato per anni l'architettura di riferimento per classificare immagini?",
+      "options": [
+        "Le reti ricorrenti LSTM, progettate per sequenze temporali",
+        "Gli autoencoder variazionali, usati per generare dati",
+        "Le macchine di Boltzmann ristrette, usate nei sistemi di raccomandazione",
+        "Le reti convoluzionali (CNN), che applicano filtri su regioni locali"
+      ],
+      "answer": [3],
+      "explanation": "Le CNN sfruttano località e condivisione dei pesi, ideali per immagini.",
+      "id": 15
+    },
+    {
+      "topic": "Reti neurali e deep learning",
+      "type": "single",
+      "difficulty": 2,
+      "text": "Che cosa fa la tecnica del dropout durante l'addestramento?",
+      "options": [
+        "Spegne casualmente una frazione di neuroni a ogni passo per ridurre l'overfitting",
+        "Interrompe l'addestramento quando l'errore sul validation set smette di migliorare",
+        "Riduce il learning rate man mano che l'addestramento procede",
+        "Elimina in modo permanente i neuroni con pesi più piccoli per velocizzare l'inferenza"
+      ],
+      "answer": [0],
+      "explanation": "Il dropout è una forma di regolarizzazione: disattiva neuroni a caso a ogni iterazione di training.",
+      "id": 16
+    },
+    {
+      "topic": "Reti neurali e deep learning",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Che cosa controlla il learning rate (tasso di apprendimento)?",
+      "options": [
+        "L'ampiezza del passo con cui i pesi vengono aggiornati a ogni iterazione",
+        "La velocità con cui il modello risponde agli utenti durante la fase di inferenza",
+        "La percentuale di dati riservata alla validazione e al test finale del modello",
+        "Il numero di strati nascosti e di neuroni presenti in ciascuno strato della rete neurale"
+      ],
+      "answer": [0],
+      "explanation": "Un learning rate troppo alto può far divergere l'addestramento, troppo basso lo rende lentissimo.",
+      "id": 17
+    },
+    {
+      "topic": "Linguaggio naturale e LLM",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Quale architettura, presentata nel 2017 nell'articolo «Attention Is All You Need», è alla base dei moderni modelli linguistici di grandi dimensioni?",
+      "options": [
+        "La macchina a vettori di supporto, basata sul massimo margine",
+        "La rete ricorrente LSTM, basata su celle con memoria a lungo termine",
+        "Il Transformer, basato sul meccanismo di attenzione",
+        "La rete convoluzionale ResNet, basata su connessioni residue"
+      ],
+      "answer": [2],
+      "explanation": "Il Transformer sostituisce la ricorrenza con l'attenzione ed è parallelizzabile in addestramento.",
+      "id": 18
+    },
+    {
+      "topic": "Linguaggio naturale e LLM",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Nel contesto dei modelli linguistici, che cos'è un «token»?",
+      "options": [
+        "Un blocco di memoria della GPU riservato ai pesi e alle attivazioni intermedie del modello",
+        "Una chiave segreta che autorizza l'accesso all'interfaccia di programmazione (API) del modello",
+        "Un parametro numerico che regola la creatività e la variabilità delle risposte generate",
+        "Un'unità di testo (parola, parte di parola o simbolo) in cui viene suddiviso l'input"
+      ],
+      "answer": [3],
+      "explanation": "I testi vengono convertiti in sequenze di token prima di entrare nel modello.",
+      "id": 19
+    },
+    {
+      "topic": "Linguaggio naturale e LLM",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Che cosa indica il termine «allucinazione» riferito a un modello linguistico?",
+      "options": [
+        "La capacità del modello di riconoscere immagini anche molto sfocate o di bassa qualità",
+        "Il fenomeno per cui il modello rifiuta di rispondere a domande sensibili o potenzialmente pericolose",
+        "La generazione di contenuti plausibili ma falsi o non supportati da fonti",
+        "Un errore hardware che produce caratteri casuali nell'output del modello durante la generazione"
+      ],
+      "answer": [2],
+      "explanation": "Le allucinazioni sono affermazioni fluenti ma inventate o errate.",
+      "id": 20
+    },
+    {
+      "topic": "Linguaggio naturale e LLM",
+      "type": "single",
+      "difficulty": 2,
+      "text": "Che cosa significa RAG (Retrieval-Augmented Generation)?",
+      "options": [
+        "Il modello genera risposte volutamente casuali per aumentare la varietà e l'originalità del testo prodotto",
+        "Il modello comprime i propri pesi con tecniche di quantizzazione per poter girare su dispositivi mobili",
+        "Il modello viene riaddestrato da zero ogni notte con tutte le domande ricevute dagli utenti nel corso della giornata",
+        "Il modello recupera documenti pertinenti da una base di conoscenza e li usa come contesto per rispondere"
+      ],
+      "answer": [3],
+      "explanation": "RAG affianca ricerca (retrieval) e generazione: riduce le allucinazioni e permette dati aggiornati senza riaddestrare.",
+      "id": 21
+    },
+    {
+      "topic": "Linguaggio naturale e LLM",
+      "type": "single",
+      "difficulty": 2,
+      "text": "A che cosa serve il parametro «temperature» nella generazione di testo?",
+      "options": [
+        "A misurare il calore dissipato dalla GPU durante l'inferenza e a regolare le ventole",
+        "A stabilire la lunghezza massima della risposta, espressa in numero di token generati",
+        "A regolare il grado di casualità con cui viene scelto il token successivo",
+        "A decidere quanti documenti recuperare da una base di conoscenza prima di rispondere"
+      ],
+      "answer": [2],
+      "explanation": "Temperature bassa = risposte più deterministiche; alta = più varie (e più rischiose).",
+      "id": 22
+    },
+    {
+      "topic": "Visione artificiale e IA generativa",
+      "type": "single",
+      "difficulty": 2,
+      "text": "Quali due reti si sfidano in una GAN (Generative Adversarial Network)?",
+      "options": [
+        "Un encoder e un decoder che comprimono in uno spazio latente e poi ricostruiscono lo stesso input di partenza",
+        "Un generatore, che crea esempi, e un discriminatore, che prova a distinguerli da quelli reali",
+        "Un agente e un ambiente che si scambiano azioni e ricompense a ogni passo di interazione, nell'apprendimento per rinforzo",
+        "Un classificatore e un regressore addestrati in parallelo sugli stessi dati etichettati da esperti"
+      ],
+      "answer": [1],
+      "explanation": "Il gioco avversario tra generatore e discriminatore (Goodfellow, 2014) porta a campioni sempre più realistici.",
+      "id": 23
+    },
+    {
+      "topic": "Visione artificiale e IA generativa",
+      "type": "single",
+      "difficulty": 2,
+      "text": "Come generano immagini i modelli di diffusione?",
+      "options": [
+        "Copiano pixel e ritagli da immagini simili presenti nell'archivio di addestramento e li ricompongono",
+        "Partono da rumore casuale e lo ripuliscono gradualmente, guidati dal testo di descrizione",
+        "Sovrappongono filtri convoluzionali fissi a una fotografia scelta dall'utente, senza alcun addestramento",
+        "Partono da un'immagine nitida e la comprimono fino a ottenere una descrizione testuale di poche parole"
+      ],
+      "answer": [1],
+      "explanation": "La diffusione impara a invertire un processo che aggiunge rumore; in generazione rimuove rumore passo dopo passo.",
+      "id": 24
+    },
+    {
+      "topic": "Visione artificiale e IA generativa",
+      "type": "single",
+      "difficulty": 2,
+      "text": "Quale compito di visione artificiale assegna una classe a ciascun pixel dell'immagine?",
+      "options": [
+        "Super-risoluzione, che aumenta il numero di pixel di un'immagine",
+        "Rilevamento di oggetti, che disegna rettangoli attorno agli oggetti",
+        "Segmentazione semantica, che separa le regioni per categoria",
+        "Classificazione di immagini, che assegna una sola etichetta all'intera immagine"
+      ],
+      "answer": [2],
+      "explanation": "La segmentazione semantica produce una mappa di etichette pixel per pixel.",
+      "id": 25
+    },
+    {
+      "topic": "Dati, valutazione e MLOps",
+      "type": "single",
+      "difficulty": 2,
+      "text": "Quale metrica indica, tra gli esempi predetti come positivi, la quota di quelli realmente positivi?",
+      "options": [
+        "Recall, cioè la quota di positivi reali individuati dal modello",
+        "RMSE, cioè la radice dell'errore quadratico medio",
+        "Precision, cioè TP / (TP + FP)",
+        "Accuracy, cioè la quota complessiva di predizioni corrette"
+      ],
+      "answer": [2],
+      "explanation": "Precision = TP / (TP + FP); recall = TP / (TP + FN).",
+      "id": 26
+    },
+    {
+      "topic": "Dati, valutazione e MLOps",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Perché si tiene da parte un test set che non viene mai usato durante l'addestramento?",
+      "options": [
+        "Per avere una stima onesta delle prestazioni su dati mai visti dal modello",
+        "Per velocizzare l'addestramento riducendo la quantità di dati da elaborare",
+        "Per poter scegliere gli iperparametri migliori provando molte configurazioni",
+        "Per aumentare il numero di esempi disponibili nella fase di riaddestramento"
+      ],
+      "answer": [0],
+      "explanation": "Il test set serve solo alla valutazione finale; per gli iperparametri si usa il validation set.",
+      "id": 27
+    },
+    {
+      "topic": "Etica, sicurezza e normativa",
+      "type": "single",
+      "difficulty": 2,
+      "text": "Come classifica i sistemi di IA il Regolamento europeo sull'intelligenza artificiale (AI Act)?",
+      "options": [
+        "In base alla potenza di calcolo usata: bassa, media, alta ed esaflop",
+        "In base al livello di rischio: inaccettabile, alto, limitato e minimo",
+        "In base al paese di origine dell'azienda che sviluppa il modello",
+        "In base al settore commerciale: pubblico, privato, sanitario e finanziario"
+      ],
+      "answer": [1],
+      "explanation": "L'AI Act adotta un approccio basato sul rischio, con divieti per le pratiche a rischio inaccettabile.",
+      "id": 28
+    },
+    {
+      "topic": "Hardware, strumenti e applicazioni",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Perché le GPU sono particolarmente adatte all'addestramento delle reti neurali?",
+      "options": [
+        "Consumano meno energia di ogni altro tipo di processore, a parità di calcoli eseguiti",
+        "Possono funzionare senza memoria dedicata, usando direttamente il disco durante il calcolo",
+        "Eseguono in parallelo un enorme numero di operazioni su matrici e vettori",
+        "Hanno una frequenza di clock molto più alta di qualsiasi CPU e completano ogni operazione prima"
+      ],
+      "answer": [2],
+      "explanation": "L'addestramento è dominato da prodotti matriciali, molto parallelizzabili.",
+      "id": 29
+    },
+    {
+      "topic": "Hardware, strumenti e applicazioni",
+      "type": "single",
+      "difficulty": 1,
+      "text": "Quale tra queste è una libreria open source per il deep learning sviluppata inizialmente da Meta (Facebook)?",
+      "options": [
+        "TensorFlow, nato nei laboratori di Google Brain",
+        "Scikit-learn, pensata per il machine learning classico",
+        "PyTorch, molto diffusa nella ricerca",
+        "Keras, interfaccia di alto livello originariamente creata da François Chollet"
+      ],
+      "answer": [2],
+      "explanation": "PyTorch nasce nel laboratorio di ricerca sull'IA di Facebook (oggi Meta).",
+      "id": 30
+    },
+    {
+      "topic": "Storia e concetti di base",
+      "type": "multiple",
+      "difficulty": 2,
+      "text": "Quali dei seguenti eventi sono avvenuti dopo il 2015? Seleziona i due corretti.",
+      "options": [
+        "Il workshop di Dartmouth, organizzato nell'estate del 1956",
+        "La partita in cui AlphaGo ha sconfitto Lee Sedol, giocata nel 2016",
+        "La pubblicazione dell'articolo sul Transformer, uscito nel 2017",
+        "La vittoria di Deep Blue su Kasparov, avvenuta nel 1997"
+      ],
+      "answer": [1, 2],
+      "explanation": "AlphaGo-Lee Sedol (2016) e il Transformer (2017) sono posteriori al 2015; Deep Blue (1997) e Dartmouth (1956) no.",
+      "id": 31
+    },
+    {
+      "topic": "Machine learning classico",
+      "type": "multiple",
+      "difficulty": 2,
+      "text": "Quali dei seguenti algoritmi appartengono all'apprendimento supervisionato? Seleziona i tre corretti.",
+      "options": [
+        "DBSCAN, che individua gruppi in base alla densità dei punti",
+        "k-means, che raggruppa i punti attorno a centroidi",
+        "Macchina a vettori di supporto (SVM), che cerca il massimo margine",
+        "Foresta casuale (random forest), che combina molti alberi decisionali",
+        "Regressione logistica, che stima la probabilità di una classe"
+      ],
+      "answer": [2, 3, 4],
+      "explanation": "k-means e DBSCAN sono algoritmi di clustering (non supervisionati).",
+      "id": 32
+    },
+    {
+      "topic": "Machine learning classico",
+      "type": "multiple",
+      "difficulty": 2,
+      "text": "Quali tecniche aiutano a ridurre l'overfitting? Scegli le tre corrette.",
+      "options": [
+        "Dropout, che spegne casualmente alcuni neuroni durante il training",
+        "Aumentare le epoche all'infinito, anche dopo che la validazione ha smesso di migliorare",
+        "Early stopping, che interrompe l'addestramento quando la validazione peggiora",
+        "Regolarizzazione L2, che penalizza i pesi di valore elevato",
+        "Ridurre il training set ai soli esempi più semplici da classificare"
+      ],
+      "answer": [0, 2, 3],
+      "explanation": "Regolarizzazione, early stopping e dropout riducono l'overfitting; più epoche o meno dati lo peggiorano.",
+      "id": 33
+    },
+    {
+      "topic": "Reti neurali e deep learning",
+      "type": "multiple",
+      "difficulty": 2,
+      "text": "Quali dei seguenti sono funzioni di attivazione? Seleziona le tre corrette.",
+      "options": [
+        "Adam, che adatta il passo di aggiornamento di ogni parametro",
+        "Sigmoide, con uscita compresa tra 0 e 1",
+        "Entropia incrociata, usata per misurare l'errore di classificazione",
+        "ReLU, che azzera i valori negativi",
+        "Tangente iperbolica (tanh), con uscita compresa tra -1 e 1"
+      ],
+      "answer": [1, 3, 4],
+      "explanation": "L'entropia incrociata è una funzione di perdita; Adam è un ottimizzatore.",
+      "id": 34
+    },
+    {
+      "topic": "Reti neurali e deep learning",
+      "type": "multiple",
+      "difficulty": 2,
+      "text": "Quali dei seguenti sono algoritmi di ottimizzazione usati per addestrare reti neurali? Seleziona i due corretti.",
+      "options": [
+        "Adam, che mantiene stime dei momenti del gradiente",
+        "Softmax, che normalizza le uscite in probabilità",
+        "Discesa del gradiente stocastica (SGD), che aggiorna i pesi su mini-batch",
+        "Dropout, che disattiva casualmente alcuni neuroni",
+        "ReLU, che introduce la non linearità nei neuroni"
+      ],
+      "answer": [0, 2],
+      "explanation": "Adam e SGD sono ottimizzatori; gli altri sono funzioni di attivazione o tecniche di regolarizzazione.",
+      "id": 35
+    },
+    {
+      "topic": "Linguaggio naturale e LLM",
+      "type": "multiple",
+      "difficulty": 3,
+      "text": "Quali tecniche permettono di adattare un modello linguistico a un dominio specifico? Seleziona le tre corrette.",
+      "options": [
+        "Aumentare il learning rate fino a far divergere l'addestramento del modello",
+        "RAG, che fornisce al modello documenti recuperati da una base di conoscenza",
+        "Fine-tuning su esempi del dominio, che aggiorna i pesi del modello",
+        "Rimuovere il tokenizer dal modello prima di usarlo per l'inferenza",
+        "Prompt con esempi (few-shot), che mostrano il formato di risposta desiderato"
+      ],
+      "answer": [1, 2, 4],
+      "explanation": "Fine-tuning, RAG e few-shot prompting sono strategie comuni di adattamento; le altre opzioni danneggiano il modello.",
+      "id": 36
+    },
+    {
+      "topic": "Visione artificiale e IA generativa",
+      "type": "multiple",
+      "difficulty": 2,
+      "text": "Quali dei seguenti sono esempi di modelli generativi? Seleziona i tre corretti.",
+      "options": [
+        "Una regressione lineare che stima il prezzo di un immobile",
+        "Un modello di diffusione che crea immagini da una descrizione testuale",
+        "Una GAN che genera volti sintetici realistici",
+        "Un modello linguistico che scrive un testo a partire da un prompt",
+        "Un filtro antispam che assegna a ogni e-mail l'etichetta «spam» o «non spam»"
+      ],
+      "answer": [1, 2, 3],
+      "explanation": "Il filtro antispam e la regressione sono modelli discriminativi/predittivi, non generativi.",
+      "id": 37
+    },
+    {
+      "topic": "Dati, valutazione e MLOps",
+      "type": "multiple",
+      "difficulty": 2,
+      "text": "Quali dei seguenti sono metriche per problemi di classificazione? Seleziona le tre corrette.",
+      "options": [
+        "RMSE, radice dell'errore quadratico medio sui valori numerici",
+        "Punteggio F1, media armonica di precision e recall",
+        "Accuracy, quota di predizioni corrette sul totale",
+        "Recall, quota di positivi reali individuati dal modello",
+        "MAE, errore assoluto medio tra valori previsti e reali"
+      ],
+      "answer": [1, 2, 3],
+      "explanation": "RMSE e MAE sono metriche tipiche della regressione.",
+      "id": 38
+    },
+    {
+      "topic": "Dati, valutazione e MLOps",
+      "type": "multiple",
+      "difficulty": 2,
+      "text": "Quali pratiche rientrano nel MLOps? Seleziona le tre corrette.",
+      "options": [
+        "Versionare dataset, codice e modelli per poter riprodurre i risultati",
+        "Monitorare il drift dei dati e delle prestazioni in produzione",
+        "Eliminare i log di inferenza per evitare di analizzare gli errori",
+        "Automatizzare test e rilascio con pipeline di integrazione continua",
+        "Addestrare il modello una sola volta e non controllarlo mai più"
+      ],
+      "answer": [0, 1, 3],
+      "explanation": "Il MLOps porta nel machine learning le pratiche DevOps: monitoraggio, versionamento e automazione.",
+      "id": 39
+    },
+    {
+      "topic": "Etica, sicurezza e normativa",
+      "type": "multiple",
+      "difficulty": 2,
+      "text": "Quali misure aiutano a mitigare il bias in un sistema di IA? Seleziona le due corrette.",
+      "options": [
+        "Usare solo i dati del gruppo più numeroso per avere un dataset omogeneo",
+        "Eliminare ogni documentazione sul modello per evitare contestazioni",
+        "Misurare le prestazioni separatamente per gruppo con metriche di equità",
+        "Verificare che i dati di addestramento rappresentino adeguatamente i diversi gruppi"
+      ],
+      "answer": [2, 3],
+      "explanation": "Audit dei dati e metriche per gruppo sono pratiche standard; le altre opzioni peggiorano il problema.",
+      "id": 40
+    },
+    {
+      "topic": "Etica, sicurezza e normativa",
+      "type": "multiple",
+      "difficulty": 3,
+      "text": "Quali pratiche sono vietate dall'AI Act europeo in quanto a rischio inaccettabile? Seleziona le due corrette.",
+      "options": [
+        "Un chatbot di assistenza clienti che si dichiara un'IA",
+        "La manipolazione subliminale che induce a comportamenti dannosi",
+        "Un filtro antispam che classifica le e-mail in arrivo",
+        "Un assistente vocale che imposta sveglie e promemoria",
+        "Il «social scoring» di cittadini da parte delle autorità pubbliche"
+      ],
+      "answer": [1, 4],
+      "explanation": "Il social scoring pubblico e le tecniche manipolative dannose sono tra le pratiche vietate; chatbot e filtri non lo sono.",
+      "id": 41
+    },
+    {
+      "topic": "Hardware, strumenti e applicazioni",
+      "type": "multiple",
+      "difficulty": 1,
+      "text": "Quali dei seguenti sono acceleratori hardware usati per l'IA? Seleziona i due corretti.",
+      "options": [
+        "Disco rigido meccanico, usato per archiviare grandi dataset",
+        "GPU (Graphics Processing Unit), molto usate per l'addestramento",
+        "TPU (Tensor Processing Unit), progettata da Google per calcoli tensoriali",
+        "Router Wi-Fi, usato per collegare dispositivi alla rete locale"
+      ],
+      "answer": [1, 2],
+      "explanation": "GPU e TPU accelerano i calcoli di deep learning; disco e router non eseguono calcoli di rete neurale.",
+      "id": 42
+    },
+    {
+      "topic": "Storia e concetti di base",
+      "type": "truefalse",
+      "difficulty": 2,
+      "text": "Il perceptron fu introdotto da Frank Rosenblatt alla fine degli anni Cinquanta.",
+      "answer": true,
+      "explanation": "Rosenblatt presentò il perceptron nel 1958.",
+      "id": 43
+    },
+    {
+      "topic": "Storia e concetti di base",
+      "type": "truefalse",
+      "difficulty": 1,
+      "text": "Il machine learning è un sottoinsieme dell'intelligenza artificiale.",
+      "answer": true,
+      "explanation": "L'IA è il campo più ampio; il machine learning ne è una parte.",
+      "id": 44
+    },
+    {
+      "topic": "Machine learning classico",
+      "type": "truefalse",
+      "difficulty": 2,
+      "text": "Un modello che raggiunge il 99% di accuracy è sempre un buon modello, anche se il 99% degli esempi appartiene a una sola classe.",
+      "answer": false,
+      "explanation": "Con classi molto sbilanciate basta predire sempre la classe maggioritaria per ottenere il 99%: servono precision, recall e altre metriche.",
+      "id": 45
+    },
+    {
+      "topic": "Machine learning classico",
+      "type": "truefalse",
+      "difficulty": 1,
+      "text": "Nell'apprendimento non supervisionato i dati di addestramento sono sempre accompagnati da etichette.",
+      "answer": false,
+      "explanation": "È proprio l'assenza di etichette a caratterizzarlo.",
+      "id": 46
+    },
+    {
+      "topic": "Reti neurali e deep learning",
+      "type": "truefalse",
+      "difficulty": 2,
+      "text": "La regolarizzazione L2 penalizza i pesi di valore elevato.",
+      "answer": true,
+      "explanation": "Aggiunge alla perdita un termine proporzionale alla somma dei quadrati dei pesi.",
+      "id": 47
+    },
+    {
+      "topic": "Linguaggio naturale e LLM",
+      "type": "truefalse",
+      "difficulty": 1,
+      "text": "Il fine-tuning aggiorna, almeno in parte, i pesi di un modello già addestrato.",
+      "answer": true,
+      "explanation": "Si riparte da un modello preaddestrato e lo si specializza con nuovi dati.",
+      "id": 48
+    },
+    {
+      "topic": "Linguaggio naturale e LLM",
+      "type": "truefalse",
+      "difficulty": 2,
+      "text": "Un modello linguistico, per come è costruito, consulta Internet in tempo reale a ogni risposta.",
+      "answer": false,
+      "explanation": "Salvo strumenti esterni (ricerca, RAG), risponde usando solo ciò che ha appreso in addestramento e il contesto fornito.",
+      "id": 49
+    },
+    {
+      "topic": "Etica, sicurezza e normativa",
+      "type": "truefalse",
+      "difficulty": 2,
+      "text": "Il GDPR può applicarsi anche ai dati personali usati per addestrare un modello di IA.",
+      "answer": true,
+      "explanation": "Se i dati riguardano persone identificabili, valgono gli obblighi del GDPR.",
+      "id": 50
+    },
+    {
+      "topic": "Hardware, strumenti e applicazioni",
+      "type": "truefalse",
+      "difficulty": 3,
+      "text": "AlphaFold, sistema di DeepMind per la previsione della struttura delle proteine, è stato riconosciuto con un premio Nobel nel 2024.",
+      "answer": true,
+      "explanation": "Demis Hassabis e John Jumper hanno ricevuto il Nobel per la Chimica 2024 (con David Baker).",
+      "id": 51
+    },
+    {
+      "topic": "Visione artificiale e IA generativa",
+      "type": "truefalse",
+      "difficulty": 2,
+      "text": "Le reti convoluzionali possono essere usate soltanto con le immagini.",
+      "answer": false,
+      "explanation": "Le convoluzioni si usano anche su audio, testo e serie temporali.",
+      "id": 52
+    },
+    {
+      "topic": "Dati, valutazione e MLOps",
+      "type": "truefalse",
+      "difficulty": 2,
+      "text": "Nella validazione incrociata k-fold ogni sottoinsieme viene usato, in iterazioni diverse, sia per l'addestramento sia per la validazione.",
+      "answer": true,
+      "explanation": "I dati sono divisi in k parti; a turno una funge da validazione e le altre da training.",
+      "id": 53
+    },
+    {
+      "topic": "Etica, sicurezza e normativa",
+      "type": "truefalse",
+      "difficulty": 3,
+      "text": "Con «prompt injection» si indica l'aumento del numero di parametri di un modello dopo l'addestramento.",
+      "answer": false,
+      "explanation": "La prompt injection è un attacco in cui istruzioni malevole nascoste nell'input manipolano il comportamento del modello.",
+      "id": 54
+    },
+    {
+      "topic": "Storia e concetti di base",
+      "type": "ordering",
+      "difficulty": 2,
+      "text": "Disponi in ordine cronologico, dal più antico al più recente, questi eventi della storia dell'IA.",
+      "items": [
+        "Articolo di Turing sul gioco dell'imitazione (1950)",
+        "Workshop di Dartmouth (1956)",
+        "Deep Blue batte Kasparov (1997)",
+        "AlexNet vince la gara ImageNet (2012)",
+        "Pubblicazione del Transformer (2017)",
+        "Lancio pubblico di ChatGPT (2022)"
+      ],
+      "explanation": "Dal 1950 al 2022: Turing, Dartmouth, Deep Blue, AlexNet, Transformer, ChatGPT.",
+      "id": 55
+    },
+    {
+      "topic": "Dati, valutazione e MLOps",
+      "type": "ordering",
+      "difficulty": 2,
+      "text": "Metti nell'ordine corretto le fasi tipiche di un progetto di machine learning.",
+      "items": [
+        "Raccolta dei dati",
+        "Pulizia e preparazione dei dati",
+        "Suddivisione in training, validation e test set",
+        "Addestramento del modello",
+        "Valutazione sul test set",
+        "Rilascio in produzione e monitoraggio"
+      ],
+      "explanation": "Dati → preparazione → suddivisione → addestramento → valutazione → deployment e monitoraggio.",
+      "id": 56
+    },
+    {
+      "topic": "Reti neurali e deep learning",
+      "type": "ordering",
+      "difficulty": 2,
+      "text": "Ordina i passi di una singola iterazione di addestramento di una rete neurale.",
+      "items": [
+        "Passaggio in avanti (forward pass) sui dati del mini-batch",
+        "Calcolo della funzione di perdita",
+        "Passaggio all'indietro per calcolare i gradienti",
+        "Aggiornamento dei pesi con l'ottimizzatore"
+      ],
+      "explanation": "Forward → perdita → backward (gradienti) → aggiornamento dei pesi.",
+      "id": 57
+    },
+    {
+      "topic": "Linguaggio naturale e LLM",
+      "type": "ordering",
+      "difficulty": 3,
+      "text": "Ordina i passi di una pipeline RAG.",
+      "items": [
+        "Conversione della domanda in un vettore (embedding)",
+        "Ricerca dei documenti più simili nell'archivio vettoriale",
+        "Costruzione del prompt con la domanda e i documenti trovati",
+        "Generazione della risposta da parte del modello linguistico"
+      ],
+      "explanation": "Embedding della domanda → ricerca → prompt arricchito → generazione.",
+      "id": 58
+    },
+    {
+      "topic": "Linguaggio naturale e LLM",
+      "type": "ordering",
+      "difficulty": 3,
+      "text": "Ordina i passi dell'inferenza di un modello linguistico, dalla richiesta alla risposta leggibile.",
+      "items": [
+        "Tokenizzazione del testo di input",
+        "Conversione dei token in embedding",
+        "Elaborazione negli strati del Transformer",
+        "Scelta (campionamento) del token successivo",
+        "Ricomposizione dei token in testo leggibile"
+      ],
+      "explanation": "Tokenizzazione → embedding → strati Transformer → campionamento → detokenizzazione.",
+      "id": 59
+    },
+    {
+      "topic": "Storia e concetti di base",
+      "type": "ordering",
+      "difficulty": 3,
+      "text": "Ordina cronologicamente queste tappe del deep learning e dei sistemi di gioco.",
+      "items": [
+        "Perceptron (1958)",
+        "Diffusione della backpropagation (1986)",
+        "Deep Blue batte Kasparov (1997)",
+        "AlphaGo batte Lee Sedol (2016)",
+        "GPT-3 con 175 miliardi di parametri (2020)"
+      ],
+      "explanation": "Perceptron 1958, backpropagation 1986, Deep Blue 1997, AlphaGo 2016, GPT-3 2020.",
+      "id": 60
+    },
+    {
+      "topic": "Storia e concetti di base",
+      "type": "matching",
+      "difficulty": 2,
+      "text": "Abbina ogni personaggio al suo contributo.",
+      "pairs": [
+        { "left": "Alan Turing", "right": "Test di Turing" },
+        {
+          "left": "John McCarthy",
+          "right": "Coniò il termine «intelligenza artificiale»"
+        },
+        { "left": "Frank Rosenblatt", "right": "Perceptron" },
+        { "left": "Ian Goodfellow", "right": "Reti generative avversarie (GAN)" },
+        {
+          "left": "Geoffrey Hinton",
+          "right": "Pioniere del deep learning, Nobel per la Fisica 2024"
+        }
+      ],
+      "explanation": "Turing (1950), McCarthy (Dartmouth 1956), Rosenblatt (1958), Goodfellow (2014), Hinton (Nobel 2024 con Hopfield).",
+      "id": 61
+    },
+    {
+      "topic": "Machine learning classico",
+      "type": "matching",
+      "difficulty": 2,
+      "text": "Abbina ogni algoritmo al problema che risolve.",
+      "pairs": [
+        { "left": "k-means", "right": "Raggruppare esempi simili (clustering)" },
+        { "left": "PCA", "right": "Ridurre la dimensionalità dei dati" },
+        {
+          "left": "Regressione lineare",
+          "right": "Prevedere un valore numerico continuo"
+        },
+        {
+          "left": "Albero decisionale",
+          "right": "Classificare con regole if-then successive"
+        },
+        {
+          "left": "Q-learning",
+          "right": "Imparare una politica con ricompense (rinforzo)"
+        }
+      ],
+      "explanation": "Ogni algoritmo appartiene a una famiglia diversa del machine learning.",
+      "id": 62
+    },
+    {
+      "topic": "Reti neurali e deep learning",
+      "type": "matching",
+      "difficulty": 2,
+      "text": "Abbina ogni architettura al dominio in cui è tipicamente usata.",
+      "pairs": [
+        { "left": "CNN", "right": "Immagini" },
+        { "left": "LSTM", "right": "Sequenze e serie temporali" },
+        { "left": "Transformer", "right": "Linguaggio naturale e sequenze lunghe" },
+        { "left": "GAN", "right": "Generazione di dati sintetici" },
+        { "left": "Autoencoder", "right": "Compressione e ricostruzione dei dati" }
+      ],
+      "explanation": "CNN → immagini, LSTM → sequenze, Transformer → linguaggio, GAN → generazione, autoencoder → compressione.",
+      "id": 63
+    },
+    {
+      "topic": "Dati, valutazione e MLOps",
+      "type": "matching",
+      "difficulty": 2,
+      "text": "Abbina ogni metrica alla sua definizione.",
+      "pairs": [
+        { "left": "Precision", "right": "TP / (TP + FP)" },
+        { "left": "Recall", "right": "TP / (TP + FN)" },
+        { "left": "Accuracy", "right": "Predizioni corrette / predizioni totali" },
+        { "left": "RMSE", "right": "Radice dell'errore quadratico medio (regressione)" }
+      ],
+      "explanation": "Le prime tre sono metriche di classificazione; RMSE è tipica della regressione.",
+      "id": 64
+    },
+    {
+      "topic": "Hardware, strumenti e applicazioni",
+      "type": "matching",
+      "difficulty": 2,
+      "text": "Abbina ogni sigla al suo significato.",
+      "pairs": [
+        { "left": "GPU", "right": "Graphics Processing Unit" },
+        { "left": "TPU", "right": "Tensor Processing Unit" },
+        { "left": "CUDA", "right": "Piattaforma NVIDIA di calcolo parallelo" },
+        { "left": "ONNX", "right": "Formato aperto per lo scambio di modelli" }
+      ],
+      "explanation": "GPU e TPU sono acceleratori; CUDA è la piattaforma di programmazione NVIDIA; ONNX è un formato di interscambio.",
+      "id": 65
+    },
+    {
+      "topic": "Etica, sicurezza e normativa",
+      "type": "matching",
+      "difficulty": 3,
+      "text": "Abbina ogni concetto alla sua descrizione.",
+      "pairs": [
+        {
+          "left": "Bias algoritmico",
+          "right": "Distorsione sistematica negli esiti del modello"
+        },
+        {
+          "left": "Explainability",
+          "right": "Capacità di spiegare perché è stata presa una decisione"
+        },
+        {
+          "left": "Federated learning",
+          "right": "Addestramento distribuito senza centralizzare i dati"
+        },
+        {
+          "left": "Privacy differenziale",
+          "right": "Rumore aggiunto per proteggere i singoli individui"
+        }
+      ],
+      "explanation": "Quattro concetti chiave di IA responsabile.",
+      "id": 66
+    },
+    {
+      "topic": "Storia e concetti di base",
+      "type": "numeric",
+      "difficulty": 1,
+      "text": "In che anno si tenne il workshop di Dartmouth in cui fu coniato il termine «intelligenza artificiale»?",
+      "answer": 1956,
+      "explanation": "Estate 1956.",
+      "id": 67
+    },
+    {
+      "topic": "Dati, valutazione e MLOps",
+      "type": "numeric",
+      "difficulty": 2,
+      "text": "Un classificatore ottiene TP = 40 e FP = 10. Quanto vale la precision? (valore decimale)",
+      "answer": { "value": 0.8, "tolerance": 0.01 },
+      "explanation": "Precision = 40 / (40 + 10) = 0,8.",
+      "id": 68
+    },
+    {
+      "topic": "Dati, valutazione e MLOps",
+      "type": "numeric",
+      "difficulty": 2,
+      "text": "Un classificatore ottiene TP = 40 e FN = 60. Quanto vale il recall? (valore decimale)",
+      "answer": { "value": 0.4, "tolerance": 0.01 },
+      "explanation": "Recall = 40 / (40 + 60) = 0,4.",
+      "id": 69
+    },
+    {
+      "topic": "Dati, valutazione e MLOps",
+      "type": "numeric",
+      "difficulty": 1,
+      "text": "Un modello classifica correttamente 90 esempi su 120. Qual è l'accuracy in percentuale?",
+      "answer": { "value": 75, "tolerance": 0.5, "unit": "%" },
+      "explanation": "90 / 120 = 0,75 = 75%.",
+      "id": 70
+    },
+    {
+      "topic": "Reti neurali e deep learning",
+      "type": "numeric",
+      "difficulty": 3,
+      "text": "Uno strato denso ha 100 ingressi e 50 neuroni, ciascuno con un bias. Quanti parametri addestrabili contiene?",
+      "answer": 5050,
+      "explanation": "100 × 50 pesi + 50 bias = 5050.",
+      "id": 71
+    },
+    {
+      "topic": "Reti neurali e deep learning",
+      "type": "numeric",
+      "difficulty": 3,
+      "text": "Un peso vale 0,5, il gradiente della perdita rispetto a esso è 0,2 e il learning rate è 0,1. Quanto vale il peso dopo un passo di discesa del gradiente?",
+      "answer": { "value": 0.48, "tolerance": 0.005 },
+      "explanation": "w ← w − η·g = 0,5 − 0,1 × 0,2 = 0,48.",
+      "id": 72
+    },
+    {
+      "topic": "Dati, valutazione e MLOps",
+      "type": "numeric",
+      "difficulty": 2,
+      "text": "Un dataset di 1000 esempi è diviso in 5 fold di pari dimensione. Quanti esempi contiene il fold di validazione a ogni iterazione?",
+      "answer": 200,
+      "explanation": "1000 / 5 = 200.",
+      "id": 73
+    },
+    {
+      "topic": "Linguaggio naturale e LLM",
+      "type": "numeric",
+      "difficulty": 2,
+      "text": "Quanti miliardi di parametri aveva il modello linguistico GPT-3, presentato nel 2020?",
+      "answer": { "value": 175, "unit": "miliardi" },
+      "explanation": "GPT-3 aveva 175 miliardi di parametri.",
+      "id": 74
+    },
+    {
+      "topic": "Machine learning classico",
+      "type": "scenario",
+      "difficulty": 3,
+      "text": "Previsione dell'abbandono dei clienti",
+      "context": "Una compagnia telefonica vuole prevedere quali clienti disdiranno il contratto entro tre mesi. Dispone di cinque anni di storico in cui ogni cliente è marcato «ha disdetto» oppure «non ha disdetto». Soltanto il 4% dei clienti ha disdetto.",
+      "parts": [
+        {
+          "type": "single",
+          "text": "Che tipo di problema di machine learning è questo?",
+          "options": [
+            "Clustering non supervisionato di tutti i clienti in segmenti",
+            "Classificazione supervisionata binaria sui dati etichettati",
+            "Apprendimento per rinforzo con ricompensa per ogni disdetta",
+            "Riduzione della dimensionalità per comprimere lo storico"
+          ],
+          "answer": [1],
+          "explanation": "Esiste un'etichetta nota (disdetta sì/no): è classificazione supervisionata binaria."
+        },
+        {
+          "type": "truefalse",
+          "text": "L'accuracy è, da sola, una metrica sufficiente per valutare questo modello.",
+          "answer": false,
+          "explanation": "Con il 96% di «non disdetta», un modello che predice sempre «non disdetta» avrebbe il 96% di accuracy senza servire a nulla."
+        },
+        {
+          "type": "numeric",
+          "text": "Su 10.000 clienti, quanti ci si aspetta che disdicano, dato il 4%?",
+          "answer": 400,
+          "explanation": "10.000 × 0,04 = 400."
+        }
+      ],
+      "id": 75
+    },
+    {
+      "topic": "Visione artificiale e IA generativa",
+      "type": "scenario",
+      "difficulty": 3,
+      "text": "Diagnostica per immagini",
+      "context": "Un ospedale addestra una rete convoluzionale per individuare noduli nelle radiografie. Le immagini di addestramento provengono da un solo ospedale e l'accuracy in validazione è del 98%. Quando il modello viene provato in un altro ospedale, con apparecchi diversi, l'accuracy scende all'81%.",
+      "parts": [
+        {
+          "type": "single",
+          "text": "Qual è la causa più probabile del calo?",
+          "options": [
+            "Il learning rate era troppo basso durante l'addestramento",
+            "Il modello ha troppi pochi strati per riconoscere un nodulo",
+            "I dati di addestramento non rappresentano altri apparecchi e popolazioni: cambio di distribuzione",
+            "Le radiografie del secondo ospedale hanno una risoluzione in pixel troppo bassa"
+          ],
+          "answer": [2],
+          "explanation": "È un tipico caso di distribution shift/mancata generalizzazione."
+        },
+        {
+          "type": "single",
+          "text": "Quale azione è più efficace per ridurre il problema?",
+          "options": [
+            "Eliminare il validation set per usare più dati nel training",
+            "Aggiungere epoche di addestramento sugli stessi dati del primo ospedale",
+            "Sostituire la rete con una regressione lineare sui pixel",
+            "Usare dati eterogenei di più strutture e validare su un ospedale esterno"
+          ],
+          "answer": [3],
+          "explanation": "Dati più vari e validazione esterna migliorano la robustezza."
+        },
+        {
+          "type": "truefalse",
+          "text": "Aumentare soltanto il numero di epoche sullo stesso dataset risolve il calo di accuracy nel secondo ospedale.",
+          "answer": false,
+          "explanation": "Più epoche sugli stessi dati peggiorano l'overfitting al dominio di origine."
+        }
+      ],
+      "id": 76
+    },
+    {
+      "topic": "Linguaggio naturale e LLM",
+      "type": "scenario",
+      "difficulty": 3,
+      "text": "Assistente per le policy aziendali",
+      "context": "Un'azienda costruisce un assistente interno basato su un modello linguistico per rispondere sulle policy del personale. A volte l'assistente cita articoli di policy che non esistono, con grande sicurezza.",
+      "parts": [
+        {
+          "type": "single",
+          "text": "Come si chiama questo fenomeno?",
+          "options": [
+            "Collasso della modalità (mode collapse)",
+            "Drift dei dati in produzione",
+            "Allucinazione del modello",
+            "Overfitting dei pesi sul validation set"
+          ],
+          "answer": [2],
+          "explanation": "Contenuti plausibili ma inventati sono allucinazioni."
+        },
+        {
+          "type": "single",
+          "text": "Quale soluzione architetturale è la più indicata?",
+          "options": [
+            "Eliminare le istruzioni di sistema per lasciare il modello libero",
+            "Ridurre il numero di token consentiti a una sola parola",
+            "Aumentare al massimo la temperature per ottenere più varietà",
+            "RAG sui documenti ufficiali, con citazione delle fonti nella risposta"
+          ],
+          "answer": [3],
+          "explanation": "RAG ancora le risposte a documenti reali e consente di citarli."
+        },
+        {
+          "type": "truefalse",
+          "text": "Impostare la temperature a 0 elimina del tutto le allucinazioni.",
+          "answer": false,
+          "explanation": "Rende l'output più deterministico, non più veritiero."
+        }
+      ],
+      "id": 77
+    },
+    {
+      "topic": "Etica, sicurezza e normativa",
+      "type": "scenario",
+      "difficulty": 3,
+      "text": "Selezione dei curriculum",
+      "context": "Una società usa un algoritmo per preselezionare i curriculum. Un audit mostra che penalizza le candidate donne: il modello è stato addestrato sulle assunzioni passate, in cui la maggioranza dei selezionati era di sesso maschile.",
+      "parts": [
+        {
+          "type": "single",
+          "text": "Qual è l'origine principale del problema?",
+          "options": [
+            "Un errore di arrotondamento nei calcoli in virgola mobile",
+            "La mancanza di GPU sufficienti per l'addestramento",
+            "Il formato PDF dei curriculum, non leggibile dal modello",
+            "Bias presente nei dati storici, appreso e riprodotto dal modello"
+          ],
+          "answer": [3],
+          "explanation": "Il modello impara dai dati: se sono distorti, riproduce la distorsione."
+        },
+        {
+          "type": "single",
+          "text": "Come considera l'AI Act i sistemi di IA usati per selezionare il personale?",
+          "options": [
+            "Sistemi ad alto rischio, soggetti a requisiti stringenti",
+            "Sistemi esclusi dal campo di applicazione del regolamento",
+            "Pratiche vietate in ogni circostanza",
+            "Sistemi a rischio minimo, senza alcun obbligo"
+          ],
+          "answer": [0],
+          "explanation": "Reclutamento e gestione del personale rientrano tra gli usi ad alto rischio."
+        },
+        {
+          "type": "truefalse",
+          "text": "Per eliminare il bias è sempre sufficiente togliere la colonna «genere» dai dati.",
+          "answer": false,
+          "explanation": "Altre variabili possono fare da proxy (ad esempio storia lavorativa o interruzioni di carriera)."
+        }
+      ],
+      "id": 78
+    },
+    {
+      "topic": "Dati, valutazione e MLOps",
+      "type": "scenario",
+      "difficulty": 3,
+      "text": "Sistema antifrode in produzione",
+      "context": "Un modello antifrode aveva ottime prestazioni al momento del lancio. Dopo otto mesi molte frodi non vengono più individuate: i truffatori hanno cambiato tecniche. Su 500 frodi mensili, il recall è sceso da 0,9 a 0,6.",
+      "parts": [
+        {
+          "type": "single",
+          "text": "Come si chiama il fenomeno per cui il rapporto tra input e risposta corretta cambia nel tempo?",
+          "options": [
+            "Normalizzazione per batch",
+            "Overfitting sul test set",
+            "Quantizzazione dei pesi",
+            "Concept drift"
+          ],
+          "answer": [3],
+          "explanation": "Quando cambiano le relazioni apprese si parla di concept drift (o, più in generale, di drift)."
+        },
+        {
+          "type": "single",
+          "text": "Quale pratica di MLOps è la più appropriata per reagire?",
+          "options": [
+            "Aumentare il learning rate del modello già in produzione",
+            "Eliminare le frodi dal dataset per avere solo casi normali",
+            "Spegnere il modello e basarsi solo sulle segnalazioni dei clienti",
+            "Monitorare le metriche in produzione e riaddestrare con dati recenti"
+          ],
+          "answer": [3],
+          "explanation": "Monitoraggio continuo e riaddestramento periodico sono il rimedio standard."
+        },
+        {
+          "type": "numeric",
+          "text": "Quante frodi in più, rispetto a prima, non vengono individuate ogni mese?",
+          "answer": 150,
+          "explanation": "(0,9 − 0,6) × 500 = 150."
+        }
+      ],
+      "id": 79
+    },
+    {
+      "topic": "Hardware, strumenti e applicazioni",
+      "type": "scenario",
+      "difficulty": 3,
+      "text": "Addestrare un modello da 7 miliardi di parametri",
+      "context": "Una startup vuole addestrare un modello da 7 miliardi di parametri. I pesi sono memorizzati in FP16 (2 byte per parametro) e le GPU disponibili hanno 24 GB di memoria ciascuna.",
+      "parts": [
+        {
+          "type": "numeric",
+          "text": "Quanta memoria occupano i soli pesi del modello, in GB (1 GB = 10^9 byte)?",
+          "answer": { "value": 14, "tolerance": 0.5, "unit": "GB" },
+          "explanation": "7 × 10^9 × 2 byte = 14 × 10^9 byte = 14 GB."
+        },
+        {
+          "type": "single",
+          "text": "Perché in addestramento serve molta più memoria dei soli pesi?",
+          "options": [
+            "I pesi vengono duplicati per ogni parola del vocabolario",
+            "Occorre memorizzare anche gradienti, stati dell'ottimizzatore e attivazioni",
+            "La GPU deve conservare l'intero dataset di addestramento",
+            "Il sistema operativo richiede 10 GB per ogni miliardo di parametri"
+          ],
+          "answer": [1],
+          "explanation": "Gradienti, momenti di Adam e attivazioni possono moltiplicare il fabbisogno di memoria."
+        },
+        {
+          "type": "truefalse",
+          "text": "La quantizzazione dei pesi (ad esempio da FP16 a INT8) riduce la memoria occupata dal modello.",
+          "answer": true,
+          "explanation": "Meno bit per parametro significa meno memoria, spesso con un piccolo calo di qualità."
+        }
+      ],
+      "id": 80
+    }
+  ]
+});
