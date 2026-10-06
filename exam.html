@@ -3736,7 +3736,9 @@ App.ui = {};
     // ---- language / theme are per device: stored outside the profile data ----
     const UI_KEY = 'examsim:ui';
     const rawBackend = () => App.backend || App.defaultBackend();
+    // Language and theme are also mirrored in localStorage: it is synchronous, so the choice survives even a reload right after the click.
     App.ui.getGlobal = function (k) {
+        try { const m = localStorage.getItem('examsim:ui:' + k); if (m) return m; } catch (e) { /* storage blocked */ }
         try { const o = JSON.parse(rawBackend().getItem(UI_KEY)) || {}; if (o[k] !== undefined) return o[k]; } catch (e) { /* fall through */ }
         return App.storage.getPref(k);
     };
@@ -3744,6 +3746,7 @@ App.ui = {};
         let o = {};
         try { o = JSON.parse(rawBackend().getItem(UI_KEY)) || {}; } catch (e) { o = {}; }
         o[k] = v;
+        try { localStorage.setItem('examsim:ui:' + k, v); } catch (e) { /* mirror is optional */ }
         try { rawBackend().setItem(UI_KEY, JSON.stringify(o)); if (rawBackend().flush) rawBackend().flush(); } catch (e) { App.events.emit('storageError', e); }
     };
 
