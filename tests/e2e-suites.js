@@ -87,23 +87,23 @@ module.exports = {
         check('start page is empty until "Check for exams" is pressed (web address)', (await p.locator('.exam-card').count()) === 0);
         await p.click('#scan-btn');
         await p.waitForSelector('.exam-card');
-        check('exam cards listed after the check', (await p.locator('.exam-card').count()) >= 4);
+        check('exam cards listed after the check', (await p.locator('.exam-card').count()) >= 3);
         await p.reload();
         await p.waitForSelector('#picker-empty');
         check('a new visit starts empty again', (await p.locator('.exam-card').count()) === 0);
         await p.click('#scan-btn');
         await p.waitForSelector('.exam-card');
-        await p.click('.exam-card >> text=V31 Practice Test');
+        await p.click('.exam-card >> text=Intelligenza artificiale');
         await p.waitForSelector('#start-btn');
-        check('dashboard opens', /V31/.test(await p.title()));
-        check('exam menu lists every exam', (await p.locator('#exam-switch option').count()) >= 4 && (await p.locator('.exam-chip').count()) === 0);
+        check('dashboard opens', /Intelligenza/.test(await p.title()));
+        check('exam menu lists every exam', (await p.locator('#exam-switch option').count()) >= 3 && (await p.locator('.exam-chip').count()) === 0);
         await p.goto(URL_BASE + '?content=doesnotexist');
         await p.waitForSelector('.error-box');
         check('missing file shows a clear error', /doesnotexist\.exam/.test(await p.locator('.error-box').innerText()));
     },
 
     'full run of each bundled exam (single/multiple)': async ({ p, check, runAll, URL_BASE }) => {
-        for (const name of ['managedServices', 'v31', 'v31realtest', 'ai-realtest', 'cinema-realtest']) {
+        for (const name of ['ai-realtest', 'cinema-realtest']) {
             await fresh(p, URL_BASE, name);
             const n = await runAll(p, 'all');
             const pct = await p.locator('#metric-percentage').innerText();
@@ -374,9 +374,9 @@ module.exports = {
         const errs = [];
         p.on('pageerror', e => errs.push(e.message));
         p.on('dialog', d => d.accept());
-        await p.goto(HTTP_BASE + '/exam.html?content=v31realtest');
+        await p.goto(HTTP_BASE + '/exam.html?content=ai-realtest');
         await p.waitForSelector('#start-btn');
-        check('exam loaded via fetch (octet-stream + nosniff)', /V31 Real Test/.test(await p.title()));
+        check('exam loaded via fetch (octet-stream + nosniff)', /Intelligenza/.test(await p.title()));
         await p.goto(HTTP_BASE + '/exam.html?content=nope');
         await p.waitForSelector('.error-box');
         check('404 reported as not found', /nope\.exam/.test(await p.locator('.error-box').innerText()));

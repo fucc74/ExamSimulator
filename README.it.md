@@ -134,6 +134,8 @@ Eventi, tipi di domanda e modalità di studio personalizzati sono descritti in [
 Segnalazioni di bug, nuovi esami, traduzioni e codice sono tutti benvenuti: vedi [CONTRIBUTING.md](CONTRIBUTING.md). Buoni primi contributi: una nuova lingua dell'interfaccia, un esame di esempio nel tuo campo, una correzione di accessibilità.
 
 ## Sul contenuto degli esami
+Gli esami che non vuoi pubblicare tienili in una cartella `private/`: è ignorata da git e dal build. Aprila con *Cerca esami* (Chrome/Edge) per usarli in locale.
+
 QZ è il motore; gli esami sono file di dati separati. Chi condivide un esame è responsabile di averne il diritto: non pubblicare domande copiate da materiale protetto da copyright o riservato.
 
 ## Sostieni il progetto

@@ -35,35 +35,5 @@ window.ExamCatalog = [
     "version": "1.0",
     "questionCount": 15,
     "topicCount": 3
-  },
-  {
-    "file": "managedServices",
-    "id": "managedServices",
-    "title": "HPE Managed Services Expertise Exam Simulator",
-    "description": "Comprehensive validation bank for HPE Managed Services knowledge across ITSM, delivery, tooling, security, and partner programs.",
-    "code": "MS-EXPERTISE",
-    "version": "v1.0",
-    "questionCount": 120,
-    "topicCount": 5
-  },
-  {
-    "file": "v31",
-    "id": "v31",
-    "title": "V31 Practice Test (Complete)",
-    "description": "Complete V31 practice bank: 200 scenario-based and advanced questions plus 100 expert-level questions on AI fundamentals, HPE Private Cloud AI architecture and sizing, deployment and administration, NVIDIA and AI Essentials, MLIS/NIM, KAI Scheduler, air-gapped deployments, operations, edge AI and HPC.",
-    "code": "V31",
-    "version": "v2.0",
-    "questionCount": 300,
-    "topicCount": 26
-  },
-  {
-    "file": "v31realtest",
-    "id": "v31realtest",
-    "title": "V31 Real Test",
-    "description": "Thirty practice questions with the official answer rationales, transcribed from the V31 practice test document.",
-    "code": "V31-REAL",
-    "version": "v1.0",
-    "questionCount": 30,
-    "topicCount": 8
   }
 ];

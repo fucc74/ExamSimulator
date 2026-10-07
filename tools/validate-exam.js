@@ -6,7 +6,8 @@ const { readExamFile, examFiles } = require('./exam-files.js');
 const { loadAppForTools } = require('./convert-legacy.js');
 
 const App = loadAppForTools();
-const files = process.argv.length > 2 ? process.argv.slice(2).map(f => path.resolve(f)) : examFiles();
+const privateDir = path.join(path.resolve(__dirname, '..'), 'private');
+const files = process.argv.length > 2 ? process.argv.slice(2).map(f => path.resolve(f)) : examFiles().concat(require('fs').existsSync(privateDir) ? examFiles(privateDir) : []);
 let bad = 0;
 files.forEach(file => {
     const name = path.basename(file);

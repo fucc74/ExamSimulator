@@ -2,3 +2,6 @@ node_modules/
 .DS_Store
 dist/
 tests/visual-output/
+
+# Private exams: kept on your computer, never committed (read them with "Check for exams" pointing at this folder)
+private/

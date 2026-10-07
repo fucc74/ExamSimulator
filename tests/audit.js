@@ -10,7 +10,7 @@ const BUDGET = {
     htmlKB: 450,            // exam.html as shipped
     gzipKB: 120,            // the same, gzip compressed
     firstRenderMs: 2500,    // exam list visible, CPU throttled 4x
-    startBigSessionMs: 2500 // 200-question exam: click Start -> first question visible, CPU throttled 4x
+    startBigSessionMs: 2500 // 80-question exam: click Start -> first question visible, CPU throttled 4x
 };
 
 let failures = 0;
@@ -54,14 +54,14 @@ async function perf() {
         await b.p.waitForSelector('#exam-list .exam-card');
         const first = Date.now() - t0;
         (first <= BUDGET.firstRenderMs ? ok : fail)('exam list visible after ' + first + ' ms at 4x CPU slowdown (budget ' + BUDGET.firstRenderMs + ')');
-        await b.p.goto(b.base + '/?content=v31');
+        await b.p.goto(b.base + '/?content=ai-realtest');
         await b.p.waitForSelector('#start-btn');
         await b.p.selectOption('#cfg-mode', 'all');
         const t1 = Date.now();
         await b.p.click('#start-btn');
         await b.p.waitForSelector('#q-body .option-card');
         const start = Date.now() - t1;
-        (start <= BUDGET.startBigSessionMs ? ok : fail)('200-question session ready after ' + start + ' ms (budget ' + BUDGET.startBigSessionMs + ')');
+        (start <= BUDGET.startBigSessionMs ? ok : fail)('80-question session ready after ' + start + ' ms (budget ' + BUDGET.startBigSessionMs + ')');
         const longTasks = await b.p.evaluate(() => performance.getEntriesByType('longtask').length).catch(() => 0);
         console.log('  · long tasks observed: ' + longTasks);
     } finally { await b.close(); }

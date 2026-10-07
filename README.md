@@ -134,6 +134,8 @@ Events, custom question types and custom study modes are described in [docs/API.
 Bug reports, new exams, translations and code are all welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). Good first contributions: a new interface language, a sample exam in your field, an accessibility fix.
 
 ## About exam content
+Keep exams you do not want to publish in a `private/` folder: it is ignored by git and by the build. Open it with *Check for exams* (Chrome/Edge) to use them locally.
+
 QZ is the engine; exams are separate data files. Whoever shares an exam is responsible for having the right to do so — please do not publish questions copied from copyrighted or confidential material.
 
 ## Support the project

@@ -49,7 +49,7 @@ test('schema: legacy format is converted (option letters stripped, types inferre
 });
 
 test('bundled exam files are valid', () => {
-    for (const f of ['managedServices.exam', 'v31.exam', 'v31realtest.exam']) {
+    for (const f of ['demo.exam', 'ai-realtest.exam', 'cinema-realtest.exam']) {
         const data = loadExamFile(f);
         const { exam, report } = App.schema.prepare(data, f.replace('.exam', ''));
         assert.ok(exam, f + '\n' + report.format());
